@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckCircle2, XCircle, Home } from "lucide-react";
+import { CheckCircle2, XCircle, Home, Trophy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const OPTIONS = ["A", "B", "C", "D"] as const;
@@ -21,14 +21,23 @@ const ResultSummary = ({
   const navigate = useNavigate();
   const percentage = Math.round((score / totalQuestions) * 100);
 
+  const getScoreColor = () => {
+    if (percentage >= 80) return "text-success";
+    if (percentage >= 50) return "text-primary";
+    return "text-destructive";
+  };
+
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-card">
       {/* Score header */}
       <div className="border-b p-6 text-center">
-        <div className="text-5xl font-black text-primary">
+        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+          <Trophy className={`h-7 w-7 ${getScoreColor()}`} />
+        </div>
+        <div className={`text-4xl font-black tabular-nums ${getScoreColor()}`}>
           {score}/{totalQuestions}
         </div>
-        <p className="mt-1 text-lg text-muted-foreground">{percentage}%</p>
+        <p className="mt-1 text-sm text-muted-foreground font-medium">{percentage}% correct</p>
         <Button
           variant="outline"
           className="mt-4"
@@ -41,7 +50,7 @@ const ResultSummary = ({
 
       {/* Answer review */}
       <ScrollArea className="flex-1">
-        <div className="space-y-1 p-4">
+        <div className="space-y-0.5 p-4">
           {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((q) => {
             const userAnswer = answers[q];
             const correct = correctAnswers[q];
@@ -50,41 +59,41 @@ const ResultSummary = ({
             return (
               <div
                 key={q}
-                className="flex items-center gap-2 rounded-md px-2 py-1.5"
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 ${
+                  isCorrect
+                    ? "bg-success/5"
+                    : userAnswer
+                    ? "bg-destructive/5"
+                    : ""
+                }`}
               >
-                <span className="w-8 text-sm font-medium text-muted-foreground">
-                  {q}.
+                <span className="w-7 text-right text-xs font-bold tabular-nums text-muted-foreground">
+                  {q}
                 </span>
                 <div className="flex gap-1.5">
                   {OPTIONS.map((opt) => {
-                    let className = "h-8 w-10 text-xs font-semibold ";
-                    if (opt === correct) {
-                      className +=
-                        "bg-green-500 text-white hover:bg-green-600 border-green-500";
-                    } else if (opt === userAnswer && !isCorrect) {
-                      className +=
-                        "bg-destructive text-destructive-foreground hover:bg-destructive/90";
-                    }
+                    const isCorrectOpt = opt === correct;
+                    const isUserWrong = opt === userAnswer && !isCorrect;
+
                     return (
-                      <Button
+                      <div
                         key={opt}
-                        size="sm"
-                        variant={
-                          opt === correct || opt === userAnswer
-                            ? "default"
-                            : "outline"
-                        }
-                        className={className}
-                        disabled
+                        className={`flex h-8 w-9 items-center justify-center rounded-md text-xs font-semibold border transition-all ${
+                          isCorrectOpt
+                            ? "bg-success text-success-foreground border-success shadow-sm"
+                            : isUserWrong
+                            ? "bg-destructive text-destructive-foreground border-destructive"
+                            : "bg-background text-muted-foreground border-border"
+                        }`}
                       >
                         {opt}
-                      </Button>
+                      </div>
                     );
                   })}
                 </div>
                 <span className="ml-auto">
                   {isCorrect ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <CheckCircle2 className="h-4 w-4 text-success" />
                   ) : userAnswer ? (
                     <XCircle className="h-4 w-4 text-destructive" />
                   ) : (
