@@ -12,6 +12,8 @@ import {
   ResizableHandle,
 } from "@/components/ui/resizable";
 import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const TOTAL_QUESTIONS = 40;
 
@@ -74,7 +76,6 @@ const ExamPage = () => {
     setScore(correct);
     setIsSubmitted(true);
 
-    // Save attempt
     const { error } = await supabase.from("attempts").insert({
       paper_id: paperId!,
       score: correct,
@@ -90,31 +91,48 @@ const ExamPage = () => {
 
   if (paperLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Loading exam...</p>
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Loading exam...</p>
+        </div>
       </div>
     );
   }
 
   if (!paper) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-destructive">Paper not found</p>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">
+        <p className="text-destructive font-medium">Paper not found</p>
+        <Button variant="outline" onClick={() => navigate("/")}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Papers
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen flex-col">
+    <div className="flex h-screen flex-col bg-background">
       {/* Top bar */}
-      <div className="flex items-center justify-between border-b bg-card px-4 py-2">
-        <div>
-          <h2 className="font-semibold">
-            {paper.subject} — {paper.paper_code}
-          </h2>
-          <p className="text-xs text-muted-foreground">
-            {paper.level} · {paper.year} · {paper.session}
-          </p>
+      <div className="flex items-center justify-between border-b bg-card px-5 py-3 shadow-sm">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/")}
+            className="shrink-0"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h2 className="text-sm font-bold leading-tight">
+              {paper.subject} — <span className="font-mono text-muted-foreground">{paper.paper_code}</span>
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              {paper.level} · {paper.year} · {paper.session}
+            </p>
+          </div>
         </div>
         <Timer
           durationMinutes={45}

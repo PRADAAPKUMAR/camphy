@@ -31,17 +31,17 @@ const Timer = ({ durationMinutes, onTimeUp, isRunning }: TimerProps) => {
 
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
-  const isLow = secondsLeft < 300; // < 5 min
+  const isLow = secondsLeft < 300;
 
   return (
     <div
-      className={`flex items-center gap-2 rounded-lg px-4 py-2 font-mono text-lg font-bold ${
+      className={`flex items-center gap-2 rounded-lg border px-4 py-2 font-mono text-sm font-bold tabular-nums transition-colors ${
         isLow
-          ? "bg-destructive/10 text-destructive animate-pulse"
-          : "bg-primary/10 text-primary"
+          ? "border-destructive/30 bg-destructive/10 text-destructive animate-pulse"
+          : "border-primary/20 bg-primary/5 text-primary"
       }`}
     >
-      <Clock className="h-5 w-5" />
+      <Clock className="h-4 w-4" />
       <span>
         {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
       </span>
