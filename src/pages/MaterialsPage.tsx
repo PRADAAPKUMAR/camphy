@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, X, BookOpen, ArrowLeft, FileText, Download } from "lucide-react";
@@ -70,10 +69,6 @@ const MaterialsPage = () => {
     setLevelFilter(ALL_VALUE);
   };
 
-  const fileIcon = (type: string) => {
-    return <FileText className="h-4 w-4" />;
-  };
-
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -86,9 +81,11 @@ const MaterialsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background bg-grid relative">
+      <div className="absolute inset-0 bg-radial-glow pointer-events-none" />
+
       {/* Header */}
-      <header className="border-b bg-card">
+      <header className="relative border-b border-border/40">
         <div className="container py-8">
           <Button
             variant="ghost"
@@ -99,8 +96,8 @@ const MaterialsPage = () => {
             <ArrowLeft className="h-4 w-4" /> Home
           </Button>
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent">
-              <BookOpen className="h-5 w-5 text-accent-foreground" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 border border-accent/20">
+              <BookOpen className="h-5 w-5 text-accent" />
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight">Study Materials</h1>
           </div>
@@ -110,9 +107,9 @@ const MaterialsPage = () => {
         </div>
       </header>
 
-      <main className="container py-8">
+      <main className="container relative py-8">
         {/* Filters */}
-        <div className="mb-8 rounded-xl border bg-card p-4 shadow-sm">
+        <div className="mb-8 glass-card rounded-xl p-4">
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative flex-1 min-w-[220px]">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -120,11 +117,11 @@ const MaterialsPage = () => {
                 placeholder="Search materials…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 bg-background"
+                className="pl-9 bg-background/50 border-border/40"
               />
             </div>
             <Select value={subjectFilter} onValueChange={setSubjectFilter}>
-              <SelectTrigger className="w-[160px] bg-background">
+              <SelectTrigger className="w-[160px] bg-background/50 border-border/40">
                 <SelectValue placeholder="Subject" />
               </SelectTrigger>
               <SelectContent>
@@ -135,7 +132,7 @@ const MaterialsPage = () => {
               </SelectContent>
             </Select>
             <Select value={levelFilter} onValueChange={setLevelFilter}>
-              <SelectTrigger className="w-[140px] bg-background">
+              <SelectTrigger className="w-[140px] bg-background/50 border-border/40">
                 <SelectValue placeholder="Level" />
               </SelectTrigger>
               <SelectContent>
@@ -171,42 +168,38 @@ const MaterialsPage = () => {
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((mat) => (
-              <Card
+              <div
                 key={mat.id}
-                className="group border bg-card transition-all duration-200 hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5"
+                className="glass-card-hover group rounded-xl p-5"
               >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
-                      {fileIcon(mat.file_type)}
-                    </div>
-                    <div className="min-w-0">
-                      <CardTitle className="text-base font-semibold truncate">{mat.title}</CardTitle>
-                      {mat.description && (
-                        <CardDescription className="text-xs line-clamp-2">{mat.description}</CardDescription>
-                      )}
-                    </div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 border border-accent/20 text-accent">
+                    <FileText className="h-4 w-4" />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary" className="font-medium text-xs">{mat.subject}</Badge>
-                      <Badge variant="outline" className="text-xs">{mat.level}</Badge>
-                      <Badge variant="outline" className="text-xs uppercase">{mat.file_type}</Badge>
-                    </div>
-                    <a
-                      href={mat.file_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
-                    >
-                      <Download className="h-4 w-4" />
-                    </a>
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-semibold truncate">{mat.title}</h3>
+                    {mat.description && (
+                      <p className="text-xs text-muted-foreground line-clamp-2">{mat.description}</p>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary" className="font-medium text-xs bg-secondary/60">{mat.subject}</Badge>
+                    <Badge variant="outline" className="text-xs border-border/40">{mat.level}</Badge>
+                    <Badge variant="outline" className="text-xs uppercase border-border/40">{mat.file_type}</Badge>
+                  </div>
+                  <a
+                    href={mat.file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                  >
+                    <Download className="h-4 w-4" />
+                  </a>
+                </div>
+              </div>
             ))}
           </div>
         )}
