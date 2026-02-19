@@ -1,78 +1,90 @@
 import { useNavigate } from "react-router-dom";
-import { GraduationCap, BookOpen, FileText, ArrowRight } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { GraduationCap, BookOpen, FileText, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const HomePage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background bg-grid relative">
+      <div className="absolute inset-0 bg-radial-glow pointer-events-none" />
+
       {/* Hero */}
-      <header className="relative overflow-hidden border-b bg-card">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-        <div className="container relative py-20 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/25 mb-6">
-            <GraduationCap className="h-8 w-8 text-primary-foreground" />
+      <header className="relative border-b border-border/40 pt-20 pb-16">
+        <div className="container relative text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 glow-md mb-6">
+            <GraduationCap className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl mb-4">
+          <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl mb-4">
             Physics<span className="gradient-text">HQ</span>
           </h1>
           <p className="mx-auto max-w-md text-lg text-muted-foreground">
             Your one-stop platform for exam practice and study resources. Master every topic with confidence.
           </p>
+
+          {/* Stats */}
+          <div className="mt-12 flex flex-wrap justify-center gap-8">
+            {[
+              { value: "10+", label: "Past Papers" },
+              { value: "10+", label: "Study Notes" },
+              { value: "4", label: "Subjects" },
+              { value: "100%", label: "Free Access" },
+            ].map((s) => (
+              <div key={s.label} className="text-center">
+                <p className="text-3xl font-bold gradient-text">{s.value}</p>
+                <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </header>
 
       {/* Feature cards */}
-      <main className="container py-16">
-        <div className="grid gap-8 sm:grid-cols-2 max-w-3xl mx-auto">
+      <main className="container relative py-16">
+        <div className="flex items-center gap-2 mb-8">
+          <Sparkles className="h-4 w-4 text-primary" />
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Explore</h2>
+        </div>
+
+        <div className="grid gap-6 sm:grid-cols-2 max-w-3xl">
           {/* MCQ Practice */}
-          <Card
-            className="group cursor-pointer border bg-card transition-all duration-200 hover:shadow-lg hover:border-primary/30 hover:-translate-y-1"
+          <div
+            className="glass-card-hover group cursor-pointer rounded-xl p-6"
             onClick={() => navigate("/papers")}
           >
-            <CardHeader className="pb-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4 transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                <FileText className="h-6 w-6" />
-              </div>
-              <CardTitle className="text-xl font-bold">MCQ Exam Practice</CardTitle>
-              <CardDescription>
-                Browse past papers, practice under timed conditions, and get instant results with detailed review.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="ghost" className="gap-2 px-0 text-primary group-hover:gap-3 transition-all">
-                Start Practicing <ArrowRight className="h-4 w-4" />
-              </Button>
-            </CardContent>
-          </Card>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary mb-5 transition-all group-hover:bg-primary group-hover:text-primary-foreground group-hover:glow-sm">
+              <FileText className="h-6 w-6" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">MCQ Exam Practice</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Browse past papers, practice under timed conditions, and get instant results with detailed review.
+            </p>
+            <Button variant="ghost" className="gap-2 px-0 text-primary group-hover:gap-3 transition-all">
+              Start Practicing <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
 
           {/* Study Materials */}
-          <Card
-            className="group cursor-pointer border bg-card transition-all duration-200 hover:shadow-lg hover:border-primary/30 hover:-translate-y-1"
+          <div
+            className="glass-card-hover group cursor-pointer rounded-xl p-6"
             onClick={() => navigate("/materials")}
           >
-            <CardHeader className="pb-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent mb-4 transition-colors group-hover:bg-accent group-hover:text-accent-foreground">
-                <BookOpen className="h-6 w-6" />
-              </div>
-              <CardTitle className="text-xl font-bold">Study Materials</CardTitle>
-              <CardDescription>
-                Access notes, guides, and reference documents organized by subject and level to support your learning.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="ghost" className="gap-2 px-0 text-accent group-hover:gap-3 transition-all">
-                Browse Materials <ArrowRight className="h-4 w-4" />
-              </Button>
-            </CardContent>
-          </Card>
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 border border-accent/20 text-accent mb-5 transition-all group-hover:bg-accent group-hover:text-accent-foreground group-hover:glow-sm">
+              <BookOpen className="h-6 w-6" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">Study Materials</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Access notes, guides, and reference documents organized by subject and level to support your learning.
+            </p>
+            <Button variant="ghost" className="gap-2 px-0 text-accent group-hover:gap-3 transition-all">
+              Browse Materials <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-card/50">
+      <footer className="border-t border-border/40">
         <div className="container py-6 text-center text-xs text-muted-foreground">
           © {new Date().getFullYear()} PhysicsHQ — Built for learners.
         </div>
