@@ -111,6 +111,39 @@ export type Database = {
         }
         Relationships: []
       }
+      study_materials: {
+        Row: {
+          created_at: string
+          description: string | null
+          file_type: string
+          file_url: string
+          id: string
+          level: string
+          subject: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          file_type?: string
+          file_url: string
+          id?: string
+          level: string
+          subject: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          file_type?: string
+          file_url?: string
+          id?: string
+          level?: string
+          subject?: string
+          title?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
