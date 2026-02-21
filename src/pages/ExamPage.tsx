@@ -104,7 +104,7 @@ const ExamPage = () => {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">
         <p className="text-destructive font-medium">Paper not found</p>
-        <Button variant="outline" onClick={() => navigate("/")}>
+        <Button variant="outline" onClick={() => navigate("/papers")}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Papers
         </Button>
@@ -120,7 +120,7 @@ const ExamPage = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/papers")}
             className="shrink-0"
           >
             <ArrowLeft className="h-4 w-4" />
