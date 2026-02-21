@@ -143,11 +143,11 @@ const ExamPage = () => {
 
       {/* Split view */}
       <ResizablePanelGroup direction="horizontal" className="flex-1">
-        <ResizablePanel defaultSize={70} minSize={40}>
+        <ResizablePanel defaultSize={78} minSize={40}>
           <PDFViewer url={paper.pdf_url} />
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={30} minSize={20}>
+        <ResizablePanel defaultSize={22} minSize={18}>
           {isSubmitted ? (
             <ResultSummary
               score={score}
