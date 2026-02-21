@@ -45,21 +45,19 @@ const MCQPanel = ({
           {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((q) => (
             <div
               key={q}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
-                answers[q] ? "bg-primary/5" : "hover:bg-muted/50"
-              }`}
+              className="flex items-center justify-center gap-4 py-3"
             >
-              <span className="w-7 text-right text-xs font-bold tabular-nums text-muted-foreground">
+              <span className="w-8 text-right text-sm font-bold tabular-nums text-muted-foreground">
                 {q}
               </span>
-              <div className="flex gap-1.5">
+              <div className="flex gap-3">
                 {OPTIONS.map((opt) => (
                   <button
                     key={opt}
-                    className={`flex h-8 w-9 items-center justify-center rounded-md text-xs font-semibold transition-all duration-150 ${
+                    className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-semibold transition-all duration-150 ${
                       answers[q] === opt
                         ? "bg-primary text-primary-foreground shadow-sm scale-105"
-                        : "border bg-background text-foreground hover:border-primary/40 hover:bg-primary/5"
+                        : "bg-muted/60 text-foreground hover:bg-primary/15"
                     }`}
                     onClick={() => onSelectAnswer(q, opt)}
                     disabled={isSubmitted}
