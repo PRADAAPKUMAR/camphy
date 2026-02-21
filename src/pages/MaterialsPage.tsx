@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, X, BookOpen, ArrowLeft, FileText, Download } from "lucide-react";
+import { Search, X, BookOpen, ArrowLeft, FileText } from "lucide-react";
 
 const ALL_VALUE = "__all__";
 
@@ -168,9 +168,12 @@ const MaterialsPage = () => {
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((mat) => (
-              <div
+              <a
                 key={mat.id}
-                className="glass-card-hover group rounded-xl p-5"
+                href={mat.file_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="glass-card-hover group rounded-xl p-5 block cursor-pointer no-underline text-inherit"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 border border-accent/20 text-accent">
@@ -183,23 +186,12 @@ const MaterialsPage = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary" className="font-medium text-xs bg-secondary/60">{mat.subject}</Badge>
-                    <Badge variant="outline" className="text-xs border-border/40">{mat.level}</Badge>
-                    <Badge variant="outline" className="text-xs uppercase border-border/40">{mat.file_type}</Badge>
-                  </div>
-                  <a
-                    href={mat.file_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
-                  >
-                    <Download className="h-4 w-4" />
-                  </a>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="secondary" className="font-medium text-xs bg-secondary/60">{mat.subject}</Badge>
+                  <Badge variant="outline" className="text-xs border-border/40">{mat.level}</Badge>
+                  <Badge variant="outline" className="text-xs uppercase border-border/40">{mat.file_type}</Badge>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         )}
