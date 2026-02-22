@@ -1,10 +1,11 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, GraduationCap, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const PaperSelector = () => {
   const navigate = useNavigate();
@@ -21,10 +22,21 @@ const PaperSelector = () => {
     },
   });
 
+  const levels = useMemo(() => {
+    if (!papers) return [];
+    const set = new Set(papers.map((p) => p.level));
+    return Array.from(set).sort();
+  }, [papers]);
+
+  const [selectedLevel, setSelectedLevel] = useState<string>("");
+
+  const activeLevel = selectedLevel || levels[0] || "";
+
   const subjects = useMemo(() => {
     if (!papers) return [];
+    const filtered = papers.filter((p) => p.level === activeLevel);
     const map = new Map<string, { subject: string; level: string; count: number; years: number[] }>();
-    papers.forEach((p) => {
+    filtered.forEach((p) => {
       const existing = map.get(p.subject);
       if (existing) {
         existing.count++;
@@ -34,7 +46,7 @@ const PaperSelector = () => {
       }
     });
     return Array.from(map.values()).sort((a, b) => a.subject.localeCompare(b.subject));
-  }, [papers]);
+  }, [papers, activeLevel]);
 
   if (isLoading) {
     return (
@@ -74,6 +86,18 @@ const PaperSelector = () => {
       </header>
 
       <main className="container relative py-8">
+        {levels.length > 1 && (
+          <Tabs value={activeLevel} onValueChange={setSelectedLevel} className="mb-6">
+            <TabsList>
+              {levels.map((level) => (
+                <TabsTrigger key={level} value={level}>
+                  {level}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        )}
+
         {subjects.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
             <BookOpen className="h-12 w-12 text-muted-foreground/40 mb-4" />
