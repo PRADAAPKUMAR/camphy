@@ -8,22 +8,22 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const SubjectPage = () => {
-  const { subject } = useParams<{ subject: string }>();
+  const { level } = useParams<{ level: string }>();
   const navigate = useNavigate();
-  const decodedSubject = decodeURIComponent(subject || "");
+  const decodedLevel = decodeURIComponent(level || "");
 
   const { data: papers, isLoading } = useQuery({
-    queryKey: ["papers", decodedSubject],
+    queryKey: ["papers", decodedLevel],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("papers")
         .select("*")
-        .eq("subject", decodedSubject)
+        .eq("level", decodedLevel)
         .order("year", { ascending: false });
       if (error) throw error;
       return data;
     },
-    enabled: !!decodedSubject,
+    enabled: !!decodedLevel,
   });
 
   const years = useMemo(() => {
@@ -64,14 +64,14 @@ const SubjectPage = () => {
             onClick={() => navigate("/papers")}
             className="mb-4 gap-1 text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="h-4 w-4" /> Back to Subjects
+            <ArrowLeft className="h-4 w-4" /> Back to Levels
           </Button>
           <div className="flex items-center gap-3 mb-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
               <BookOpen className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight">{decodedSubject}</h1>
+              <h1 className="text-3xl font-extrabold tracking-tight">Physics — {decodedLevel}</h1>
               <p className="text-sm text-muted-foreground">
                 {papers?.length ?? 0} paper{(papers?.length ?? 0) !== 1 ? "s" : ""} available
               </p>
@@ -84,7 +84,7 @@ const SubjectPage = () => {
         {years.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
             <BookOpen className="h-12 w-12 text-muted-foreground/40 mb-4" />
-            <p className="text-muted-foreground font-medium">No papers found for this subject.</p>
+            <p className="text-muted-foreground font-medium">No papers found for this level.</p>
           </div>
         ) : (
           <Tabs defaultValue={String(years[0])} className="w-full">
@@ -120,9 +120,6 @@ const SubjectPage = () => {
                       <div className="flex flex-wrap gap-2">
                         <Badge variant="secondary" className="font-medium text-xs bg-secondary/60">
                           {paper.session}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs border-border/40">
-                          {paper.level}
                         </Badge>
                       </div>
                     </div>
