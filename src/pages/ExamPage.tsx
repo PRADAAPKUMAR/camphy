@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import PDFViewer from "@/components/PDFViewer";
@@ -12,8 +12,15 @@ import {
   ResizableHandle,
 } from "@/components/ui/resizable";
 import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 const TOTAL_QUESTIONS = 40;
 
@@ -105,7 +112,6 @@ const ExamPage = () => {
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">
         <p className="text-destructive font-medium">Paper not found</p>
         <Button variant="outline" onClick={() => navigate("/papers")}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Papers
         </Button>
       </div>
@@ -117,22 +123,21 @@ const ExamPage = () => {
       {/* Top bar */}
       <div className="flex items-center justify-between border-b bg-card px-5 py-3 shadow-sm">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate("/papers")}
-            className="shrink-0"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h2 className="text-sm font-bold leading-tight">
-              {paper.subject} — <span className="font-mono text-muted-foreground">{paper.paper_code}</span>
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              {paper.level} · {paper.year} · {paper.session}
-            </p>
-          </div>
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild><Link to="/papers">Levels</Link></BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild><Link to={`/papers/${encodeURIComponent(paper.level)}`}>{paper.level}</Link></BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{paper.paper_code} — {paper.session} {paper.year}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
         <Timer
           durationMinutes={45}
