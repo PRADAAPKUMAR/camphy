@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import SubjectPage from "./pages/SubjectPage";
 import ExamPage from "./pages/ExamPage";
 import MaterialsPage from "./pages/MaterialsPage";
+import MaterialsLevelPage from "./pages/MaterialsLevelPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/papers/:level" element={<SubjectPage />} />
           <Route path="/exam/:paperId" element={<ExamPage />} />
           <Route path="/materials" element={<MaterialsPage />} />
+          <Route path="/materials/:level" element={<MaterialsLevelPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
