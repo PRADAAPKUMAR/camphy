@@ -27,7 +27,6 @@ const HomePage = () => {
             {[
               { value: "10+", label: "Past Papers" },
               { value: "10+", label: "Study Notes" },
-              { value: "4", label: "Subjects" },
               { value: "100%", label: "Free Access" },
             ].map((s) => (
               <div key={s.label} className="text-center">
@@ -46,7 +45,7 @@ const HomePage = () => {
           <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Explore</h2>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 max-w-3xl">
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
           {/* MCQ Practice */}
           <div
             className="glass-card-hover group cursor-pointer rounded-xl p-6"
