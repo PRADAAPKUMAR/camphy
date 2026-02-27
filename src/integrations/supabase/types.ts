@@ -117,6 +117,7 @@ export type Database = {
           description: string | null
           file_type: string
           file_url: string
+          folder_path: string | null
           id: string
           level: string
           subject: string
@@ -127,6 +128,7 @@ export type Database = {
           description?: string | null
           file_type?: string
           file_url: string
+          folder_path?: string | null
           id?: string
           level: string
           subject: string
@@ -137,6 +139,7 @@ export type Database = {
           description?: string | null
           file_type?: string
           file_url?: string
+          folder_path?: string | null
           id?: string
           level?: string
           subject?: string

@@ -1,0 +1,1 @@
+ALTER TABLE public.study_materials ADD COLUMN folder_path text DEFAULT NULL;
