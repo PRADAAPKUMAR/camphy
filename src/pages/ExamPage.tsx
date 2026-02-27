@@ -48,14 +48,14 @@ const ExamPage = () => {
     enabled: !!paperId,
   });
 
-  const { data: answerKeys } = useQuery({
+  const { data: answerKey } = useQuery({
     queryKey: ["answer_keys", paperId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("answer_keys")
         .select("*")
         .eq("paper_id", paperId!)
-        .order("question_number");
+        .single();
       if (error) throw error;
       return data;
     },
@@ -68,12 +68,13 @@ const ExamPage = () => {
   };
 
   const handleSubmit = useCallback(async () => {
-    if (isSubmitted || !answerKeys) return;
+    if (isSubmitted || !answerKey) return;
 
     const correctMap: Record<number, string> = {};
-    answerKeys.forEach((ak) => {
-      correctMap[ak.question_number] = ak.correct_option;
-    });
+    for (let q = 1; q <= TOTAL_QUESTIONS; q++) {
+      const val = (answerKey as any)[`q${q}`];
+      if (val) correctMap[q] = val;
+    }
     setCorrectAnswersMap(correctMap);
 
     let correct = 0;
@@ -94,7 +95,7 @@ const ExamPage = () => {
     } else {
       toast.success(`Score: ${correct}/${TOTAL_QUESTIONS}`);
     }
-  }, [isSubmitted, answerKeys, answers, paperId]);
+  }, [isSubmitted, answerKey, answers, paperId]);
 
   if (paperLoading) {
     return (
