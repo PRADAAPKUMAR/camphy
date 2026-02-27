@@ -16,28 +16,142 @@ export type Database = {
     Tables: {
       answer_keys: {
         Row: {
-          correct_option: string
           id: string
           paper_id: string
-          question_number: number
+          q1: string | null
+          q10: string | null
+          q11: string | null
+          q12: string | null
+          q13: string | null
+          q14: string | null
+          q15: string | null
+          q16: string | null
+          q17: string | null
+          q18: string | null
+          q19: string | null
+          q2: string | null
+          q20: string | null
+          q21: string | null
+          q22: string | null
+          q23: string | null
+          q24: string | null
+          q25: string | null
+          q26: string | null
+          q27: string | null
+          q28: string | null
+          q29: string | null
+          q3: string | null
+          q30: string | null
+          q31: string | null
+          q32: string | null
+          q33: string | null
+          q34: string | null
+          q35: string | null
+          q36: string | null
+          q37: string | null
+          q38: string | null
+          q39: string | null
+          q4: string | null
+          q40: string | null
+          q5: string | null
+          q6: string | null
+          q7: string | null
+          q8: string | null
+          q9: string | null
         }
         Insert: {
-          correct_option: string
           id?: string
           paper_id: string
-          question_number: number
+          q1?: string | null
+          q10?: string | null
+          q11?: string | null
+          q12?: string | null
+          q13?: string | null
+          q14?: string | null
+          q15?: string | null
+          q16?: string | null
+          q17?: string | null
+          q18?: string | null
+          q19?: string | null
+          q2?: string | null
+          q20?: string | null
+          q21?: string | null
+          q22?: string | null
+          q23?: string | null
+          q24?: string | null
+          q25?: string | null
+          q26?: string | null
+          q27?: string | null
+          q28?: string | null
+          q29?: string | null
+          q3?: string | null
+          q30?: string | null
+          q31?: string | null
+          q32?: string | null
+          q33?: string | null
+          q34?: string | null
+          q35?: string | null
+          q36?: string | null
+          q37?: string | null
+          q38?: string | null
+          q39?: string | null
+          q4?: string | null
+          q40?: string | null
+          q5?: string | null
+          q6?: string | null
+          q7?: string | null
+          q8?: string | null
+          q9?: string | null
         }
         Update: {
-          correct_option?: string
           id?: string
           paper_id?: string
-          question_number?: number
+          q1?: string | null
+          q10?: string | null
+          q11?: string | null
+          q12?: string | null
+          q13?: string | null
+          q14?: string | null
+          q15?: string | null
+          q16?: string | null
+          q17?: string | null
+          q18?: string | null
+          q19?: string | null
+          q2?: string | null
+          q20?: string | null
+          q21?: string | null
+          q22?: string | null
+          q23?: string | null
+          q24?: string | null
+          q25?: string | null
+          q26?: string | null
+          q27?: string | null
+          q28?: string | null
+          q29?: string | null
+          q3?: string | null
+          q30?: string | null
+          q31?: string | null
+          q32?: string | null
+          q33?: string | null
+          q34?: string | null
+          q35?: string | null
+          q36?: string | null
+          q37?: string | null
+          q38?: string | null
+          q39?: string | null
+          q4?: string | null
+          q40?: string | null
+          q5?: string | null
+          q6?: string | null
+          q7?: string | null
+          q8?: string | null
+          q9?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "answer_keys_paper_id_fkey"
             columns: ["paper_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "papers"
             referencedColumns: ["id"]
           },
