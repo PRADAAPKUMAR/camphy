@@ -1,11 +1,11 @@
 import { useState, useMemo } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, X, BookOpen, FileText } from "lucide-react";
+import { Search, X, BookOpen, FileText, Folder, ChevronRight } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -17,9 +17,9 @@ import {
 
 const MaterialsLevelPage = () => {
   const { level } = useParams<{ level: string }>();
-  const navigate = useNavigate();
   const decodedLevel = decodeURIComponent(level || "");
   const [search, setSearch] = useState("");
+  const [currentPath, setCurrentPath] = useState<string[]>([]);
 
   const { data: materials, isLoading } = useQuery({
     queryKey: ["study_materials", decodedLevel],
@@ -35,17 +35,88 @@ const MaterialsLevelPage = () => {
     enabled: !!decodedLevel,
   });
 
-  const filtered = useMemo(() => {
-    if (!materials) return [];
-    if (!search) return materials;
+  // Parse folder_path into segments array
+  const parsePath = (folderPath: string | null): string[] => {
+    if (!folderPath) return [];
+    return folderPath.split(",").map((s) => s.trim()).filter(Boolean);
+  };
+
+  // Get subfolders and files at the current path level
+  const { subfolders, files } = useMemo(() => {
+    if (!materials) return { subfolders: [], files: [] };
+
     const q = search.toLowerCase();
-    return materials.filter(
-      (m) =>
-        m.title.toLowerCase().includes(q) ||
-        m.subject.toLowerCase().includes(q) ||
-        (m.description ?? "").toLowerCase().includes(q)
-    );
-  }, [materials, search]);
+    const folderSet = new Set<string>();
+    const currentFiles: typeof materials = [];
+
+    for (const mat of materials) {
+      const segments = parsePath(mat.folder_path);
+
+      // Check if this item is within the current path
+      const isUnderCurrentPath = currentPath.every(
+        (seg, i) => segments[i] === seg
+      );
+
+      if (!isUnderCurrentPath) continue;
+
+      if (segments.length > currentPath.length) {
+        // This item is in a subfolder — collect the next folder name
+        const nextFolder = segments[currentPath.length];
+        if (!search || nextFolder.toLowerCase().includes(q)) {
+          folderSet.add(nextFolder);
+        }
+      } else {
+        // This item is at the current level (a file)
+        if (
+          !search ||
+          mat.title.toLowerCase().includes(q) ||
+          mat.subject.toLowerCase().includes(q) ||
+          (mat.description ?? "").toLowerCase().includes(q)
+        ) {
+          currentFiles.push(mat);
+        }
+      }
+    }
+
+    // If searching, also include files from deeper levels that match
+    if (search) {
+      for (const mat of materials) {
+        const segments = parsePath(mat.folder_path);
+        const isUnderCurrentPath = currentPath.every(
+          (seg, i) => segments[i] === seg
+        );
+        if (
+          isUnderCurrentPath &&
+          segments.length > currentPath.length &&
+          (mat.title.toLowerCase().includes(q) ||
+            mat.subject.toLowerCase().includes(q) ||
+            (mat.description ?? "").toLowerCase().includes(q))
+        ) {
+          currentFiles.push(mat);
+        }
+      }
+    }
+
+    return {
+      subfolders: Array.from(folderSet).sort(),
+      files: currentFiles,
+    };
+  }, [materials, currentPath, search]);
+
+  const navigateToFolder = (folderName: string) => {
+    setCurrentPath((prev) => [...prev, folderName]);
+    setSearch("");
+  };
+
+  const navigateToPathIndex = (index: number) => {
+    setCurrentPath((prev) => prev.slice(0, index + 1));
+    setSearch("");
+  };
+
+  const navigateToRoot = () => {
+    setCurrentPath([]);
+    setSearch("");
+  };
 
   if (isLoading) {
     return (
@@ -74,9 +145,36 @@ const MaterialsLevelPage = () => {
                 <BreadcrumbLink asChild><Link to="/materials">Materials</Link></BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{decodedLevel}</BreadcrumbPage>
-              </BreadcrumbItem>
+              {currentPath.length === 0 ? (
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{decodedLevel}</BreadcrumbPage>
+                </BreadcrumbItem>
+              ) : (
+                <>
+                  <BreadcrumbItem>
+                    <BreadcrumbLink className="cursor-pointer" onClick={navigateToRoot}>
+                      {decodedLevel}
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  {currentPath.map((seg, i) => (
+                    <span key={i} className="contents">
+                      <BreadcrumbSeparator />
+                      <BreadcrumbItem>
+                        {i === currentPath.length - 1 ? (
+                          <BreadcrumbPage>{seg}</BreadcrumbPage>
+                        ) : (
+                          <BreadcrumbLink
+                            className="cursor-pointer"
+                            onClick={() => navigateToPathIndex(i)}
+                          >
+                            {seg}
+                          </BreadcrumbLink>
+                        )}
+                      </BreadcrumbItem>
+                    </span>
+                  ))}
+                </>
+              )}
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-3 mb-2">
@@ -84,9 +182,16 @@ const MaterialsLevelPage = () => {
               <BookOpen className="h-5 w-5 text-accent" />
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight">Materials — {decodedLevel}</h1>
+              <h1 className="text-3xl font-extrabold tracking-tight">
+                {currentPath.length > 0
+                  ? currentPath[currentPath.length - 1]
+                  : `Materials — ${decodedLevel}`}
+              </h1>
               <p className="text-sm text-muted-foreground">
-                {materials?.length ?? 0} resource{(materials?.length ?? 0) !== 1 ? "s" : ""} available
+                {subfolders.length > 0 && `${subfolders.length} folder${subfolders.length !== 1 ? "s" : ""}`}
+                {subfolders.length > 0 && files.length > 0 && " · "}
+                {files.length > 0 && `${files.length} file${files.length !== 1 ? "s" : ""}`}
+                {subfolders.length === 0 && files.length === 0 && "Empty"}
               </p>
             </div>
           </div>
@@ -114,55 +219,83 @@ const MaterialsLevelPage = () => {
           </div>
         </div>
 
-        {/* Results */}
-        {filtered.length === 0 ? (
+        {/* Folders */}
+        {subfolders.length > 0 && (
+          <div className="mb-6">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Folders</h2>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {subfolders.map((folder) => (
+                <button
+                  key={folder}
+                  onClick={() => navigateToFolder(folder)}
+                  className="glass-card-hover group rounded-xl p-5 flex items-center gap-4 text-left w-full transition-all"
+                >
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
+                    <Folder className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-sm font-semibold truncate">{folder}</h3>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Files */}
+        {files.length > 0 && (
+          <div>
+            {subfolders.length > 0 && (
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Files</h2>
+            )}
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {files.map((mat) => (
+                <a
+                  key={mat.id}
+                  href={mat.file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="glass-card-hover group rounded-xl p-5 block cursor-pointer no-underline text-inherit"
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 border border-accent/20 text-accent">
+                      <FileText className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="text-sm font-semibold truncate">{mat.title}</h3>
+                      {mat.description && (
+                        <p className="text-xs text-muted-foreground line-clamp-2">{mat.description}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary" className="font-medium text-xs bg-secondary/60">{mat.subject}</Badge>
+                    <Badge variant="outline" className="text-xs uppercase border-border/40">{mat.file_type}</Badge>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {subfolders.length === 0 && files.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20">
             <BookOpen className="h-12 w-12 text-muted-foreground/40 mb-4" />
             <p className="text-muted-foreground font-medium">
-              {materials && materials.length === 0
-                ? "No materials found for this level."
-                : "No materials match your search."}
+              {search ? "No materials match your search." : "No materials found here."}
             </p>
             {search && (
               <Button variant="link" onClick={() => setSearch("")} className="mt-2 text-primary">
                 Clear search
               </Button>
             )}
+            {!search && currentPath.length > 0 && (
+              <Button variant="link" onClick={navigateToRoot} className="mt-2 text-primary">
+                Back to root
+              </Button>
+            )}
           </div>
-        ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((mat) => (
-              <a
-                key={mat.id}
-                href={mat.file_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="glass-card-hover group rounded-xl p-5 block cursor-pointer no-underline text-inherit"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 border border-accent/20 text-accent">
-                    <FileText className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-semibold truncate">{mat.title}</h3>
-                    {mat.description && (
-                      <p className="text-xs text-muted-foreground line-clamp-2">{mat.description}</p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary" className="font-medium text-xs bg-secondary/60">{mat.subject}</Badge>
-                  <Badge variant="outline" className="text-xs uppercase border-border/40">{mat.file_type}</Badge>
-                </div>
-              </a>
-            ))}
-          </div>
-        )}
-
-        {filtered.length > 0 && (
-          <p className="mt-6 text-center text-xs text-muted-foreground">
-            Showing {filtered.length} material{filtered.length !== 1 ? "s" : ""}
-          </p>
         )}
       </main>
     </div>
