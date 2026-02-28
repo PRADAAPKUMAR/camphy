@@ -1,9 +1,33 @@
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { GraduationCap, BookOpen, FileText, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const HomePage = () => {
   const navigate = useNavigate();
+
+  const { data: paperCount } = useQuery({
+    queryKey: ["papers_count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("papers")
+        .select("*", { count: "exact", head: true });
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
+  const { data: materialsCount } = useQuery({
+    queryKey: ["materials_count"],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("study_materials")
+        .select("*", { count: "exact", head: true });
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
 
   return (
     <div className="min-h-screen bg-background bg-grid relative">
@@ -25,8 +49,8 @@ const HomePage = () => {
           {/* Stats */}
           <div className="mt-12 flex flex-wrap justify-center gap-8">
             {[
-              { value: "10+", label: "Past Papers" },
-              { value: "10+", label: "Study Notes" },
+              { value: paperCount != null ? `${paperCount}+` : "...", label: "Past Papers" },
+              { value: materialsCount != null ? `${materialsCount}+` : "...", label: "Study Notes" },
               { value: "100%", label: "Free Access" },
             ].map((s) => (
               <div key={s.label} className="text-center">

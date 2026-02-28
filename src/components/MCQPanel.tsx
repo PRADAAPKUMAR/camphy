@@ -1,11 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 const OPTIONS = ["A", "B", "C", "D"] as const;
 
 interface MCQPanelProps {
   totalQuestions: number;
   answers: Record<number, string>;
+  correctAnswers: Record<number, string>;
   onSelectAnswer: (question: number, option: string) => void;
   onSubmit: () => void;
   isSubmitted: boolean;
@@ -14,6 +16,7 @@ interface MCQPanelProps {
 const MCQPanel = ({
   totalQuestions,
   answers,
+  correctAnswers,
   onSelectAnswer,
   onSubmit,
   isSubmitted,
@@ -42,32 +45,74 @@ const MCQPanel = ({
       {/* Questions */}
       <ScrollArea className="flex-1">
         <div className="space-y-0.5 p-4">
-          {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((q) => (
-            <div
-              key={q}
-              className="flex items-center justify-center gap-4 py-3"
-            >
-              <span className="w-8 text-right text-sm font-bold tabular-nums text-muted-foreground">
-                {q}
-              </span>
-              <div className="flex gap-3">
-                {OPTIONS.map((opt) => (
-                  <button
-                    key={opt}
-                    className={`flex h-10 w-10 items-center justify-center rounded-lg text-sm font-semibold transition-all duration-150 ${
-                      answers[q] === opt
-                        ? "bg-primary text-primary-foreground shadow-sm scale-105"
-                        : "bg-muted/60 text-foreground hover:bg-primary/15"
-                    }`}
-                    onClick={() => onSelectAnswer(q, opt)}
-                    disabled={isSubmitted}
-                  >
-                    {opt}
-                  </button>
-                ))}
+          {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((q) => {
+            const userAnswer = answers[q];
+            const correctAnswer = correctAnswers[q];
+            const isAnswered = !!userAnswer;
+            const isCorrect = isAnswered && userAnswer === correctAnswer;
+
+            return (
+              <div
+                key={q}
+                className={`flex items-center justify-center gap-4 py-3 ${
+                  isAnswered
+                    ? isCorrect
+                      ? "bg-success/5 rounded-lg"
+                      : "bg-destructive/5 rounded-lg"
+                    : ""
+                }`}
+              >
+                <span className="w-8 text-right text-sm font-bold tabular-nums text-muted-foreground">
+                  {q}
+                </span>
+                <div className="flex gap-3">
+                  {OPTIONS.map((opt) => {
+                    const isSelected = userAnswer === opt;
+                    const isCorrectOpt = isAnswered && opt === correctAnswer;
+                    const isWrongSelection = isSelected && !isCorrect;
+
+                    let className =
+                      "flex h-10 w-10 items-center justify-center rounded-lg text-sm font-semibold transition-all duration-150 ";
+
+                    if (isAnswered) {
+                      if (isCorrectOpt) {
+                        className +=
+                          "bg-success text-success-foreground shadow-sm";
+                      } else if (isWrongSelection) {
+                        className +=
+                          "bg-destructive text-destructive-foreground";
+                      } else {
+                        className += "bg-muted/40 text-muted-foreground/50";
+                      }
+                    } else {
+                      className +=
+                        "bg-muted/60 text-foreground hover:bg-primary/15 cursor-pointer";
+                    }
+
+                    return (
+                      <button
+                        key={opt}
+                        className={className}
+                        onClick={() => onSelectAnswer(q, opt)}
+                        disabled={isAnswered || isSubmitted}
+                      >
+                        {opt}
+                      </button>
+                    );
+                  })}
+                </div>
+                {isAnswered && (
+                  <span className="w-5">
+                    {isCorrect ? (
+                      <CheckCircle2 className="h-4 w-4 text-success" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-destructive" />
+                    )}
+                  </span>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </ScrollArea>
 
