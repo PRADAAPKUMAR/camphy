@@ -57,6 +57,13 @@ const ExamPage = () => {
         .eq("paper_id", paperId!)
         .single();
       if (error) throw error;
+      // Build correct answers map immediately
+      const map: Record<number, string> = {};
+      for (let q = 1; q <= TOTAL_QUESTIONS; q++) {
+        const val = (data as any)[`q${q}`];
+        if (val) map[q] = val;
+      }
+      setCorrectAnswersMap(map);
       return data;
     },
     enabled: !!paperId,
@@ -70,16 +77,9 @@ const ExamPage = () => {
   const handleSubmit = useCallback(async () => {
     if (isSubmitted || !answerKey) return;
 
-    const correctMap: Record<number, string> = {};
-    for (let q = 1; q <= TOTAL_QUESTIONS; q++) {
-      const val = (answerKey as any)[`q${q}`];
-      if (val) correctMap[q] = val;
-    }
-    setCorrectAnswersMap(correctMap);
-
     let correct = 0;
     for (let q = 1; q <= TOTAL_QUESTIONS; q++) {
-      if (answers[q] === correctMap[q]) correct++;
+      if (answers[q] === correctAnswersMap[q]) correct++;
     }
     setScore(correct);
     setIsSubmitted(true);
@@ -95,7 +95,7 @@ const ExamPage = () => {
     } else {
       toast.success(`Score: ${correct}/${TOTAL_QUESTIONS}`);
     }
-  }, [isSubmitted, answerKey, answers, paperId]);
+  }, [isSubmitted, answerKey, answers, paperId, correctAnswersMap]);
 
   if (paperLoading) {
     return (
@@ -165,6 +165,7 @@ const ExamPage = () => {
             <MCQPanel
               totalQuestions={TOTAL_QUESTIONS}
               answers={answers}
+              correctAnswers={correctAnswersMap}
               onSelectAnswer={handleSelectAnswer}
               onSubmit={handleSubmit}
               isSubmitted={isSubmitted}
