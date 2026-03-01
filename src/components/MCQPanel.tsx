@@ -54,7 +54,7 @@ const MCQPanel = ({
             return (
               <div
                 key={q}
-                className={`flex items-center gap-3 px-2 py-3 ${
+                className={`flex items-center justify-center gap-4 py-3 ${
                   isAnswered
                     ? isCorrect
                       ? "bg-success/5 rounded-lg"
@@ -65,14 +65,14 @@ const MCQPanel = ({
                 <span className="w-8 text-right text-sm font-bold tabular-nums text-muted-foreground">
                   {q}
                 </span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2 flex-1">
+                <div className="flex gap-3">
                   {OPTIONS.map((opt) => {
                     const isSelected = userAnswer === opt;
                     const isCorrectOpt = isAnswered && opt === correctAnswer;
                     const isWrongSelection = isSelected && !isCorrect;
 
                     let className =
-                      "flex min-h-[3rem] w-full items-center justify-center rounded-lg text-sm font-semibold transition-all duration-150 ";
+                      "flex h-10 w-10 items-center justify-center rounded-lg text-sm font-semibold transition-all duration-150 ";
 
                     if (isAnswered) {
                       if (isCorrectOpt) {
