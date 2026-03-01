@@ -6,11 +6,6 @@ import PDFViewer from "@/components/PDFViewer";
 import MCQPanel from "@/components/MCQPanel";
 import ResultSummary from "@/components/ResultSummary";
 import Timer from "@/components/Timer";
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from "@/components/ui/resizable";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -147,13 +142,12 @@ const ExamPage = () => {
         />
       </div>
 
-      {/* Split view */}
-      <ResizablePanelGroup direction="horizontal" className="flex-1">
-        <ResizablePanel defaultSize={78} minSize={40}>
+      {/* Split view — horizontal on md+, vertical on mobile */}
+      <div className="flex flex-1 flex-col md:flex-row min-h-0 overflow-hidden">
+        <div className="w-full md:w-[70%] h-[50vh] md:h-auto min-h-0 overflow-hidden">
           <PDFViewer url={paper.pdf_url} />
-        </ResizablePanel>
-        <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={22} minSize={18}>
+        </div>
+        <div className="w-full md:w-[30%] flex-1 md:flex-none min-h-0 overflow-auto border-t md:border-t-0 md:border-l border-border">
           {isSubmitted ? (
             <ResultSummary
               score={score}
@@ -171,8 +165,8 @@ const ExamPage = () => {
               isSubmitted={isSubmitted}
             />
           )}
-        </ResizablePanel>
-      </ResizablePanelGroup>
+        </div>
+      </div>
     </div>
   );
 };
