@@ -21,12 +21,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const TOTAL_QUESTIONS = 40;
 
 const ExamPage = () => {
   const { paperId } = useParams<{ paperId: string }>();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [score, setScore] = useState(0);
@@ -148,12 +150,12 @@ const ExamPage = () => {
       </div>
 
       {/* Split view */}
-      <ResizablePanelGroup direction="horizontal" className="flex-1">
-        <ResizablePanel defaultSize={78} minSize={40}>
+      <ResizablePanelGroup direction={isMobile ? "vertical" : "horizontal"} className="flex-1">
+        <ResizablePanel defaultSize={isMobile ? 55 : 70} minSize={30}>
           <PDFViewer url={paper.pdf_url} />
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={22} minSize={18}>
+        <ResizablePanel defaultSize={isMobile ? 45 : 30} minSize={20}>
           {isSubmitted ? (
             <ResultSummary
               score={score}
