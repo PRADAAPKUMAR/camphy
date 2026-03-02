@@ -147,34 +147,30 @@ const ExamPage = () => {
         />
       </div>
 
-      {/* Split view with resizable panels */}
-      <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
-        <ResizablePanel defaultSize={70} minSize={40}>
-          <div className="h-full min-h-0 overflow-hidden">
-            <PDFViewer url={paper.pdf_url} />
-          </div>
+      {/* Split view */}
+      <ResizablePanelGroup direction="horizontal" className="flex-1">
+        <ResizablePanel defaultSize={78} minSize={40}>
+          <PDFViewer url={paper.pdf_url} />
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={30} minSize={18}>
-          <div className="h-full min-h-0 overflow-auto">
-            {isSubmitted ? (
-              <ResultSummary
-                score={score}
-                totalQuestions={TOTAL_QUESTIONS}
-                answers={answers}
-                correctAnswers={correctAnswersMap}
-              />
-            ) : (
-              <MCQPanel
-                totalQuestions={TOTAL_QUESTIONS}
-                answers={answers}
-                correctAnswers={correctAnswersMap}
-                onSelectAnswer={handleSelectAnswer}
-                onSubmit={handleSubmit}
-                isSubmitted={isSubmitted}
-              />
-            )}
-          </div>
+        <ResizablePanel defaultSize={22} minSize={18}>
+          {isSubmitted ? (
+            <ResultSummary
+              score={score}
+              totalQuestions={TOTAL_QUESTIONS}
+              answers={answers}
+              correctAnswers={correctAnswersMap}
+            />
+          ) : (
+            <MCQPanel
+              totalQuestions={TOTAL_QUESTIONS}
+              answers={answers}
+              correctAnswers={correctAnswersMap}
+              onSelectAnswer={handleSelectAnswer}
+              onSubmit={handleSubmit}
+              isSubmitted={isSubmitted}
+            />
+          )}
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
