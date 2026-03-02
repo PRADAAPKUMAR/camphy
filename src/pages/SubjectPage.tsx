@@ -38,20 +38,21 @@ const SubjectPage = () => {
     return [...new Set(papers.map((p) => p.year))].sort((a, b) => b - a);
   }, [papers]);
 
-  const papersByYear = useMemo(() => {
+  const isIGCSE = decodedLevel === "IGCSE";
+
+  const papersByYearGrouped = useMemo(() => {
     if (!papers) return {};
-    const map: Record<number, { extended: typeof papers; core: typeof papers }> = {};
+    const map: Record<number, Record<string, typeof papers>> = {};
     papers.forEach((p) => {
-      if (!map[p.year]) map[p.year] = { extended: [], core: [] };
-      const isExtended = /extended/i.test(p.paper_code);
-      if (isExtended) {
-        map[p.year].extended.push(p);
-      } else {
-        map[p.year].core.push(p);
-      }
+      if (!map[p.year]) map[p.year] = {};
+      const group = isIGCSE
+        ? (/extended/i.test(p.paper_code) ? "Extended" : "Core")
+        : p.session;
+      if (!map[p.year][group]) map[p.year][group] = [];
+      map[p.year][group].push(p);
     });
     return map;
-  }, [papers]);
+  }, [papers, isIGCSE]);
 
   if (isLoading) {
     return (
@@ -121,11 +122,11 @@ const SubjectPage = () => {
 
             {years.map((y) => (
               <TabsContent key={y} value={String(y)} className="space-y-8">
-                {papersByYear[y]?.extended.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Extended</h3>
+                {Object.entries(papersByYearGrouped[y] || {}).map(([group, groupPapers]) => (
+                  <div key={group}>
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">{group}</h3>
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                      {papersByYear[y].extended.map((paper) => (
+                      {groupPapers.map((paper) => (
                         <div
                           key={paper.id}
                           className="glass-card-hover group cursor-pointer rounded-xl p-5"
@@ -148,35 +149,7 @@ const SubjectPage = () => {
                       ))}
                     </div>
                   </div>
-                )}
-                {papersByYear[y]?.core.length > 0 && (
-                  <div>
-                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">Core</h3>
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                      {papersByYear[y].core.map((paper) => (
-                        <div
-                          key={paper.id}
-                          className="glass-card-hover group cursor-pointer rounded-xl p-5"
-                          onClick={() => navigate(`/exam/${paper.id}`)}
-                        >
-                          <div className="flex items-center gap-3 mb-3">
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
-                              <BookOpen className="h-4 w-4" />
-                            </div>
-                            <div>
-                              <h3 className="text-base font-semibold font-mono">{paper.paper_code}</h3>
-                            </div>
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            <Badge variant="secondary" className="font-medium text-xs bg-secondary/60">
-                              {paper.session}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                ))}
               </TabsContent>
             ))}
           </Tabs>
