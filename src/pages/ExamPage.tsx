@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 import PDFViewer from "@/components/PDFViewer";
 import MCQPanel from "@/components/MCQPanel";
 import ResultSummary from "@/components/ResultSummary";
@@ -37,6 +37,7 @@ const ExamPage = () => {
   const { data: paper, isLoading: paperLoading } = useQuery({
     queryKey: ["paper", paperId],
     queryFn: async () => {
+      const supabase = await getSupabase();
       const { data, error } = await supabase
         .from("papers")
         .select("*")
@@ -51,6 +52,7 @@ const ExamPage = () => {
   const { data: answerKey } = useQuery({
     queryKey: ["answer_keys", paperId],
     queryFn: async () => {
+      const supabase = await getSupabase();
       const { data, error } = await supabase
         .from("answer_keys")
         .select("*")
@@ -84,6 +86,7 @@ const ExamPage = () => {
     setScore(correct);
     setIsSubmitted(true);
 
+    const supabase = await getSupabase();
     const { error } = await supabase.from("attempts").insert({
       paper_id: paperId!,
       score: correct,

@@ -1,8 +1,9 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, GraduationCap, Atom, FlaskConical, Microscope } from "lucide-react";
+
+const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -24,6 +25,7 @@ const PaperSelector = () => {
   const { data: papers, isLoading } = useQuery({
     queryKey: ["papers"],
     queryFn: async () => {
+      const supabase = await getSupabase();
       const { data, error } = await supabase
         .from("papers")
         .select("*")

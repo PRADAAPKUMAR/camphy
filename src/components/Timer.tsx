@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 import { Clock } from "lucide-react";
 
 interface TimerProps {
@@ -7,7 +7,7 @@ interface TimerProps {
   isRunning: boolean;
 }
 
-const Timer = ({ durationMinutes, onTimeUp, isRunning }: TimerProps) => {
+const Timer = memo(({ durationMinutes, onTimeUp, isRunning }: TimerProps) => {
   const [secondsLeft, setSecondsLeft] = useState(durationMinutes * 60);
 
   useEffect(() => {
@@ -47,6 +47,8 @@ const Timer = ({ durationMinutes, onTimeUp, isRunning }: TimerProps) => {
       </span>
     </div>
   );
-};
+});
+
+Timer.displayName = "Timer";
 
 export default Timer;
