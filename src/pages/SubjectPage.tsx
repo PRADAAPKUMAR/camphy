@@ -122,7 +122,7 @@ const SubjectPage = () => {
 
             {years.map((y) => (
               <TabsContent key={y} value={String(y)} className="space-y-8">
-                {Object.entries(papersByYearGrouped[y] || {}).map(([group, groupPapers]) => (
+                {Object.entries(papersByYearGrouped[y] || {}).sort(([a], [b]) => a.localeCompare(b)).map(([group, groupPapers]) => (
                   <div key={group}>
                     <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">{group}</h3>
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
