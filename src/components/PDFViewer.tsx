@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 
 interface PDFViewerProps {
   url: string;
@@ -6,7 +6,7 @@ interface PDFViewerProps {
 
 const isAndroid = () => /android/i.test(navigator.userAgent);
 
-const PDFViewer = ({ url }: PDFViewerProps) => {
+const PDFViewer = memo(({ url }: PDFViewerProps) => {
   const viewerUrl = useMemo(() => {
     if (isAndroid()) {
       return `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}`;
@@ -20,9 +20,12 @@ const PDFViewer = ({ url }: PDFViewerProps) => {
         src={viewerUrl}
         className="h-full w-full border-0"
         title="PDF Viewer"
+        loading="lazy"
       />
     </div>
   );
-};
+});
+
+PDFViewer.displayName = "PDFViewer";
 
 export default PDFViewer;

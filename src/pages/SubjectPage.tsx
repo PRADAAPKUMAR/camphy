@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 import { BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -22,6 +22,7 @@ const SubjectPage = () => {
   const { data: papers, isLoading } = useQuery({
     queryKey: ["papers", decodedLevel],
     queryFn: async () => {
+      const supabase = await getSupabase();
       const { data, error } = await supabase
         .from("papers")
         .select("*")

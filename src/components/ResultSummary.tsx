@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CheckCircle2, XCircle, Home, Trophy } from "lucide-react";
@@ -12,7 +13,59 @@ interface ResultSummaryProps {
   correctAnswers: Record<number, string>;
 }
 
-const ResultSummary = ({
+const ResultRow = memo(({ q, userAnswer, correct }: { q: number; userAnswer: string | undefined; correct: string | undefined }) => {
+  const isCorrect = userAnswer === correct;
+
+  return (
+    <div
+      className={`flex items-center gap-3 rounded-lg px-3 py-2 ${
+        isCorrect
+          ? "bg-success/5"
+          : userAnswer
+          ? "bg-destructive/5"
+          : ""
+      }`}
+    >
+      <span className="w-7 text-right text-xs font-bold tabular-nums text-muted-foreground">
+        {q}
+      </span>
+      <div className="flex gap-1.5">
+        {OPTIONS.map((opt) => {
+          const isCorrectOpt = opt === correct;
+          const isUserWrong = opt === userAnswer && !isCorrect;
+
+          return (
+            <div
+              key={opt}
+              className={`flex h-8 w-9 items-center justify-center rounded-md text-xs font-semibold border transition-all ${
+                isCorrectOpt
+                  ? "bg-success text-success-foreground border-success shadow-sm"
+                  : isUserWrong
+                  ? "bg-destructive text-destructive-foreground border-destructive"
+                  : "bg-background text-muted-foreground border-border"
+              }`}
+            >
+              {opt}
+            </div>
+          );
+        })}
+      </div>
+      <span className="ml-auto">
+        {isCorrect ? (
+          <CheckCircle2 className="h-4 w-4 text-success" />
+        ) : userAnswer ? (
+          <XCircle className="h-4 w-4 text-destructive" />
+        ) : (
+          <span className="text-xs text-muted-foreground">—</span>
+        )}
+      </span>
+    </div>
+  );
+});
+
+ResultRow.displayName = "ResultRow";
+
+const ResultSummary = memo(({
   score,
   totalQuestions,
   answers,
@@ -51,62 +104,20 @@ const ResultSummary = ({
       {/* Answer review */}
       <ScrollArea className="flex-1">
         <div className="space-y-0.5 p-4">
-          {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((q) => {
-            const userAnswer = answers[q];
-            const correct = correctAnswers[q];
-            const isCorrect = userAnswer === correct;
-
-            return (
-              <div
-                key={q}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 ${
-                  isCorrect
-                    ? "bg-success/5"
-                    : userAnswer
-                    ? "bg-destructive/5"
-                    : ""
-                }`}
-              >
-                <span className="w-7 text-right text-xs font-bold tabular-nums text-muted-foreground">
-                  {q}
-                </span>
-                <div className="flex gap-1.5">
-                  {OPTIONS.map((opt) => {
-                    const isCorrectOpt = opt === correct;
-                    const isUserWrong = opt === userAnswer && !isCorrect;
-
-                    return (
-                      <div
-                        key={opt}
-                        className={`flex h-8 w-9 items-center justify-center rounded-md text-xs font-semibold border transition-all ${
-                          isCorrectOpt
-                            ? "bg-success text-success-foreground border-success shadow-sm"
-                            : isUserWrong
-                            ? "bg-destructive text-destructive-foreground border-destructive"
-                            : "bg-background text-muted-foreground border-border"
-                        }`}
-                      >
-                        {opt}
-                      </div>
-                    );
-                  })}
-                </div>
-                <span className="ml-auto">
-                  {isCorrect ? (
-                    <CheckCircle2 className="h-4 w-4 text-success" />
-                  ) : userAnswer ? (
-                    <XCircle className="h-4 w-4 text-destructive" />
-                  ) : (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
-                </span>
-              </div>
-            );
-          })}
+          {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((q) => (
+            <ResultRow
+              key={q}
+              q={q}
+              userAnswer={answers[q]}
+              correct={correctAnswers[q]}
+            />
+          ))}
         </div>
       </ScrollArea>
     </div>
   );
-};
+});
+
+ResultSummary.displayName = "ResultSummary";
 
 export default ResultSummary;
