@@ -126,7 +126,7 @@ const SubjectPage = () => {
                   <div key={group}>
                     <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">{group}</h3>
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                      {groupPapers.map((paper) => (
+                      {[...groupPapers].sort((a, b) => a.paper_code.localeCompare(b.paper_code)).map((paper) => (
                         <div
                           key={paper.id}
                           className="glass-card-hover group cursor-pointer rounded-xl p-5"

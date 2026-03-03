@@ -141,7 +141,7 @@ const ExamPage = () => {
           </Breadcrumb>
         </div>
         <Timer
-          durationMinutes={paper.level === "AS Level" ? 75 : 45}
+          durationMinutes={paper.level.toUpperCase() === "AS LEVEL" ? 75 : 45}
           onTimeUp={handleSubmit}
           isRunning={!isSubmitted}
         />
