@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { GraduationCap, BookOpen, FileText, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const HomePage = () => {
   const { data: paperCount } = useQuery({
     queryKey: ["papers_count"],
     queryFn: async () => {
+      const supabase = await getSupabase();
       const { count, error } = await supabase
         .from("papers")
         .select("*", { count: "exact", head: true });
@@ -21,6 +23,7 @@ const HomePage = () => {
   const { data: materialsCount } = useQuery({
     queryKey: ["materials_count"],
     queryFn: async () => {
+      const supabase = await getSupabase();
       const { count, error } = await supabase
         .from("study_materials")
         .select("*", { count: "exact", head: true });
