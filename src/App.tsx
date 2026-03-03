@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
@@ -16,25 +16,42 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+/** Deferred shell components that aren't needed for first paint */
+const DeferredShell = () => {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const id = requestIdleCallback ? requestIdleCallback(() => setReady(true)) : setTimeout(() => setReady(true), 100);
+    return () => { if (requestIdleCallback) cancelIdleCallback(id as number); else clearTimeout(id as ReturnType<typeof setTimeout>); };
+  }, []);
+  if (!ready) return null;
+  return (
+    <Suspense fallback={null}>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/papers" element={<Index />} />
-            <Route path="/papers/:level" element={<SubjectPage />} />
-            <Route path="/exam/:paperId" element={<ExamPage />} />
-            <Route path="/materials" element={<MaterialsPage />} />
-            <Route path="/materials/:level" element={<MaterialsLevelPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </TooltipProvider>
+    </Suspense>
+  );
+};
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <Suspense fallback={null}>
+      <TooltipProvider>
+        <DeferredShell />
+        <BrowserRouter>
+          <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/papers" element={<Index />} />
+              <Route path="/papers/:level" element={<SubjectPage />} />
+              <Route path="/exam/:paperId" element={<ExamPage />} />
+              <Route path="/materials" element={<MaterialsPage />} />
+              <Route path="/materials/:level" element={<MaterialsLevelPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </TooltipProvider>
+    </Suspense>
   </QueryClientProvider>
 );
 
