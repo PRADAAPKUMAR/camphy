@@ -6,6 +6,7 @@ import { ArrowLeft, GraduationCap, Atom, FlaskConical, Microscope } from "lucide
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const levelIcons: Record<string, React.ReactNode> = {
   IGCSE: <Microscope className="h-6 w-6" />,
@@ -56,11 +57,37 @@ const PaperSelector = () => {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-sm text-muted-foreground">Loading...</p>
-        </div>
+      <div className="min-h-screen bg-background bg-grid relative">
+        <div className="absolute inset-0 bg-radial-glow pointer-events-none" />
+        <header className="relative border-b border-border/40">
+          <div className="container py-10">
+            <Skeleton className="h-8 w-20 mb-4" />
+            <div className="flex items-center gap-3 mb-2">
+              <Skeleton className="h-10 w-10 rounded-xl" />
+              <div>
+                <Skeleton className="h-8 w-64 mb-1" />
+                <Skeleton className="h-4 w-48" />
+              </div>
+            </div>
+          </div>
+        </header>
+        <main className="container relative py-10">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="glass-card rounded-2xl p-7 flex flex-col gap-4">
+                <Skeleton className="h-14 w-14 rounded-xl" />
+                <div>
+                  <Skeleton className="h-6 w-28 mb-1" />
+                  <Skeleton className="h-3 w-full" />
+                </div>
+                <div className="flex gap-2 mt-auto">
+                  <Skeleton className="h-5 w-20 rounded-full" />
+                  <Skeleton className="h-5 w-24 rounded-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </main>
       </div>
     );
   }

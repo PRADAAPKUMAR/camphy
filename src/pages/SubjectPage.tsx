@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 import { BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Breadcrumb,
@@ -57,11 +58,39 @@ const SubjectPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-sm text-muted-foreground">Loading papers...</p>
-        </div>
+      <div className="min-h-screen bg-background bg-grid relative">
+        <div className="absolute inset-0 bg-radial-glow pointer-events-none" />
+        <header className="relative border-b border-border/40">
+          <div className="container py-10">
+            <Skeleton className="h-4 w-40 mb-5" />
+            <div className="flex items-center gap-3 mb-2">
+              <Skeleton className="h-10 w-10 rounded-xl" />
+              <div>
+                <Skeleton className="h-8 w-56 mb-1" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+            </div>
+          </div>
+        </header>
+        <main className="container relative py-8">
+          <div className="flex gap-1 mb-6">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-10 w-16 rounded-md" />
+            ))}
+          </div>
+          <Skeleton className="h-4 w-24 mb-3" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="glass-card rounded-xl p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <Skeleton className="h-9 w-9 rounded-lg" />
+                  <Skeleton className="h-5 w-24" />
+                </div>
+                <Skeleton className="h-5 w-16 rounded-full" />
+              </div>
+            ))}
+          </div>
+        </main>
       </div>
     );
   }
