@@ -47,7 +47,33 @@ const App = () => (
       <TooltipProvider>
         <DeferredShell />
         <BrowserRouter>
-          <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" /></div>}>
+          <Suspense fallback={
+            <div className="min-h-screen bg-background">
+              <div className="border-b border-border/40">
+                <div className="container py-10">
+                  <div className="h-4 w-32 rounded bg-muted animate-pulse mb-5" />
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-muted animate-pulse" />
+                    <div>
+                      <div className="h-8 w-48 rounded bg-muted animate-pulse mb-1" />
+                      <div className="h-4 w-56 rounded bg-muted animate-pulse" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="container py-10">
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
+                  {[1,2,3].map(i=>(
+                    <div key={i} className="rounded-2xl border border-border/40 bg-muted/10 p-7 flex flex-col gap-4">
+                      <div className="h-14 w-14 rounded-xl bg-muted animate-pulse" />
+                      <div className="h-6 w-28 rounded bg-muted animate-pulse" />
+                      <div className="h-4 w-full rounded bg-muted animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          }>
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/papers" element={<Index />} />
