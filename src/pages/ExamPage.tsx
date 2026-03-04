@@ -21,6 +21,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const TOTAL_QUESTIONS = 40;
 
@@ -102,10 +103,27 @@ const ExamPage = () => {
 
   if (paperLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-sm text-muted-foreground">Loading exam...</p>
+      <div className="flex h-screen flex-col bg-background">
+        <div className="flex items-center justify-between border-b bg-card px-5 py-3 shadow-sm">
+          <Skeleton className="h-5 w-48" />
+          <Skeleton className="h-8 w-24 rounded-md" />
+        </div>
+        <div className="flex flex-1">
+          <div className="flex-1 p-4">
+            <Skeleton className="h-full w-full rounded-lg" />
+          </div>
+          <div className="w-[22%] min-w-[200px] border-l border-border/40 p-4 space-y-3">
+            {Array.from({ length: 10 }, (_, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <Skeleton className="h-6 w-6 rounded-full shrink-0" />
+                <div className="flex gap-1.5 flex-1">
+                  {[1, 2, 3, 4].map((j) => (
+                    <Skeleton key={j} className="h-8 flex-1 rounded-md" />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );

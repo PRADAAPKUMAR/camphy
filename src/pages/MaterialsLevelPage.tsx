@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, X, BookOpen, FileText, Folder, ChevronRight } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -121,11 +122,34 @@ const MaterialsLevelPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-sm text-muted-foreground">Loading materials...</p>
-        </div>
+      <div className="min-h-screen bg-background bg-grid relative">
+        <div className="absolute inset-0 bg-radial-glow pointer-events-none" />
+        <header className="relative border-b border-border/40">
+          <div className="container py-10">
+            <Skeleton className="h-4 w-48 mb-5" />
+            <div className="flex items-center gap-3 mb-2">
+              <Skeleton className="h-10 w-10 rounded-xl" />
+              <div>
+                <Skeleton className="h-8 w-52 mb-1" />
+                <Skeleton className="h-4 w-36" />
+              </div>
+            </div>
+          </div>
+        </header>
+        <main className="container relative py-8">
+          <div className="glass-card rounded-xl p-4 mb-8">
+            <Skeleton className="h-10 w-full rounded-md" />
+          </div>
+          <Skeleton className="h-3 w-16 mb-3" />
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="glass-card rounded-xl p-5 flex items-center gap-4">
+                <Skeleton className="h-11 w-11 rounded-lg shrink-0" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+            ))}
+          </div>
+        </main>
       </div>
     );
   }
