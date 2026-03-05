@@ -4,8 +4,8 @@ interface PDFViewerProps {
   url: string;
 }
 
-const isMobileOrTablet = () =>
-  /android|iphone|ipad|ipod|mobile|tablet/i.test(navigator.userAgent);
+const isAndroid = () =>
+  /android/i.test(navigator.userAgent);
 
 const isTV = () =>
   /smart-tv|smarttv|googletv|crkey|aftt|aftm|aftb|fire tv|silk|tv|hbbtv|netcast|viera|bravia|philipstv|roku/i.test(navigator.userAgent);
@@ -17,7 +17,7 @@ const PDFViewer = memo(({ url }: PDFViewerProps) => {
   const [retryKey, setRetryKey] = useState(0);
 
   const viewerUrl = useMemo(() => {
-    if (isMobileOrTablet() || isTV()) {
+    if (isAndroid() || isTV()) {
       return `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}`;
     }
     return url;
