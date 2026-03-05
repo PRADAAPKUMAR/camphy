@@ -29,8 +29,9 @@ const queryClient = new QueryClient({
 const DeferredShell = () => {
   const [ready, setReady] = useState(false);
   useEffect(() => {
-    const id = requestIdleCallback ? requestIdleCallback(() => setReady(true)) : setTimeout(() => setReady(true), 100);
-    return () => { if (requestIdleCallback) cancelIdleCallback(id as number); else clearTimeout(id as ReturnType<typeof setTimeout>); };
+    const ric = typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function';
+    const id = ric ? window.requestIdleCallback(() => setReady(true)) : setTimeout(() => setReady(true), 100);
+    return () => { if (ric) window.cancelIdleCallback(id as number); else clearTimeout(id as ReturnType<typeof setTimeout>); };
   }, []);
   if (!ready) return null;
   return (
