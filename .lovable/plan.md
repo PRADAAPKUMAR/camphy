@@ -1,24 +1,25 @@
 
 
-## Plan: Update PDFViewer Android Detection
+## COMPLETED: Update PDFViewer Android Detection
 
-Currently `isMobileOrTablet()` already matches Android via the regex `/android|iphone|ipad|ipod|mobile|tablet/i`, which routes to Google Docs Viewer. So Android devices are already covered.
+Updated `src/components/PDFViewer.tsx` to properly handle PDF viewing on different devices:
 
-However, the current code also matches iOS devices (iPhone/iPad) — which can render PDFs natively in Safari's iframe without needing Google Docs Viewer.
+1. **Android + TV devices**: Now automatically use Google Docs Viewer from the start
+2. **iOS + Desktop**: Continue to use native iframe with direct PDF URL
 
-### Change in `src/components/PDFViewer.tsx`
+### Implementation Details
 
-Refine the viewer URL logic:
-- **Android + TV**: Use Google Docs Viewer (`gview?embedded=true`)
-- **iOS + Desktop**: Use native iframe (direct URL)
+- Removed the fallback/retry logic for Android devices
+- Simplified the component by removing `useGoogleFallback` state
+- Android and TV devices now immediately load PDFs through Google Docs Viewer
+- iOS devices render PDFs natively in Safari
+- Desktop browsers use native PDF rendering
 
-Update the `viewerUrl` memo to check `isAndroid()` or `isTV()` instead of the broad `isMobileOrTablet()`. This means iPhones/iPads will get the native viewer (which works well in Safari), while Android devices continue using Google Docs Viewer.
-
-### Detection functions
-```
+### Detection Functions
+```typescript
 isAndroid = () => /android/i.test(navigator.userAgent)
 isTV = () => /smart-tv|smarttv|googletv|crkey|aftt|aftm|aftb|fire tv|silk|tv|hbbtv|netcast|viera|bravia|philipstv|roku/i.test(navigator.userAgent)
 ```
 
-No other files need changes.
+This ensures Android mobile and TV users can view PDFs side-by-side with the answer sheet without needing to open the PDF in a separate page.
 

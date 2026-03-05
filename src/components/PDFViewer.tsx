@@ -15,50 +15,33 @@ const LOAD_TIMEOUT = 12000;
 const PDFViewer = memo(({ url }: PDFViewerProps) => {
   const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
   const [retryKey, setRetryKey] = useState(0);
-  const [useGoogleFallback, setUseGoogleFallback] = useState(false);
   const androidDevice = isAndroid();
   const tvDevice = isTV();
 
   const viewerUrl = useMemo(() => {
-    const shouldUseGoogleViewer = tvDevice || (androidDevice && useGoogleFallback);
-    if (shouldUseGoogleViewer) {
+    if (androidDevice || tvDevice) {
       return `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}`;
     }
     return url;
-  }, [androidDevice, tvDevice, url, useGoogleFallback]);
-
-  const switchToGoogleFallback = useCallback(() => {
-    setUseGoogleFallback(true);
-    setStatus("loading");
-    setRetryKey((k) => k + 1);
-  }, []);
+  }, [androidDevice, tvDevice, url]);
 
   // Timeout fallback if onLoad never fires
   useEffect(() => {
     if (status !== "loading") return;
     const timer = setTimeout(() => {
-      if (androidDevice && !useGoogleFallback) {
-        switchToGoogleFallback();
-        return;
-      }
       setStatus((s) => (s === "loading" ? "error" : s));
     }, LOAD_TIMEOUT);
     return () => clearTimeout(timer);
-  }, [androidDevice, retryKey, status, switchToGoogleFallback, useGoogleFallback]);
+  }, [retryKey, status]);
 
   const handleRetry = useCallback(() => {
-    setUseGoogleFallback(false);
     setStatus("loading");
     setRetryKey((k) => k + 1);
   }, []);
 
   const handleFrameError = useCallback(() => {
-    if (androidDevice && !useGoogleFallback) {
-      switchToGoogleFallback();
-      return;
-    }
     setStatus("error");
-  }, [androidDevice, switchToGoogleFallback, useGoogleFallback]);
+  }, []);
 
   return (
     <div className="flex h-full flex-col bg-muted/30 relative">
