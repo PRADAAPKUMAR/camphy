@@ -1,26 +1,24 @@
 
 
-## Issues Identified
+## Plan: Update PDFViewer Android Detection
 
-1. **PDF not loading on mobile/tablet**: Mozilla's PDF.js viewer fails due to CORS restrictions — it cannot fetch the PDF URL from a different origin. The previous Google Docs viewer worked for mobile.
+Currently `isMobileOrTablet()` already matches Android via the regex `/android|iphone|ipad|ipod|mobile|tablet/i`, which routes to Google Docs Viewer. So Android devices are already covered.
 
-2. **Smart TV PDF loading failure**: Same CORS issue with PDF.js viewer. Google Docs viewer is also unreliable on TV browsers. Will use Google Docs viewer as primary fallback for all non-desktop, with a retry/fallback UI.
+However, the current code also matches iOS devices (iPhone/iPad) — which can render PDFs natively in Safari's iframe without needing Google Docs Viewer.
 
-3. **Safari crash / app not loading**: `requestIdleCallback` is not available in Safari (only added in Safari 16.4+, and older Safari versions lack it). The current code references it without `window.` prefix, which can throw a ReferenceError in Safari, breaking the entire app.
+### Change in `src/components/PDFViewer.tsx`
 
-## Plan
+Refine the viewer URL logic:
+- **Android + TV**: Use Google Docs Viewer (`gview?embedded=true`)
+- **iOS + Desktop**: Use native iframe (direct URL)
 
-### 1. Fix Safari compatibility in `src/App.tsx`
-- Change bare `requestIdleCallback` references to `window.requestIdleCallback` (or use `typeof requestIdleCallback !== 'undefined'`) to prevent ReferenceError in Safari versions that don't support it.
+Update the `viewerUrl` memo to check `isAndroid()` or `isTV()` instead of the broad `isMobileOrTablet()`. This means iPhones/iPads will get the native viewer (which works well in Safari), while Android devices continue using Google Docs Viewer.
 
-### 2. Rewrite `src/components/PDFViewer.tsx`
-- **Mobile/Tablet**: Revert to Google Docs viewer (`https://docs.google.com/gview?embedded=true&url=...`) — this was working before.
-- **Smart TV**: Use Google Docs viewer as well (best available option for limited TV browsers).
-- **Desktop**: Keep native iframe with direct URL.
-- **Add error/fallback UI**: Track iframe load state with `onLoad`/`onError`. Show a retry button and a "Open PDF directly" link if loading fails after a timeout (~10 seconds). Include a loading spinner while the PDF loads.
-- Separate detection: `isMobile()` for phones/tablets, `isTV()` for smart TVs — both use Google Docs viewer.
+### Detection functions
+```
+isAndroid = () => /android/i.test(navigator.userAgent)
+isTV = () => /smart-tv|smarttv|googletv|crkey|aftt|aftm|aftb|fire tv|silk|tv|hbbtv|netcast|viera|bravia|philipstv|roku/i.test(navigator.userAgent)
+```
 
-### 3. Files changed
-- `src/App.tsx` — Safari `requestIdleCallback` fix
-- `src/components/PDFViewer.tsx` — Revert mobile viewer, add fallback UI
+No other files need changes.
 
