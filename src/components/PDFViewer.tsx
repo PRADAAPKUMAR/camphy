@@ -15,27 +15,50 @@ const LOAD_TIMEOUT = 12000;
 const PDFViewer = memo(({ url }: PDFViewerProps) => {
   const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
   const [retryKey, setRetryKey] = useState(0);
+  const [useGoogleFallback, setUseGoogleFallback] = useState(false);
+  const androidDevice = isAndroid();
+  const tvDevice = isTV();
 
   const viewerUrl = useMemo(() => {
-    if (isAndroid() || isTV()) {
+    const shouldUseGoogleViewer = tvDevice || (androidDevice && useGoogleFallback);
+    if (shouldUseGoogleViewer) {
       return `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}`;
     }
     return url;
-  }, [url]);
+  }, [androidDevice, tvDevice, url, useGoogleFallback]);
+
+  const switchToGoogleFallback = useCallback(() => {
+    setUseGoogleFallback(true);
+    setStatus("loading");
+    setRetryKey((k) => k + 1);
+  }, []);
 
   // Timeout fallback if onLoad never fires
   useEffect(() => {
     if (status !== "loading") return;
     const timer = setTimeout(() => {
+      if (androidDevice && !useGoogleFallback) {
+        switchToGoogleFallback();
+        return;
+      }
       setStatus((s) => (s === "loading" ? "error" : s));
     }, LOAD_TIMEOUT);
     return () => clearTimeout(timer);
-  }, [status, retryKey]);
+  }, [androidDevice, retryKey, status, switchToGoogleFallback, useGoogleFallback]);
 
   const handleRetry = useCallback(() => {
+    setUseGoogleFallback(false);
     setStatus("loading");
     setRetryKey((k) => k + 1);
   }, []);
+
+  const handleFrameError = useCallback(() => {
+    if (androidDevice && !useGoogleFallback) {
+      switchToGoogleFallback();
+      return;
+    }
+    setStatus("error");
+  }, [androidDevice, switchToGoogleFallback, useGoogleFallback]);
 
   return (
     <div className="flex h-full flex-col bg-muted/30 relative">
@@ -81,7 +104,7 @@ const PDFViewer = memo(({ url }: PDFViewerProps) => {
         title="PDF Viewer"
         allow="fullscreen"
         onLoad={() => setStatus("loaded")}
-        onError={() => setStatus("error")}
+        onError={handleFrameError}
         style={{ WebkitOverflowScrolling: "touch", overflowY: "auto" }}
       />
     </div>
