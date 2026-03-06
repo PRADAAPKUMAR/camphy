@@ -79,7 +79,7 @@ const HomePage = () => {
             onClick={() => navigate("/papers")}
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary mb-5 transition-all group-hover:bg-primary group-hover:text-primary-foreground group-hover:glow-sm">
-              <FileText className="h-6 w-6" />
+              <ClipboardList className="h-6 w-6" />
             </div>
             <h3 className="text-xl font-bold mb-2">MCQ Exam Practice</h3>
             <p className="text-sm text-muted-foreground mb-4">

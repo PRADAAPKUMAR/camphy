@@ -96,7 +96,7 @@ const ResultSummary = memo(({
           className="mt-4"
           onClick={() => navigate("/")}
         >
-          <Home className="mr-2 h-4 w-4" />
+          <Undo2 className="mr-2 h-4 w-4" />
           Back to Papers
         </Button>
       </div>

@@ -164,7 +164,7 @@ const SubjectPage = () => {
                         >
                           <div className="flex items-center gap-3 mb-3">
                             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
-                              <BookOpen className="h-4 w-4" />
+                              <ScrollText className="h-4 w-4" />
                             </div>
                             <div>
                               <h3 className="text-base font-semibold font-mono">{paper.paper_code}</h3>
