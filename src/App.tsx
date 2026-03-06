@@ -32,7 +32,7 @@ const DeferredShell = () => {
     const rIC = typeof window !== 'undefined' && 'requestIdleCallback' in window ? window.requestIdleCallback : undefined;
     const cIC = typeof window !== 'undefined' && 'cancelIdleCallback' in window ? window.cancelIdleCallback : undefined;
     const id = rIC ? rIC(() => setReady(true)) : window.setTimeout(() => setReady(true), 100);
-    return () => { if (cIC) cIC(id as number); else window.clearTimeout(id as ReturnType<typeof setTimeout>); };
+    return () => { if (cIC) cIC(id as number); else window.clearTimeout(id as unknown as ReturnType<typeof setTimeout>); };
   }, []);
   if (!ready) return null;
   return (
