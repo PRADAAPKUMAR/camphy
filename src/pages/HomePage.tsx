@@ -68,7 +68,7 @@ const HomePage = () => {
       {/* Feature cards */}
       <main className="container relative py-16">
         <div className="flex items-center gap-2 mb-8">
-          <Sparkles className="h-4 w-4 text-primary" />
+          <Orbit className="h-4 w-4 text-primary" />
           <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Explore</h2>
         </div>
 
