@@ -5,7 +5,7 @@ const getSupabase = () => import("@/integrations/supabase/client").then(m => m.s
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, X, BookOpen, FileText, Folder, ChevronRight } from "lucide-react";
+import { Search, X, BookMarked, FileText, Folder, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Breadcrumb,
