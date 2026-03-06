@@ -52,9 +52,9 @@ const ResultRow = memo(({ q, userAnswer, correct }: { q: number; userAnswer: str
       </div>
       <span className="ml-auto">
         {isCorrect ? (
-          <CheckCircle2 className="h-4 w-4 text-success" />
-        ) : userAnswer ? (
-          <XCircle className="h-4 w-4 text-destructive" />
+           <CircleCheck className="h-4 w-4 text-success" />
+         ) : userAnswer ? (
+           <CircleX className="h-4 w-4 text-destructive" />
         ) : (
           <span className="text-xs text-muted-foreground">—</span>
         )}
