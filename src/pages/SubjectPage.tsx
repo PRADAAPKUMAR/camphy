@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
-import { BookOpen } from "lucide-react";
+import { FlaskConical, ScrollText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -118,7 +118,7 @@ const SubjectPage = () => {
           </Breadcrumb>
           <div className="flex items-center gap-3 mb-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
-              <BookOpen className="h-5 w-5 text-primary" />
+              <FlaskConical className="h-5 w-5 text-primary" />
             </div>
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">Physics — {decodedLevel}</h1>
@@ -133,7 +133,7 @@ const SubjectPage = () => {
       <main className="container relative py-8">
         {years.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <BookOpen className="h-12 w-12 text-muted-foreground/40 mb-4" />
+            <FlaskConical className="h-12 w-12 text-muted-foreground/40 mb-4" />
             <p className="text-muted-foreground font-medium">No papers found for this level.</p>
           </div>
         ) : (
@@ -164,7 +164,7 @@ const SubjectPage = () => {
                         >
                           <div className="flex items-center gap-3 mb-3">
                             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
-                              <BookOpen className="h-4 w-4" />
+                              <ScrollText className="h-4 w-4" />
                             </div>
                             <div>
                               <h3 className="text-base font-semibold font-mono">{paper.paper_code}</h3>

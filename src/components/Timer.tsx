@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, memo } from "react";
-import { Clock } from "lucide-react";
+import { Timer as TimerIcon } from "lucide-react";
 
 interface TimerProps {
   durationMinutes: number;
@@ -41,7 +41,7 @@ const Timer = memo(({ durationMinutes, onTimeUp, isRunning }: TimerProps) => {
           : "border-primary/20 bg-primary/5 text-primary"
       }`}
     >
-      <Clock className="h-4 w-4" />
+      <TimerIcon className="h-4 w-4" />
       <span>
         {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
       </span>

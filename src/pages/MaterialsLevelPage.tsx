@@ -5,7 +5,7 @@ const getSupabase = () => import("@/integrations/supabase/client").then(m => m.s
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, X, BookOpen, FileText, Folder, ChevronRight } from "lucide-react";
+import { Search, X, BookMarked, FileText, Folder, ChevronRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Breadcrumb,
@@ -204,7 +204,7 @@ const MaterialsLevelPage = () => {
           </Breadcrumb>
           <div className="flex items-center gap-3 mb-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 border border-accent/20">
-              <BookOpen className="h-5 w-5 text-accent" />
+              <BookMarked className="h-5 w-5 text-accent" />
             </div>
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">
@@ -306,7 +306,7 @@ const MaterialsLevelPage = () => {
 
         {subfolders.length === 0 && files.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20">
-            <BookOpen className="h-12 w-12 text-muted-foreground/40 mb-4" />
+            <BookMarked className="h-12 w-12 text-muted-foreground/40 mb-4" />
             <p className="text-muted-foreground font-medium">
               {search ? "No materials match your search." : "No materials found here."}
             </p>

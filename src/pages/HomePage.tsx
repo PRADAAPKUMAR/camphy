@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { GraduationCap, BookOpen, FileText, ArrowRight, Sparkles } from "lucide-react";
+import { Zap, BookOpen, ClipboardList, ArrowRight, Orbit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
@@ -40,7 +40,7 @@ const HomePage = () => {
       <header className="relative border-b border-border/40 pt-20 pb-16">
         <div className="container relative text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 glow-md mb-6">
-            <GraduationCap className="h-8 w-8 text-primary" />
+            <Zap className="h-8 w-8 text-primary" />
           </div>
           <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl mb-4">
             Physics<span className="gradient-text">HQ</span>
@@ -68,7 +68,7 @@ const HomePage = () => {
       {/* Feature cards */}
       <main className="container relative py-16">
         <div className="flex items-center gap-2 mb-8">
-          <Sparkles className="h-4 w-4 text-primary" />
+          <Orbit className="h-4 w-4 text-primary" />
           <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Explore</h2>
         </div>
 
@@ -79,7 +79,7 @@ const HomePage = () => {
             onClick={() => navigate("/papers")}
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary mb-5 transition-all group-hover:bg-primary group-hover:text-primary-foreground group-hover:glow-sm">
-              <FileText className="h-6 w-6" />
+              <ClipboardList className="h-6 w-6" />
             </div>
             <h3 className="text-xl font-bold mb-2">MCQ Exam Practice</h3>
             <p className="text-sm text-muted-foreground mb-4">

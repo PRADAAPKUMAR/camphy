@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, GraduationCap, Atom, FlaskConical, Microscope } from "lucide-react";
+import { ArrowLeft, Zap, Atom, FlaskConical, Microscope } from "lucide-react";
 
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 import { Button } from "@/components/ui/button";
@@ -108,7 +108,7 @@ const PaperSelector = () => {
           </Button>
           <div className="flex items-center gap-3 mb-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
-              <GraduationCap className="h-5 w-5 text-primary" />
+              <Zap className="h-5 w-5 text-primary" />
             </div>
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">Physics — MCQ Practice</h1>
@@ -133,7 +133,7 @@ const PaperSelector = () => {
                 onClick={() => navigate(`/papers/${encodeURIComponent(l.level)}`)}
               >
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
-                  {levelIcons[l.level] || <GraduationCap className="h-6 w-6" />}
+                  {levelIcons[l.level] || <Zap className="h-6 w-6" />}
                 </div>
                 <div>
                   <h3 className="text-xl font-bold mb-1">{l.level}</h3>

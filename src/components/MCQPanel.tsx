@@ -1,7 +1,7 @@
 import { memo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CircleCheck, CircleX } from "lucide-react";
 
 const OPTIONS = ["A", "B", "C", "D"] as const;
 
@@ -75,9 +75,9 @@ const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubm
       {isAnswered && (
         <span className="w-5">
           {isCorrect ? (
-            <CheckCircle2 className="h-4 w-4 text-success" />
+            <CircleCheck className="h-4 w-4 text-success" />
           ) : (
-            <XCircle className="h-4 w-4 text-destructive" />
+            <CircleX className="h-4 w-4 text-destructive" />
           )}
         </span>
       )}

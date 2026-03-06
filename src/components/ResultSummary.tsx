@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckCircle2, XCircle, Home, Trophy } from "lucide-react";
+import { CircleCheck, CircleX, Undo2, Award } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const OPTIONS = ["A", "B", "C", "D"] as const;
@@ -52,9 +52,9 @@ const ResultRow = memo(({ q, userAnswer, correct }: { q: number; userAnswer: str
       </div>
       <span className="ml-auto">
         {isCorrect ? (
-          <CheckCircle2 className="h-4 w-4 text-success" />
-        ) : userAnswer ? (
-          <XCircle className="h-4 w-4 text-destructive" />
+           <CircleCheck className="h-4 w-4 text-success" />
+         ) : userAnswer ? (
+           <CircleX className="h-4 w-4 text-destructive" />
         ) : (
           <span className="text-xs text-muted-foreground">—</span>
         )}
@@ -85,7 +85,7 @@ const ResultSummary = memo(({
       {/* Score header */}
       <div className="border-b p-6 text-center">
         <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-          <Trophy className={`h-7 w-7 ${getScoreColor()}`} />
+          <Award className={`h-7 w-7 ${getScoreColor()}`} />
         </div>
         <div className={`text-4xl font-black tabular-nums ${getScoreColor()}`}>
           {score}/{totalQuestions}
@@ -96,7 +96,7 @@ const ResultSummary = memo(({
           className="mt-4"
           onClick={() => navigate("/")}
         >
-          <Home className="mr-2 h-4 w-4" />
+          <Undo2 className="mr-2 h-4 w-4" />
           Back to Papers
         </Button>
       </div>
