@@ -118,7 +118,7 @@ const SubjectPage = () => {
           </Breadcrumb>
           <div className="flex items-center gap-3 mb-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
-              <BookOpen className="h-5 w-5 text-primary" />
+              <FlaskConical className="h-5 w-5 text-primary" />
             </div>
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">Physics — {decodedLevel}</h1>
