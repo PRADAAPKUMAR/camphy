@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 import { useNavigate, Link } from "react-router-dom";
-import { BookOpen, GraduationCap, Microscope, FlaskConical, Atom } from "lucide-react";
+import { BookMarked, Zap, Microscope, FlaskConical, Atom } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
