@@ -1,4 +1,4 @@
-import { memo, useCallback } from "react";
+import { memo, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CheckCircle2, XCircle } from "lucide-react";
@@ -62,10 +62,12 @@ const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubm
 
           return (
             <button
+              type="button"
               key={opt}
               className={className}
               onClick={() => onSelectAnswer(q, opt)}
               disabled={isAnswered || isSubmitted}
+              aria-label={`Question ${q}, option ${opt}`}
             >
               {opt}
             </button>
@@ -98,9 +100,9 @@ const MCQPanel = memo(({
   const answeredCount = Object.keys(answers).length;
   const progress = Math.round((answeredCount / totalQuestions) * 100);
 
-  const handleSelectAnswer = useCallback(
-    (question: number, option: string) => onSelectAnswer(question, option),
-    [onSelectAnswer]
+  const questionNumbers = useMemo(
+    () => Array.from({ length: totalQuestions }, (_, i) => i + 1),
+    [totalQuestions]
   );
 
   return (
@@ -124,13 +126,13 @@ const MCQPanel = memo(({
       {/* Questions */}
       <ScrollArea className="flex-1">
         <div className="space-y-0.5 p-4">
-          {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((q) => (
+          {questionNumbers.map((q) => (
             <QuestionRow
               key={q}
               q={q}
               userAnswer={answers[q]}
               correctAnswer={correctAnswers[q]}
-              onSelectAnswer={handleSelectAnswer}
+              onSelectAnswer={onSelectAnswer}
               isSubmitted={isSubmitted}
             />
           ))}
