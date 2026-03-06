@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckCircle2, XCircle, Home, Trophy } from "lucide-react";
+import { CircleCheck, CircleX, Undo2, Award } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const OPTIONS = ["A", "B", "C", "D"] as const;

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, memo } from "react";
-import { Clock } from "lucide-react";
+import { Timer as TimerIcon } from "lucide-react";
 
 interface TimerProps {
   durationMinutes: number;

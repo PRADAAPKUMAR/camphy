@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { GraduationCap, BookOpen, FileText, ArrowRight, Sparkles } from "lucide-react";
+import { Zap, BookOpen, ClipboardList, ArrowRight, Orbit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);

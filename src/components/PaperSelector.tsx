@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, GraduationCap, Atom, FlaskConical, Microscope } from "lucide-react";
+import { ArrowLeft, Zap, Atom, FlaskConical, Microscope } from "lucide-react";
 
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 import { Button } from "@/components/ui/button";
