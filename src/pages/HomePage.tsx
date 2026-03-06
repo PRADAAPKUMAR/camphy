@@ -107,7 +107,7 @@ const HomePage = () => {
             <p className="text-sm text-muted-foreground mb-4">
               Browse past papers, practice under timed conditions, and get instant results with detailed review.
             </p>
-            <Button variant="ghost" className="gap-2 px-0 text-primary group-hover:gap-3 transition-all">
+            <Button variant="ghost" className="gap-2 px-0 text-primary">
               Start Practicing <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
@@ -124,7 +124,7 @@ const HomePage = () => {
             <p className="text-sm text-muted-foreground mb-4">
               Access notes, guides, and reference documents organized by subject and level to support your learning.
             </p>
-            <Button variant="ghost" className="gap-2 px-0 text-accent group-hover:gap-3 transition-all">
+            <Button variant="ghost" className="gap-2 px-0 text-accent">
               Browse Materials <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
