@@ -139,7 +139,7 @@ const MaterialsPage = () => {
                 onClick={() => navigate(`/materials/${encodeURIComponent(l.level)}`)}
               >
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-accent/10 border border-accent/20 text-accent transition-all group-hover:bg-accent group-hover:text-accent-foreground">
-                  {levelIcons[l.level] || <GraduationCap className="h-6 w-6" />}
+                  {levelIcons[l.level] || <Zap className="h-6 w-6" />}
                 </div>
                 <div>
                   <h3 className="text-xl font-bold mb-1">{l.level}</h3>

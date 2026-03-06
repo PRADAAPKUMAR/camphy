@@ -306,7 +306,7 @@ const MaterialsLevelPage = () => {
 
         {subfolders.length === 0 && files.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20">
-            <BookOpen className="h-12 w-12 text-muted-foreground/40 mb-4" />
+            <BookMarked className="h-12 w-12 text-muted-foreground/40 mb-4" />
             <p className="text-muted-foreground font-medium">
               {search ? "No materials match your search." : "No materials found here."}
             </p>
