@@ -133,7 +133,7 @@ const SubjectPage = () => {
       <main className="container relative py-8">
         {years.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <BookOpen className="h-12 w-12 text-muted-foreground/40 mb-4" />
+            <FlaskConical className="h-12 w-12 text-muted-foreground/40 mb-4" />
             <p className="text-muted-foreground font-medium">No papers found for this level.</p>
           </div>
         ) : (
