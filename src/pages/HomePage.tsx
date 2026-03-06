@@ -40,7 +40,7 @@ const HomePage = () => {
       <header className="relative border-b border-border/40 pt-20 pb-16">
         <div className="container relative text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 glow-md mb-6">
-            <GraduationCap className="h-8 w-8 text-primary" />
+            <Zap className="h-8 w-8 text-primary" />
           </div>
           <h1 className="text-5xl font-extrabold tracking-tight sm:text-6xl mb-4">
             Physics<span className="gradient-text">HQ</span>
