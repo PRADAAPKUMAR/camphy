@@ -111,4 +111,19 @@
   .bg-radial-glow {
     background: radial-gradient(ellipse at 50% 0%, hsl(217 91% 60% / 0.12) 0%, transparent 60%);
   }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .page-transition {
+    animation: fadeInUp 0.5s ease-out;
+  }
 }
