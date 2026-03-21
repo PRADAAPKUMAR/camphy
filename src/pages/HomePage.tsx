@@ -133,7 +133,7 @@ const HomePage = () => {
       {/* Footer */}
       <footer className="border-t border-border/40">
         <div className="container py-6 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} PhysicsHQ — Built for learners.
+          © {new Date().getFullYear()} PhysicsHQ — Built by PRADAAP KUMAR S.
         </div>
       </footer>
     </div>
