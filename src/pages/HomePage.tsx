@@ -35,7 +35,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-background bg-grid relative">
-      <div className="absolute inset-0 bg-radial-glow pointer-events-none" />
+      <PhysicsBackground />
 
       {/* Hero */}
       <header className="relative border-b border-border/40 pt-20 pb-16 overflow-hidden">
