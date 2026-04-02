@@ -19,6 +19,7 @@ import {
 const MaterialsLevelPage = () => {
   const { level } = useParams<{ level: string }>();
   const decodedLevel = decodeURIComponent(level || "");
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [currentPath, setCurrentPath] = useState<string[]>([]);
 
