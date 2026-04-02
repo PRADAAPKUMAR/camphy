@@ -13,6 +13,7 @@ const SubjectPage = lazy(() => import("./pages/SubjectPage"));
 const ExamPage = lazy(() => import("./pages/ExamPage"));
 const MaterialsPage = lazy(() => import("./pages/MaterialsPage"));
 const MaterialsLevelPage = lazy(() => import("./pages/MaterialsLevelPage"));
+const DriveViewerPage = lazy(() => import("./pages/DriveViewerPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -83,6 +84,7 @@ const RouterContent = () => {
         <Route path="/exam/:paperId" element={<ExamPage />} />
         <Route path="/materials" element={<MaterialsPage />} />
         <Route path="/materials/:level" element={<MaterialsLevelPage />} />
+        <Route path="/view-drive" element={<DriveViewerPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
