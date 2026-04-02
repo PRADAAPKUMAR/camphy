@@ -65,7 +65,7 @@ const MaterialsPage = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background bg-grid relative">
-        <div className="absolute inset-0 bg-radial-glow pointer-events-none" />
+        <PhysicsBackground />
         <header className="relative border-b border-border/40">
           <div className="container py-10">
             <Skeleton className="h-4 w-32 mb-5" />
