@@ -84,6 +84,7 @@ const RouterContent = () => {
         <Route path="/exam/:paperId" element={<ExamPage />} />
         <Route path="/materials" element={<MaterialsPage />} />
         <Route path="/materials/:level" element={<MaterialsLevelPage />} />
+        <Route path="/view-drive" element={<DriveViewerPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>

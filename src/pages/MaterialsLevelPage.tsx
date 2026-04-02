@@ -276,31 +276,41 @@ const MaterialsLevelPage = () => {
               <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Files</h2>
             )}
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {files.map((mat) => (
-                <a
-                  key={mat.id}
-                  href={mat.file_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="glass-card-hover group rounded-xl p-5 block cursor-pointer no-underline text-inherit"
-                >
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 border border-accent/20 text-accent">
-                      <FileText className="h-4 w-4" />
+              {files.map((mat) => {
+                const isDriveLink = mat.file_url.startsWith("https://drive.google.com/file/d/");
+                const handleClick = (e: React.MouseEvent) => {
+                  if (isDriveLink) {
+                    e.preventDefault();
+                    navigate(`/view-drive?url=${encodeURIComponent(mat.file_url)}`);
+                  }
+                };
+                return (
+                  <a
+                    key={mat.id}
+                    href={mat.file_url}
+                    target={isDriveLink ? undefined : "_blank"}
+                    rel={isDriveLink ? undefined : "noopener noreferrer"}
+                    onClick={handleClick}
+                    className="glass-card-hover group rounded-xl p-5 block cursor-pointer no-underline text-inherit"
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 border border-accent/20 text-accent">
+                        <FileText className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="text-sm font-semibold truncate">{mat.title}</h3>
+                        {mat.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-2">{mat.description}</p>
+                        )}
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <h3 className="text-sm font-semibold truncate">{mat.title}</h3>
-                      {mat.description && (
-                        <p className="text-xs text-muted-foreground line-clamp-2">{mat.description}</p>
-                      )}
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="secondary" className="font-medium text-xs bg-secondary/60">{mat.subject}</Badge>
+                      <Badge variant="outline" className="text-xs uppercase border-border/40">{mat.file_type}</Badge>
                     </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary" className="font-medium text-xs bg-secondary/60">{mat.subject}</Badge>
-                    <Badge variant="outline" className="text-xs uppercase border-border/40">{mat.file_type}</Badge>
-                  </div>
-                </a>
-              ))}
+                  </a>
+                );
+              })}
             </div>
           </div>
         )}
