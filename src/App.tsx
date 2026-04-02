@@ -13,6 +13,7 @@ const SubjectPage = lazy(() => import("./pages/SubjectPage"));
 const ExamPage = lazy(() => import("./pages/ExamPage"));
 const MaterialsPage = lazy(() => import("./pages/MaterialsPage"));
 const MaterialsLevelPage = lazy(() => import("./pages/MaterialsLevelPage"));
+const DriveViewerPage = lazy(() => import("./pages/DriveViewerPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
