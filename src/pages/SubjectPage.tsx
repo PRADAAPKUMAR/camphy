@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 import { FlaskConical, ScrollText } from "lucide-react";
+import PhysicsBackground from "@/components/PhysicsBackground";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
