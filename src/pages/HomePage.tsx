@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Zap, BookOpen, ClipboardList, ArrowRight, Orbit } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PhysicsBackground from "@/components/PhysicsBackground";
 
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 
@@ -34,7 +35,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-background bg-grid relative">
-      <div className="absolute inset-0 bg-radial-glow pointer-events-none" />
+      <PhysicsBackground />
 
       {/* Hero */}
       <header className="relative border-b border-border/40 pt-20 pb-16 overflow-hidden">

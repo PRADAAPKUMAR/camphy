@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, X, BookMarked, FileText, Folder, ChevronRight } from "lucide-react";
+import PhysicsBackground from "@/components/PhysicsBackground";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Breadcrumb,
@@ -124,7 +125,7 @@ const MaterialsLevelPage = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background bg-grid relative">
-        <div className="absolute inset-0 bg-radial-glow pointer-events-none" />
+        <PhysicsBackground />
         <header className="relative border-b border-border/40">
           <div className="container py-10">
             <Skeleton className="h-4 w-48 mb-5" />
@@ -157,7 +158,7 @@ const MaterialsLevelPage = () => {
 
   return (
     <div className="min-h-screen bg-background bg-grid relative">
-      <div className="absolute inset-0 bg-radial-glow pointer-events-none" />
+      <PhysicsBackground />
 
       <header className="relative border-b border-border/40">
         <div className="container py-10">

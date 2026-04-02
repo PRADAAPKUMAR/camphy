@@ -7,6 +7,7 @@ const getSupabase = () => import("@/integrations/supabase/client").then(m => m.s
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import PhysicsBackground from "@/components/PhysicsBackground";
 
 const levelIcons: Record<string, React.ReactNode> = {
   IGCSE: <Microscope className="h-6 w-6" />,
@@ -58,7 +59,7 @@ const PaperSelector = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background bg-grid relative">
-        <div className="absolute inset-0 bg-radial-glow pointer-events-none" />
+        <PhysicsBackground />
         <header className="relative border-b border-border/40">
           <div className="container py-10">
             <Skeleton className="h-8 w-20 mb-4" />
@@ -94,7 +95,7 @@ const PaperSelector = () => {
 
   return (
     <div className="min-h-screen bg-background bg-grid relative">
-      <div className="absolute inset-0 bg-radial-glow pointer-events-none" />
+      <PhysicsBackground />
 
       <header className="relative border-b border-border/40">
         <div className="container py-10">

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 import { useNavigate, Link } from "react-router-dom";
 import { BookMarked, Zap, Microscope, FlaskConical, Atom } from "lucide-react";
+import PhysicsBackground from "@/components/PhysicsBackground";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -64,7 +65,7 @@ const MaterialsPage = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background bg-grid relative">
-        <div className="absolute inset-0 bg-radial-glow pointer-events-none" />
+        <PhysicsBackground />
         <header className="relative border-b border-border/40">
           <div className="container py-10">
             <Skeleton className="h-4 w-32 mb-5" />
@@ -97,7 +98,7 @@ const MaterialsPage = () => {
 
   return (
     <div className="min-h-screen bg-background bg-grid relative">
-      <div className="absolute inset-0 bg-radial-glow pointer-events-none" />
+      <PhysicsBackground />
 
       <header className="relative border-b border-border/40">
         <div className="container py-10">
