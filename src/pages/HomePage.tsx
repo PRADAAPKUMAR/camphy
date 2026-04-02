@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Zap, BookOpen, ClipboardList, ArrowRight, Orbit } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PhysicsBackground from "@/components/PhysicsBackground";
 
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 
