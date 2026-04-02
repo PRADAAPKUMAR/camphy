@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 import { useNavigate, Link } from "react-router-dom";
 import { BookMarked, Zap, Microscope, FlaskConical, Atom } from "lucide-react";
+import PhysicsBackground from "@/components/PhysicsBackground";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
