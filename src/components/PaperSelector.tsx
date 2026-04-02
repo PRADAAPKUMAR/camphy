@@ -7,6 +7,7 @@ const getSupabase = () => import("@/integrations/supabase/client").then(m => m.s
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import PhysicsBackground from "@/components/PhysicsBackground";
 
 const levelIcons: Record<string, React.ReactNode> = {
   IGCSE: <Microscope className="h-6 w-6" />,
