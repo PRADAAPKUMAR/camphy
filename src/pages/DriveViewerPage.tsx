@@ -17,7 +17,7 @@ const DriveViewerPage = () => {
             <ArrowLeft className="mr-1 h-4 w-4" /> Back
           </Link>
         </Button>
-        <span className="text-sm text-muted-foreground truncate">{url}</span>
+        <span className="text-sm text-muted-foreground truncate">Google Drive Viewer</span>
       </header>
       <iframe
         src={embedUrl}
