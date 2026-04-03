@@ -7,7 +7,6 @@ import { memo, useEffect, useRef } from "react";
  */
 
 const PARTICLE_COUNT = 12;
-const SPEED = 3.5; // px per frame (~200px/s at 60fps)
 
 interface Particle {
   x: number;
@@ -17,7 +16,6 @@ interface Particle {
   opacity: number;
   hue: "primary" | "accent";
   size: number;
-  trail: { x: number; y: number }[];
 }
 
 function randomAngle() {
@@ -26,8 +24,8 @@ function randomAngle() {
 
 function spawnParticle(w: number, h: number): Particle {
   const angle = randomAngle();
-  const speed = SPEED * (0.7 + Math.random() * 0.6);
-  // spawn from a random edge
+  // Various speeds: some slow (1), some fast (6)
+  const speed = 1 + Math.random() * 5;
   const edge = Math.floor(Math.random() * 4);
   let x: number, y: number;
   switch (edge) {
@@ -43,7 +41,6 @@ function spawnParticle(w: number, h: number): Particle {
     opacity: 0.25 + Math.random() * 0.35,
     hue: Math.random() > 0.5 ? "primary" : "accent",
     size: 1.5 + Math.random() * 2,
-    trail: [],
   };
 }
 
@@ -104,10 +101,6 @@ const PhysicsBackground = memo(() => {
       }
 
       for (const p of particles) {
-        // Store trail
-        p.trail.push({ x: p.x, y: p.y });
-        if (p.trail.length > 8) p.trail.shift();
-
         // Move
         p.x += p.vx;
         p.y += p.vy;
@@ -123,19 +116,6 @@ const PhysicsBackground = memo(() => {
         }
 
         const color = p.hue === "primary" ? primaryColor : accentColor;
-
-        // Draw trail
-        if (p.trail.length > 1) {
-          ctx.beginPath();
-          ctx.moveTo(p.trail[0].x, p.trail[0].y);
-          for (let i = 1; i < p.trail.length; i++) {
-            ctx.lineTo(p.trail[i].x, p.trail[i].y);
-          }
-          ctx.lineTo(p.x, p.y);
-          ctx.strokeStyle = `${color}${p.opacity * 0.3})`;
-          ctx.lineWidth = p.size * 0.5;
-          ctx.stroke();
-        }
 
         // Draw particle dot
         ctx.beginPath();
