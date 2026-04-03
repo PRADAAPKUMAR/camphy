@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 const DriveViewerPage = () => {
   const [params] = useSearchParams();
   const url = params.get("url") || "";
+  const title = params.get("title") || "Document";
 
   // Convert Google Drive file link to embeddable preview
   const embedUrl = url.replace(/\/file\/d\/([^/]+).*/, "/file/d/$1/preview");
