@@ -282,7 +282,7 @@ const MaterialsLevelPage = () => {
                 const handleClick = (e: React.MouseEvent) => {
                   if (isDriveLink) {
                     e.preventDefault();
-                    navigate(`/view-drive?url=${encodeURIComponent(mat.file_url)}`);
+                    navigate(`/view-drive?url=${encodeURIComponent(mat.file_url)}&title=${encodeURIComponent(mat.title)}`);
                   }
                 };
                 return (
