@@ -53,12 +53,6 @@ const HomePage = () => {
               <div className="absolute -top-1 left-1/2 -translate-x-1/2 h-2 w-2 rounded-full bg-primary/30 shadow-[0_0_8px_hsl(217_91%_60%/0.3)]" />
             </div>
           </div>
-          {/* Sine wave */}
-          <svg className="absolute bottom-0 left-0 w-full h-16 opacity-[0.07]" viewBox="0 0 1200 60" preserveAspectRatio="none">
-            <path d="M0 30 Q 75 0, 150 30 T 300 30 T 450 30 T 600 30 T 750 30 T 900 30 T 1050 30 T 1200 30" fill="none" stroke="hsl(217 91% 60%)" strokeWidth="2">
-              <animate attributeName="d" dur="4s" repeatCount="indefinite" values="M0 30 Q 75 0, 150 30 T 300 30 T 450 30 T 600 30 T 750 30 T 900 30 T 1050 30 T 1200 30;M0 30 Q 75 60, 150 30 T 300 30 T 450 30 T 600 30 T 750 30 T 900 30 T 1050 30 T 1200 30;M0 30 Q 75 0, 150 30 T 300 30 T 450 30 T 600 30 T 750 30 T 900 30 T 1050 30 T 1200 30" />
-            </path>
-          </svg>
         </div>
         <div className="container relative text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 glow-md mb-6 animate-[pulse_3s_ease-in-out_infinite]">
