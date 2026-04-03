@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 const DriveViewerPage = () => {
   const [params] = useSearchParams();
   const url = params.get("url") || "";
+  const title = params.get("title") || "Document";
 
   // Convert Google Drive file link to embeddable preview
   const embedUrl = url.replace(/\/file\/d\/([^/]+).*/, "/file/d/$1/preview");
@@ -17,7 +18,7 @@ const DriveViewerPage = () => {
             <ArrowLeft className="mr-1 h-4 w-4" /> Back
           </Link>
         </Button>
-        <span className="text-sm text-muted-foreground truncate">Google Drive Viewer</span>
+        <span className="text-sm text-muted-foreground truncate">{title}</span>
       </header>
       <iframe
         src={embedUrl}
