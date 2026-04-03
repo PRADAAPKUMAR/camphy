@@ -7,7 +7,6 @@ import { memo, useEffect, useRef } from "react";
  */
 
 const PARTICLE_COUNT = 12;
-const SPEED = 3.5; // px per frame (~200px/s at 60fps)
 
 interface Particle {
   x: number;
@@ -17,7 +16,6 @@ interface Particle {
   opacity: number;
   hue: "primary" | "accent";
   size: number;
-  trail: { x: number; y: number }[];
 }
 
 function randomAngle() {
