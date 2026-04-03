@@ -24,8 +24,8 @@ function randomAngle() {
 
 function spawnParticle(w: number, h: number): Particle {
   const angle = randomAngle();
-  const speed = SPEED * (0.7 + Math.random() * 0.6);
-  // spawn from a random edge
+  // Various speeds: some slow (1), some fast (6)
+  const speed = 1 + Math.random() * 5;
   const edge = Math.floor(Math.random() * 4);
   let x: number, y: number;
   switch (edge) {
@@ -41,7 +41,6 @@ function spawnParticle(w: number, h: number): Particle {
     opacity: 0.25 + Math.random() * 0.35,
     hue: Math.random() > 0.5 ? "primary" : "accent",
     size: 1.5 + Math.random() * 2,
-    trail: [],
   };
 }
 
