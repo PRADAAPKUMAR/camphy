@@ -101,10 +101,6 @@ const PhysicsBackground = memo(() => {
       }
 
       for (const p of particles) {
-        // Store trail
-        p.trail.push({ x: p.x, y: p.y });
-        if (p.trail.length > 8) p.trail.shift();
-
         // Move
         p.x += p.vx;
         p.y += p.vy;
@@ -120,19 +116,6 @@ const PhysicsBackground = memo(() => {
         }
 
         const color = p.hue === "primary" ? primaryColor : accentColor;
-
-        // Draw trail
-        if (p.trail.length > 1) {
-          ctx.beginPath();
-          ctx.moveTo(p.trail[0].x, p.trail[0].y);
-          for (let i = 1; i < p.trail.length; i++) {
-            ctx.lineTo(p.trail[i].x, p.trail[i].y);
-          }
-          ctx.lineTo(p.x, p.y);
-          ctx.strokeStyle = `${color}${p.opacity * 0.3})`;
-          ctx.lineWidth = p.size * 0.5;
-          ctx.stroke();
-        }
 
         // Draw particle dot
         ctx.beginPath();
