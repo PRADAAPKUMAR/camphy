@@ -1,8 +1,7 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
-import { Database } from "@/integrations/supabase/types";
 import PDFViewer from "@/components/PDFViewer";
 import MCQPanel from "@/components/MCQPanel";
 import ResultSummary from "@/components/ResultSummary";
@@ -25,7 +24,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 const TOTAL_QUESTIONS = 40;
-type AnswerKeyRow = Database["public"]["Tables"]["answer_keys"]["Row"];
 
 const ExamPage = () => {
   const { paperId } = useParams<{ paperId: string }>();
@@ -33,6 +31,7 @@ const ExamPage = () => {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [score, setScore] = useState(0);
+  const [correctAnswers, setCorrectAnswers] = useState<Record<number, string>>({});
 
   const { data: paper, isLoading: paperLoading } = useQuery({
     queryKey: ["paper", paperId],
@@ -49,66 +48,39 @@ const ExamPage = () => {
     enabled: !!paperId,
   });
 
-  const { data: answerKey, isLoading: answerKeyLoading } = useQuery({
-    queryKey: ["answer_keys", paperId],
-    queryFn: async () => {
-      const supabase = await getSupabase();
-      const { data, error } = await supabase
-        .from("answer_keys")
-        .select("*")
-        .eq("paper_id", paperId!)
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!paperId,
-  });
-
-  const correctAnswersMap = useMemo(() => {
-    if (!answerKey) return {};
-
-    const map: Record<number, string> = {};
-    for (let q = 1; q <= TOTAL_QUESTIONS; q++) {
-      const key = `q${q}` as keyof AnswerKeyRow;
-      const value = answerKey[key];
-      if (typeof value === "string") {
-        map[q] = value;
-      }
-    }
-
-    return map;
-  }, [answerKey]);
-
   const handleSelectAnswer = (question: number, option: string) => {
     if (isSubmitted) return;
     setAnswers((prev) => ({ ...prev, [question]: option }));
   };
 
   const handleSubmit = useCallback(async () => {
-    if (isSubmitted || !answerKey) return;
+    if (isSubmitted) return;
 
-    let correct = 0;
-    for (let q = 1; q <= TOTAL_QUESTIONS; q++) {
-      if (answers[q] === correctAnswersMap[q]) correct++;
-    }
-    setScore(correct);
     setIsSubmitted(true);
 
-    const supabase = await getSupabase();
-    const { error } = await supabase.from("attempts").insert({
-      paper_id: paperId!,
-      score: correct,
-      total_questions: TOTAL_QUESTIONS,
-      answers,
-    });
-    if (error) {
-      toast.error("Failed to save attempt");
-    } else {
-      toast.success(`Score: ${correct}/${TOTAL_QUESTIONS}`);
-    }
-  }, [isSubmitted, answerKey, answers, paperId, correctAnswersMap]);
+    try {
+      const supabase = await getSupabase();
+      const { data, error } = await supabase.functions.invoke("submit-exam", {
+        body: { paper_id: paperId, answers },
+      });
 
-  if (paperLoading || answerKeyLoading) {
+      if (error) throw error;
+
+      setScore(data.score);
+      // Convert string keys to number keys for correctAnswers
+      const mapped: Record<number, string> = {};
+      for (const [k, v] of Object.entries(data.correct_answers)) {
+        mapped[Number(k)] = v as string;
+      }
+      setCorrectAnswers(mapped);
+      toast.success(`Score: ${data.score}/${data.total_questions}`);
+    } catch {
+      toast.error("Failed to submit exam. Please try again.");
+      setIsSubmitted(false);
+    }
+  }, [isSubmitted, answers, paperId]);
+
+  if (paperLoading) {
     return (
       <div className="flex h-screen flex-col bg-background">
         <div className="flex items-center justify-between border-b bg-card px-5 py-3 shadow-sm">
@@ -143,15 +115,6 @@ const ExamPage = () => {
         <Button variant="outline" onClick={() => navigate("/papers")}>
           Back to Papers
         </Button>
-      </div>
-    );
-  }
-
-  if (!answerKey) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">
-        <p className="text-destructive font-medium">Answer key not found for this paper</p>
-        <Button variant="outline" onClick={() => navigate("/papers")}>Back to Papers</Button>
       </div>
     );
   }
@@ -191,18 +154,18 @@ const ExamPage = () => {
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={22} minSize={18}>
-          {isSubmitted ? (
+          {isSubmitted && Object.keys(correctAnswers).length > 0 ? (
             <ResultSummary
               score={score}
               totalQuestions={TOTAL_QUESTIONS}
               answers={answers}
-              correctAnswers={correctAnswersMap}
+              correctAnswers={correctAnswers}
             />
           ) : (
             <MCQPanel
               totalQuestions={TOTAL_QUESTIONS}
               answers={answers}
-              correctAnswers={correctAnswersMap}
+              correctAnswers={{}}
               onSelectAnswer={handleSelectAnswer}
               onSubmit={handleSubmit}
               isSubmitted={isSubmitted}
