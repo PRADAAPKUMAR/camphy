@@ -18,7 +18,7 @@ const DriveViewerPage = () => {
             <ArrowLeft className="mr-1 h-4 w-4" /> Back
           </Link>
         </Button>
-        <span className="text-sm text-muted-foreground truncate">{title}</span>
+        <span className="text-base font-bold text-foreground truncate">{title}</span>
       </header>
       <iframe
         src={embedUrl}
