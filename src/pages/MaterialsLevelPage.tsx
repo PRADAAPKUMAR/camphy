@@ -21,8 +21,28 @@ const MaterialsLevelPage = () => {
   const { level } = useParams<{ level: string }>();
   const decodedLevel = decodeURIComponent(level || "");
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState("");
-  const [currentPath, setCurrentPath] = useState<string[]>([]);
+
+  // Persist currentPath in URL search params so back-navigation restores folder state
+  const currentPath = useMemo(() => {
+    const folderParam = searchParams.get("folder");
+    if (!folderParam) return [];
+    return folderParam.split(",").filter(Boolean);
+  }, [searchParams]);
+
+  const setCurrentPath = (updater: string[] | ((prev: string[]) => string[])) => {
+    const newPath = typeof updater === "function" ? updater(currentPath) : updater;
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (newPath.length > 0) {
+        next.set("folder", newPath.join(","));
+      } else {
+        next.delete("folder");
+      }
+      return next;
+    }, { replace: true });
+  };
 
   const { data: materials, isLoading } = useQuery({
     queryKey: ["study_materials", decodedLevel],
