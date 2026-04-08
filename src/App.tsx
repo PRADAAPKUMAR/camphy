@@ -14,6 +14,10 @@ const ExamPage = lazy(() => import("./pages/ExamPage"));
 const MaterialsPage = lazy(() => import("./pages/MaterialsPage"));
 const MaterialsLevelPage = lazy(() => import("./pages/MaterialsLevelPage"));
 const DriveViewerPage = lazy(() => import("./pages/DriveViewerPage"));
+const TopicPracticePage = lazy(() => import("./pages/TopicPracticePage"));
+const TopicLevelPage = lazy(() => import("./pages/TopicLevelPage"));
+const TopicExamPage = lazy(() => import("./pages/TopicExamPage"));
+const TopicTheoryPage = lazy(() => import("./pages/TopicTheoryPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -85,6 +89,10 @@ const RouterContent = () => {
         <Route path="/materials" element={<MaterialsPage />} />
         <Route path="/materials/:level" element={<MaterialsLevelPage />} />
         <Route path="/view-drive" element={<DriveViewerPage />} />
+        <Route path="/topic-practice" element={<TopicPracticePage />} />
+        <Route path="/topic-practice/:level" element={<TopicLevelPage />} />
+        <Route path="/topic-exam/:paperId" element={<TopicExamPage />} />
+        <Route path="/topic-theory/:questionId" element={<TopicTheoryPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>

@@ -261,6 +261,206 @@ export type Database = {
         }
         Relationships: []
       }
+      topicwise_mcq_answer_keys: {
+        Row: {
+          id: string
+          paper_id: string
+          q1: string | null
+          q10: string | null
+          q11: string | null
+          q12: string | null
+          q13: string | null
+          q14: string | null
+          q15: string | null
+          q16: string | null
+          q17: string | null
+          q18: string | null
+          q19: string | null
+          q2: string | null
+          q20: string | null
+          q21: string | null
+          q22: string | null
+          q23: string | null
+          q24: string | null
+          q25: string | null
+          q26: string | null
+          q27: string | null
+          q28: string | null
+          q29: string | null
+          q3: string | null
+          q30: string | null
+          q31: string | null
+          q32: string | null
+          q33: string | null
+          q34: string | null
+          q35: string | null
+          q36: string | null
+          q37: string | null
+          q38: string | null
+          q39: string | null
+          q4: string | null
+          q40: string | null
+          q5: string | null
+          q6: string | null
+          q7: string | null
+          q8: string | null
+          q9: string | null
+        }
+        Insert: {
+          id?: string
+          paper_id: string
+          q1?: string | null
+          q10?: string | null
+          q11?: string | null
+          q12?: string | null
+          q13?: string | null
+          q14?: string | null
+          q15?: string | null
+          q16?: string | null
+          q17?: string | null
+          q18?: string | null
+          q19?: string | null
+          q2?: string | null
+          q20?: string | null
+          q21?: string | null
+          q22?: string | null
+          q23?: string | null
+          q24?: string | null
+          q25?: string | null
+          q26?: string | null
+          q27?: string | null
+          q28?: string | null
+          q29?: string | null
+          q3?: string | null
+          q30?: string | null
+          q31?: string | null
+          q32?: string | null
+          q33?: string | null
+          q34?: string | null
+          q35?: string | null
+          q36?: string | null
+          q37?: string | null
+          q38?: string | null
+          q39?: string | null
+          q4?: string | null
+          q40?: string | null
+          q5?: string | null
+          q6?: string | null
+          q7?: string | null
+          q8?: string | null
+          q9?: string | null
+        }
+        Update: {
+          id?: string
+          paper_id?: string
+          q1?: string | null
+          q10?: string | null
+          q11?: string | null
+          q12?: string | null
+          q13?: string | null
+          q14?: string | null
+          q15?: string | null
+          q16?: string | null
+          q17?: string | null
+          q18?: string | null
+          q19?: string | null
+          q2?: string | null
+          q20?: string | null
+          q21?: string | null
+          q22?: string | null
+          q23?: string | null
+          q24?: string | null
+          q25?: string | null
+          q26?: string | null
+          q27?: string | null
+          q28?: string | null
+          q29?: string | null
+          q3?: string | null
+          q30?: string | null
+          q31?: string | null
+          q32?: string | null
+          q33?: string | null
+          q34?: string | null
+          q35?: string | null
+          q36?: string | null
+          q37?: string | null
+          q38?: string | null
+          q39?: string | null
+          q4?: string | null
+          q40?: string | null
+          q5?: string | null
+          q6?: string | null
+          q7?: string | null
+          q8?: string | null
+          q9?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topicwise_mcq_answer_keys_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: true
+            referencedRelation: "topicwise_mcq_papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      topicwise_mcq_papers: {
+        Row: {
+          created_at: string
+          id: string
+          level: string
+          pdf_url: string
+          timer_minutes: number
+          topic: string
+          total_questions: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          level: string
+          pdf_url: string
+          timer_minutes?: number
+          topic: string
+          total_questions?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          level?: string
+          pdf_url?: string
+          timer_minutes?: number
+          topic?: string
+          total_questions?: number
+        }
+        Relationships: []
+      }
+      topicwise_theory_questions: {
+        Row: {
+          answer_pdf_url: string
+          created_at: string
+          id: string
+          level: string
+          question_pdf_url: string
+          topic: string
+        }
+        Insert: {
+          answer_pdf_url: string
+          created_at?: string
+          id?: string
+          level: string
+          question_pdf_url: string
+          topic: string
+        }
+        Update: {
+          answer_pdf_url?: string
+          created_at?: string
+          id?: string
+          level?: string
+          question_pdf_url?: string
+          topic?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
