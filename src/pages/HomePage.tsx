@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Zap, BookOpen, ClipboardList, ArrowRight, Orbit } from "lucide-react";
+import { Zap, BookOpen, ClipboardList, ArrowRight, Orbit, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import PhysicsBackground from "@/components/PhysicsBackground";
 
@@ -30,6 +30,18 @@ const HomePage = () => {
         .select("*", { count: "exact", head: true });
       if (error) throw error;
       return count ?? 0;
+    },
+  });
+
+  const { data: topicCount } = useQuery({
+    queryKey: ["topic_count"],
+    queryFn: async () => {
+      const supabase = await getSupabase();
+      const [mcq, theory] = await Promise.all([
+        supabase.from("topicwise_mcq_papers").select("*", { count: "exact", head: true }),
+        supabase.from("topicwise_theory_questions").select("*", { count: "exact", head: true }),
+      ]);
+      return (mcq.count ?? 0) + (theory.count ?? 0);
     },
   });
 
@@ -88,7 +100,7 @@ const HomePage = () => {
           <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Explore</h2>
         </div>
 
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {/* MCQ Practice */}
           <div
             className="glass-card-hover group cursor-pointer rounded-xl p-6"
@@ -103,6 +115,23 @@ const HomePage = () => {
             </p>
             <Button variant="ghost" className="gap-2 px-0 text-primary">
               Start Practicing <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Topic-wise Practice */}
+          <div
+            className="glass-card-hover group cursor-pointer rounded-xl p-6"
+            onClick={() => navigate("/topic-practice")}
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-success/10 border border-success/20 text-success mb-5 transition-all group-hover:bg-success group-hover:text-success-foreground group-hover:glow-sm">
+              <Target className="h-6 w-6" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">Topic-wise Practice</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Focus on specific topics with MCQ and theory questions to strengthen weak areas.
+            </p>
+            <Button variant="ghost" className="gap-2 px-0 text-success">
+              Practice by Topic <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
 
