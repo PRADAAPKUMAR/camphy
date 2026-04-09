@@ -92,7 +92,7 @@ const TopicTheoryPage = () => {
           asChild
         >
           <Link
-            to={`/drive-viewer?url=${encodeURIComponent(question.answer_pdf_url)}&title=${encodeURIComponent(question.topic + " — Answer Key")}`}
+            to={`/view-drive?url=${encodeURIComponent(question.answer_pdf_url)}&title=${encodeURIComponent(question.topic + " — Answer Key")}`}
             target="_blank"
           >
             <ExternalLink className="h-4 w-4" /> View Answer Key
