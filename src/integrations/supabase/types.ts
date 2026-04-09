@@ -267,6 +267,7 @@ export type Database = {
           paper_id: string
           q1: string | null
           q10: string | null
+          q100: string | null
           q11: string | null
           q12: string | null
           q13: string | null
@@ -300,17 +301,77 @@ export type Database = {
           q39: string | null
           q4: string | null
           q40: string | null
+          q41: string | null
+          q42: string | null
+          q43: string | null
+          q44: string | null
+          q45: string | null
+          q46: string | null
+          q47: string | null
+          q48: string | null
+          q49: string | null
           q5: string | null
+          q50: string | null
+          q51: string | null
+          q52: string | null
+          q53: string | null
+          q54: string | null
+          q55: string | null
+          q56: string | null
+          q57: string | null
+          q58: string | null
+          q59: string | null
           q6: string | null
+          q60: string | null
+          q61: string | null
+          q62: string | null
+          q63: string | null
+          q64: string | null
+          q65: string | null
+          q66: string | null
+          q67: string | null
+          q68: string | null
+          q69: string | null
           q7: string | null
+          q70: string | null
+          q71: string | null
+          q72: string | null
+          q73: string | null
+          q74: string | null
+          q75: string | null
+          q76: string | null
+          q77: string | null
+          q78: string | null
+          q79: string | null
           q8: string | null
+          q80: string | null
+          q81: string | null
+          q82: string | null
+          q83: string | null
+          q84: string | null
+          q85: string | null
+          q86: string | null
+          q87: string | null
+          q88: string | null
+          q89: string | null
           q9: string | null
+          q90: string | null
+          q91: string | null
+          q92: string | null
+          q93: string | null
+          q94: string | null
+          q95: string | null
+          q96: string | null
+          q97: string | null
+          q98: string | null
+          q99: string | null
         }
         Insert: {
           id?: string
           paper_id: string
           q1?: string | null
           q10?: string | null
+          q100?: string | null
           q11?: string | null
           q12?: string | null
           q13?: string | null
@@ -344,17 +405,77 @@ export type Database = {
           q39?: string | null
           q4?: string | null
           q40?: string | null
+          q41?: string | null
+          q42?: string | null
+          q43?: string | null
+          q44?: string | null
+          q45?: string | null
+          q46?: string | null
+          q47?: string | null
+          q48?: string | null
+          q49?: string | null
           q5?: string | null
+          q50?: string | null
+          q51?: string | null
+          q52?: string | null
+          q53?: string | null
+          q54?: string | null
+          q55?: string | null
+          q56?: string | null
+          q57?: string | null
+          q58?: string | null
+          q59?: string | null
           q6?: string | null
+          q60?: string | null
+          q61?: string | null
+          q62?: string | null
+          q63?: string | null
+          q64?: string | null
+          q65?: string | null
+          q66?: string | null
+          q67?: string | null
+          q68?: string | null
+          q69?: string | null
           q7?: string | null
+          q70?: string | null
+          q71?: string | null
+          q72?: string | null
+          q73?: string | null
+          q74?: string | null
+          q75?: string | null
+          q76?: string | null
+          q77?: string | null
+          q78?: string | null
+          q79?: string | null
           q8?: string | null
+          q80?: string | null
+          q81?: string | null
+          q82?: string | null
+          q83?: string | null
+          q84?: string | null
+          q85?: string | null
+          q86?: string | null
+          q87?: string | null
+          q88?: string | null
+          q89?: string | null
           q9?: string | null
+          q90?: string | null
+          q91?: string | null
+          q92?: string | null
+          q93?: string | null
+          q94?: string | null
+          q95?: string | null
+          q96?: string | null
+          q97?: string | null
+          q98?: string | null
+          q99?: string | null
         }
         Update: {
           id?: string
           paper_id?: string
           q1?: string | null
           q10?: string | null
+          q100?: string | null
           q11?: string | null
           q12?: string | null
           q13?: string | null
@@ -388,11 +509,70 @@ export type Database = {
           q39?: string | null
           q4?: string | null
           q40?: string | null
+          q41?: string | null
+          q42?: string | null
+          q43?: string | null
+          q44?: string | null
+          q45?: string | null
+          q46?: string | null
+          q47?: string | null
+          q48?: string | null
+          q49?: string | null
           q5?: string | null
+          q50?: string | null
+          q51?: string | null
+          q52?: string | null
+          q53?: string | null
+          q54?: string | null
+          q55?: string | null
+          q56?: string | null
+          q57?: string | null
+          q58?: string | null
+          q59?: string | null
           q6?: string | null
+          q60?: string | null
+          q61?: string | null
+          q62?: string | null
+          q63?: string | null
+          q64?: string | null
+          q65?: string | null
+          q66?: string | null
+          q67?: string | null
+          q68?: string | null
+          q69?: string | null
           q7?: string | null
+          q70?: string | null
+          q71?: string | null
+          q72?: string | null
+          q73?: string | null
+          q74?: string | null
+          q75?: string | null
+          q76?: string | null
+          q77?: string | null
+          q78?: string | null
+          q79?: string | null
           q8?: string | null
+          q80?: string | null
+          q81?: string | null
+          q82?: string | null
+          q83?: string | null
+          q84?: string | null
+          q85?: string | null
+          q86?: string | null
+          q87?: string | null
+          q88?: string | null
+          q89?: string | null
           q9?: string | null
+          q90?: string | null
+          q91?: string | null
+          q92?: string | null
+          q93?: string | null
+          q94?: string | null
+          q95?: string | null
+          q96?: string | null
+          q97?: string | null
+          q98?: string | null
+          q99?: string | null
         }
         Relationships: [
           {
