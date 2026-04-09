@@ -94,13 +94,16 @@ const TopicTheoryPage = () => {
           <ExternalLink className="h-4 w-4" /> View Answer Key
         </Button>
       </header>
-      <iframe
-        src={getEmbedUrl(question.question_pdf_url)}
-        className="flex-1 w-full border-0"
-        title={`${question.topic} — Questions`}
-        allow="autoplay"
-        sandbox="allow-scripts allow-same-origin allow-popups"
-      />
+      <div className="flex-1 w-full overflow-auto">
+        <iframe
+          src={getEmbedUrl(question.question_pdf_url)}
+          className="h-full w-full border-0"
+          title={`${question.topic} — Questions`}
+          allow="autoplay"
+          sandbox="allow-scripts allow-same-origin allow-popups"
+          style={{ minHeight: "100%", minWidth: "100%" }}
+        />
+      </div>
     </div>
   );
 };

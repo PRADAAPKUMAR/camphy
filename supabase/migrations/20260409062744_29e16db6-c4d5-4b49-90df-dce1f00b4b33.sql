@@ -1,0 +1,14 @@
+
+ALTER TABLE public.topicwise_mcq_answer_keys
+  ADD COLUMN q41 text, ADD COLUMN q42 text, ADD COLUMN q43 text, ADD COLUMN q44 text, ADD COLUMN q45 text,
+  ADD COLUMN q46 text, ADD COLUMN q47 text, ADD COLUMN q48 text, ADD COLUMN q49 text, ADD COLUMN q50 text,
+  ADD COLUMN q51 text, ADD COLUMN q52 text, ADD COLUMN q53 text, ADD COLUMN q54 text, ADD COLUMN q55 text,
+  ADD COLUMN q56 text, ADD COLUMN q57 text, ADD COLUMN q58 text, ADD COLUMN q59 text, ADD COLUMN q60 text,
+  ADD COLUMN q61 text, ADD COLUMN q62 text, ADD COLUMN q63 text, ADD COLUMN q64 text, ADD COLUMN q65 text,
+  ADD COLUMN q66 text, ADD COLUMN q67 text, ADD COLUMN q68 text, ADD COLUMN q69 text, ADD COLUMN q70 text,
+  ADD COLUMN q71 text, ADD COLUMN q72 text, ADD COLUMN q73 text, ADD COLUMN q74 text, ADD COLUMN q75 text,
+  ADD COLUMN q76 text, ADD COLUMN q77 text, ADD COLUMN q78 text, ADD COLUMN q79 text, ADD COLUMN q80 text,
+  ADD COLUMN q81 text, ADD COLUMN q82 text, ADD COLUMN q83 text, ADD COLUMN q84 text, ADD COLUMN q85 text,
+  ADD COLUMN q86 text, ADD COLUMN q87 text, ADD COLUMN q88 text, ADD COLUMN q89 text, ADD COLUMN q90 text,
+  ADD COLUMN q91 text, ADD COLUMN q92 text, ADD COLUMN q93 text, ADD COLUMN q94 text, ADD COLUMN q95 text,
+  ADD COLUMN q96 text, ADD COLUMN q97 text, ADD COLUMN q98 text, ADD COLUMN q99 text, ADD COLUMN q100 text;
