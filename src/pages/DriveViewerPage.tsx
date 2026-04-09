@@ -20,13 +20,16 @@ const DriveViewerPage = () => {
         </Button>
         <span className="text-base font-bold text-foreground truncate">{title}</span>
       </header>
-      <iframe
-        src={embedUrl}
-        className="flex-1 w-full border-0"
-        title="Google Drive Viewer"
-        allow="autoplay"
-        sandbox="allow-scripts allow-same-origin allow-popups"
-      />
+      <div className="flex-1 w-full overflow-auto">
+        <iframe
+          src={embedUrl}
+          className="h-full w-full border-0"
+          title="Google Drive Viewer"
+          allow="autoplay"
+          sandbox="allow-scripts allow-same-origin allow-popups"
+          style={{ minHeight: "100%", minWidth: "100%" }}
+        />
+      </div>
     </div>
   );
 };
