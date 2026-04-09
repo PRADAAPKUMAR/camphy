@@ -89,9 +89,14 @@ const TopicTheoryPage = () => {
           variant="outline"
           size="sm"
           className="gap-2"
-          onClick={() => window.open(question.answer_pdf_url, "_blank")}
+          asChild
         >
-          <ExternalLink className="h-4 w-4" /> View Answer Key
+          <Link
+            to={`/drive-viewer?url=${encodeURIComponent(question.answer_pdf_url)}&title=${encodeURIComponent(question.topic + " — Answer Key")}`}
+            target="_blank"
+          >
+            <ExternalLink className="h-4 w-4" /> View Answer Key
+          </Link>
         </Button>
       </header>
       <div className="flex-1 w-full overflow-auto">
