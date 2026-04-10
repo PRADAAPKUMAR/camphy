@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
-import PDFViewer from "@/components/PDFViewer";
+
 import MCQPanel from "@/components/MCQPanel";
 import ResultSummary from "@/components/ResultSummary";
 import Timer from "@/components/Timer";

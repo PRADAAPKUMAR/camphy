@@ -23,16 +23,20 @@ interface QuestionRowProps {
 }
 
 const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubmitted }: QuestionRowProps) => {
-  const isAnswered = !!userAnswer;
-  const isCorrect = isAnswered && userAnswer === correctAnswer;
+  const isSelected = !!userAnswer;
+  const hasResult = correctAnswer !== undefined;
+  const isCorrect = isSelected && hasResult && userAnswer === correctAnswer;
+  const isWrong = isSelected && hasResult && userAnswer !== correctAnswer;
 
   return (
     <div
       className={`flex items-center justify-center gap-4 py-3 ${
-        isAnswered
+        hasResult
           ? isCorrect
             ? "bg-success/5 rounded-lg"
-            : "bg-destructive/5 rounded-lg"
+            : isWrong
+              ? "bg-destructive/5 rounded-lg"
+              : ""
           : ""
       }`}
     >
@@ -41,14 +45,14 @@ const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubm
       </span>
       <div className="flex gap-3">
         {OPTIONS.map((opt) => {
-          const isSelected = userAnswer === opt;
-          const isCorrectOpt = isAnswered && opt === correctAnswer;
-          const isWrongSelection = isSelected && !isCorrect;
+          const isThisSelected = userAnswer === opt;
+          const isCorrectOpt = hasResult && opt === correctAnswer;
+          const isWrongSelection = isThisSelected && isWrong;
 
           let className =
             "flex h-10 w-10 items-center justify-center rounded-lg text-sm font-semibold transition-all duration-150 ";
 
-          if (isAnswered) {
+          if (hasResult) {
             if (isCorrectOpt) {
               className += "bg-success text-success-foreground shadow-sm";
             } else if (isWrongSelection) {
@@ -56,6 +60,8 @@ const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubm
             } else {
               className += "bg-muted/40 text-muted-foreground/50";
             }
+          } else if (isThisSelected) {
+            className += "bg-primary text-primary-foreground shadow-sm";
           } else {
             className += "bg-muted/60 text-foreground hover:bg-primary/15 cursor-pointer";
           }
@@ -65,20 +71,20 @@ const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubm
               key={opt}
               className={className}
               onClick={() => onSelectAnswer(q, opt)}
-              disabled={isAnswered || isSubmitted}
+              disabled={isSubmitted}
             >
               {opt}
             </button>
           );
         })}
       </div>
-      {isAnswered && (
+      {hasResult && (
         <span className="w-5">
           {isCorrect ? (
             <CircleCheck className="h-4 w-4 text-success" />
-          ) : (
+          ) : isWrong ? (
             <CircleX className="h-4 w-4 text-destructive" />
-          )}
+          ) : null}
         </span>
       )}
     </div>
