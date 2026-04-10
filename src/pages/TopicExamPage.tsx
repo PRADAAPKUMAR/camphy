@@ -46,10 +46,29 @@ const TopicExamPage = () => {
     enabled: !!paperId,
   });
 
+  // Fetch answer key upfront for instant feedback
+  const { data: answerKeyData } = useQuery({
+    queryKey: ["topicwise_mcq_answer_key_client", paperId],
+    queryFn: async () => {
+      // We call the edge function with empty answers just to get correct_answers back
+      const supabase = await getSupabase();
+      const { data, error } = await supabase.functions.invoke("submit-topic-exam", {
+        body: { paper_id: paperId, answers: {} },
+      });
+      if (error) throw error;
+      const mapped: Record<number, string> = {};
+      for (const [k, v] of Object.entries(data.correct_answers)) {
+        mapped[Number(k)] = v as string;
+      }
+      return mapped;
+    },
+    enabled: !!paperId,
+  });
+
   const totalQuestions = paper?.total_questions ?? 40;
 
   const handleSelectAnswer = (question: number, option: string) => {
-    if (isSubmitted) return;
+    if (isSubmitted || answers[question]) return;
     setAnswers((prev) => ({ ...prev, [question]: option }));
   };
 
