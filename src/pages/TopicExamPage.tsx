@@ -76,30 +76,20 @@ const TopicExamPage = () => {
     }
   }, [isSubmitted, answers, answerKeyMap]);
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(() => {
     if (isSubmitted) return;
     setIsSubmitted(true);
 
-    try {
-      const supabase = await getSupabase();
-      const { data, error } = await supabase.functions.invoke("submit-topic-exam", {
-        body: { paper_id: paperId, answers },
-      });
-
-      if (error) throw error;
-
-      setScore(data.score);
-      const mapped: Record<number, string> = {};
-      for (const [k, v] of Object.entries(data.correct_answers)) {
-        mapped[Number(k)] = v as string;
+    if (answerKeyMap) {
+      let s = 0;
+      for (const [q, userAns] of Object.entries(answers)) {
+        if (answerKeyMap[Number(q)] === userAns) s++;
       }
-      setCorrectAnswers(mapped);
-      toast.success(`Score: ${data.score}/${data.total_questions}`);
-    } catch {
-      toast.error("Failed to submit. Please try again.");
-      setIsSubmitted(false);
+      setScore(s);
+      setCorrectAnswers(answerKeyMap);
+      toast.success(`Score: ${s}/${totalQuestions}`);
     }
-  }, [isSubmitted, answers, paperId]);
+  }, [isSubmitted, answers, answerKeyMap, totalQuestions]);
 
   if (paperLoading) {
     return (
