@@ -194,3 +194,5 @@ const TopicExamPage = () => {
     </div>
   );
 };
+
+export default TopicExamPage;
