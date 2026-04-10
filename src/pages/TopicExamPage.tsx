@@ -46,31 +46,24 @@ const TopicExamPage = () => {
     enabled: !!paperId,
   });
 
-  // Fetch answer key upfront for instant feedback
-  const { data: answerKeyData } = useQuery({
-    queryKey: ["topicwise_mcq_answer_key_client", paperId],
-    queryFn: async () => {
-      // We call the edge function with empty answers just to get correct_answers back
-      const supabase = await getSupabase();
-      const { data, error } = await supabase.functions.invoke("submit-topic-exam", {
-        body: { paper_id: paperId, answers: {} },
-      });
-      if (error) throw error;
-      const mapped: Record<number, string> = {};
-      for (const [k, v] of Object.entries(data.correct_answers)) {
-        mapped[Number(k)] = v as string;
-      }
-      return mapped;
-    },
-    enabled: !!paperId,
-  });
-
   const totalQuestions = paper?.total_questions ?? 40;
 
-  const handleSelectAnswer = (question: number, option: string) => {
+  const handleSelectAnswer = useCallback(async (question: number, option: string) => {
     if (isSubmitted || answers[question]) return;
     setAnswers((prev) => ({ ...prev, [question]: option }));
-  };
+
+    // Check the answer immediately via edge function
+    try {
+      const supabase = await getSupabase();
+      const { data, error } = await supabase.functions.invoke("check-topic-answer", {
+        body: { paper_id: paperId, question },
+      });
+      if (error) throw error;
+      setCorrectAnswers((prev) => ({ ...prev, [question]: data.correct_answer }));
+    } catch {
+      // Silently fail — answer will just not show correct/wrong
+    }
+  }, [isSubmitted, answers, paperId]);
 
   const handleSubmit = useCallback(async () => {
     if (isSubmitted) return;
@@ -190,7 +183,7 @@ const TopicExamPage = () => {
             <MCQPanel
               totalQuestions={totalQuestions}
               answers={answers}
-              correctAnswers={{}}
+              correctAnswers={correctAnswers}
               onSelectAnswer={handleSelectAnswer}
               onSubmit={handleSubmit}
               isSubmitted={isSubmitted}
@@ -201,5 +194,3 @@ const TopicExamPage = () => {
     </div>
   );
 };
-
-export default TopicExamPage;
