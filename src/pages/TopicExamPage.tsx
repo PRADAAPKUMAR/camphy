@@ -48,10 +48,22 @@ const TopicExamPage = () => {
 
   const totalQuestions = paper?.total_questions ?? 40;
 
-  const handleSelectAnswer = (question: number, option: string) => {
-    if (isSubmitted) return;
+  const handleSelectAnswer = useCallback(async (question: number, option: string) => {
+    if (isSubmitted || answers[question]) return;
     setAnswers((prev) => ({ ...prev, [question]: option }));
-  };
+
+    // Check the answer immediately via edge function
+    try {
+      const supabase = await getSupabase();
+      const { data, error } = await supabase.functions.invoke("check-topic-answer", {
+        body: { paper_id: paperId, question },
+      });
+      if (error) throw error;
+      setCorrectAnswers((prev) => ({ ...prev, [question]: data.correct_answer }));
+    } catch {
+      // Silently fail — answer will just not show correct/wrong
+    }
+  }, [isSubmitted, answers, paperId]);
 
   const handleSubmit = useCallback(async () => {
     if (isSubmitted) return;
@@ -171,7 +183,7 @@ const TopicExamPage = () => {
             <MCQPanel
               totalQuestions={totalQuestions}
               answers={answers}
-              correctAnswers={{}}
+              correctAnswers={correctAnswers}
               onSelectAnswer={handleSelectAnswer}
               onSubmit={handleSubmit}
               isSubmitted={isSubmitted}
