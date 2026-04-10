@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
-import PDFViewer from "@/components/PDFViewer";
+
 import MCQPanel from "@/components/MCQPanel";
 import ResultSummary from "@/components/ResultSummary";
 import Timer from "@/components/Timer";
@@ -148,7 +148,15 @@ const TopicExamPage = () => {
 
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         <ResizablePanel defaultSize={78} minSize={40}>
-          <PDFViewer url={paper.pdf_url} />
+          <div className="flex h-full flex-col bg-muted/30">
+            <iframe
+              src={paper.pdf_url.replace(/\/file\/d\/([^/]+).*/, "/file/d/$1/preview")}
+              className="h-full w-full border-0"
+              title="Google Drive Viewer"
+              allow="autoplay"
+              sandbox="allow-scripts allow-same-origin allow-popups"
+            />
+          </div>
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={22} minSize={18}>
