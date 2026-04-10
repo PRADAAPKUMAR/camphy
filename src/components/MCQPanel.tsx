@@ -71,7 +71,7 @@ const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubm
               key={opt}
               className={className}
               onClick={() => onSelectAnswer(q, opt)}
-              disabled={isSubmitted}
+              disabled={isSubmitted || isSelected}
             >
               {opt}
             </button>
