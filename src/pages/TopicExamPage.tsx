@@ -46,24 +46,35 @@ const TopicExamPage = () => {
     enabled: !!paperId,
   });
 
-  const totalQuestions = paper?.total_questions ?? 40;
-
-  const handleSelectAnswer = useCallback(async (question: number, option: string) => {
-    if (isSubmitted || answers[question]) return;
-    setAnswers((prev) => ({ ...prev, [question]: option }));
-
-    // Check the answer immediately via edge function
-    try {
+  // Pre-fetch all answer keys on mount for instant feedback
+  const { data: answerKeyMap } = useQuery({
+    queryKey: ["topicwise_answer_key", paperId],
+    queryFn: async () => {
       const supabase = await getSupabase();
-      const { data, error } = await supabase.functions.invoke("check-topic-answer", {
-        body: { paper_id: paperId, question },
+      const { data, error } = await supabase.functions.invoke("submit-topic-exam", {
+        body: { paper_id: paperId, answers: {} },
       });
       if (error) throw error;
-      setCorrectAnswers((prev) => ({ ...prev, [question]: data.correct_answer }));
-    } catch {
-      // Silently fail — answer will just not show correct/wrong
+      const mapped: Record<number, string> = {};
+      for (const [k, v] of Object.entries(data.correct_answers as Record<string, string>)) {
+        mapped[Number(k)] = v;
+      }
+      return mapped;
+    },
+    enabled: !!paperId,
+    staleTime: Infinity,
+  });
+
+  const totalQuestions = paper?.total_questions ?? 40;
+
+  const handleSelectAnswer = useCallback((question: number, option: string) => {
+    if (isSubmitted || answers[question]) return;
+    setAnswers((prev) => ({ ...prev, [question]: option }));
+    // Instant feedback from pre-fetched answer key
+    if (answerKeyMap?.[question]) {
+      setCorrectAnswers((prev) => ({ ...prev, [question]: answerKeyMap[question] }));
     }
-  }, [isSubmitted, answers, paperId]);
+  }, [isSubmitted, answers, answerKeyMap]);
 
   const handleSubmit = useCallback(async () => {
     if (isSubmitted) return;
