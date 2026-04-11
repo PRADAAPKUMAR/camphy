@@ -175,7 +175,7 @@ const ExamPage = () => {
             <MCQPanel
               totalQuestions={TOTAL_QUESTIONS}
               answers={answers}
-              correctAnswers={{}}
+              correctAnswers={correctAnswers}
               onSelectAnswer={handleSelectAnswer}
               onSubmit={handleSubmit}
               isSubmitted={isSubmitted}
