@@ -1,60 +1,47 @@
+import { lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Zap, BookOpen, ClipboardList, ArrowRight, Orbit, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import PhysicsBackground from "@/components/PhysicsBackground";
+
+const PhysicsBackground = lazy(() => import("@/components/PhysicsBackground"));
 
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 
 const HomePage = () => {
   const navigate = useNavigate();
 
-  const { data: paperCount } = useQuery({
-    queryKey: ["papers_count"],
+  // Single query fetches all counts in parallel
+  const { data: counts } = useQuery({
+    queryKey: ["home_counts"],
     queryFn: async () => {
       const supabase = await getSupabase();
-      const { count, error } = await supabase
-        .from("papers")
-        .select("*", { count: "exact", head: true });
-      if (error) throw error;
-      return count ?? 0;
-    },
-  });
-
-  const { data: materialsCount } = useQuery({
-    queryKey: ["materials_count"],
-    queryFn: async () => {
-      const supabase = await getSupabase();
-      const { count, error } = await supabase
-        .from("study_materials")
-        .select("*", { count: "exact", head: true });
-      if (error) throw error;
-      return count ?? 0;
-    },
-  });
-
-  const { data: topicCount } = useQuery({
-    queryKey: ["topic_count"],
-    queryFn: async () => {
-      const supabase = await getSupabase();
-      const [mcq, theory] = await Promise.all([
+      const [papers, materials, mcq, theory] = await Promise.all([
+        supabase.from("papers").select("*", { count: "exact", head: true }),
+        supabase.from("study_materials").select("*", { count: "exact", head: true }),
         supabase.from("topicwise_mcq_papers").select("*", { count: "exact", head: true }),
         supabase.from("topicwise_theory_questions").select("*", { count: "exact", head: true }),
       ]);
-      return (mcq.count ?? 0) + (theory.count ?? 0);
+      return {
+        papers: papers.count ?? 0,
+        materials: materials.count ?? 0,
+        topics: (mcq.count ?? 0) + (theory.count ?? 0),
+      };
     },
+    staleTime: 10 * 60 * 1000,
   });
 
   return (
     <div className="min-h-screen bg-background bg-grid relative">
-      <PhysicsBackground />
+      <Suspense fallback={null}>
+        <PhysicsBackground />
+      </Suspense>
 
       {/* Hero */}
       <header className="relative border-b border-border/40 pt-20 pb-16 overflow-hidden">
         {/* Orbiting electrons */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            {/* Orbit rings */}
             <div className="absolute -left-[120px] -top-[120px] h-[240px] w-[240px] rounded-full border border-primary/10 animate-[spin_12s_linear_infinite]">
               <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 h-3 w-3 rounded-full bg-primary/60 shadow-[0_0_12px_hsl(217_91%_60%/0.5)]" />
             </div>
@@ -80,8 +67,8 @@ const HomePage = () => {
           {/* Stats */}
           <div className="mt-12 flex flex-wrap justify-center gap-8">
             {[
-              { value: paperCount != null ? `${paperCount}+` : "...", label: "Past Papers" },
-              { value: materialsCount != null ? `${materialsCount}+` : "...", label: "Study Notes" },
+              { value: counts ? `${counts.papers}+` : "...", label: "Past Papers" },
+              { value: counts ? `${counts.materials}+` : "...", label: "Study Notes" },
               { value: "100%", label: "Free Access" },
             ].map((s) => (
               <div key={s.label} className="text-center">
