@@ -48,37 +48,47 @@ const ExamPage = () => {
     enabled: !!paperId,
   });
 
-  const handleSelectAnswer = (question: number, option: string) => {
-    if (isSubmitted) return;
-    setAnswers((prev) => ({ ...prev, [question]: option }));
-  };
-
-  const handleSubmit = useCallback(async () => {
-    if (isSubmitted) return;
-
-    setIsSubmitted(true);
-
-    try {
+  // Pre-fetch all answer keys for instant feedback
+  const { data: answerKeyMap } = useQuery({
+    queryKey: ["exam_answer_key", paperId],
+    queryFn: async () => {
       const supabase = await getSupabase();
       const { data, error } = await supabase.functions.invoke("submit-exam", {
-        body: { paper_id: paperId, answers },
+        body: { paper_id: paperId, answers: {} },
       });
-
       if (error) throw error;
-
-      setScore(data.score);
-      // Convert string keys to number keys for correctAnswers
       const mapped: Record<number, string> = {};
-      for (const [k, v] of Object.entries(data.correct_answers)) {
-        mapped[Number(k)] = v as string;
+      for (const [k, v] of Object.entries(data.correct_answers as Record<string, string>)) {
+        mapped[Number(k)] = v;
       }
-      setCorrectAnswers(mapped);
-      toast.success(`Score: ${data.score}/${data.total_questions}`);
-    } catch {
-      toast.error("Failed to submit exam. Please try again.");
-      setIsSubmitted(false);
+      return mapped;
+    },
+    enabled: !!paperId,
+    staleTime: Infinity,
+  });
+
+  const handleSelectAnswer = useCallback((question: number, option: string) => {
+    if (isSubmitted || answers[question]) return;
+    setAnswers((prev) => ({ ...prev, [question]: option }));
+    if (answerKeyMap?.[question]) {
+      setCorrectAnswers((prev) => ({ ...prev, [question]: answerKeyMap[question] }));
     }
-  }, [isSubmitted, answers, paperId]);
+  }, [isSubmitted, answers, answerKeyMap]);
+
+  const handleSubmit = useCallback(() => {
+    if (isSubmitted) return;
+    setIsSubmitted(true);
+
+    if (answerKeyMap) {
+      let s = 0;
+      for (const [q, userAns] of Object.entries(answers)) {
+        if (answerKeyMap[Number(q)] === userAns) s++;
+      }
+      setScore(s);
+      setCorrectAnswers(answerKeyMap);
+      toast.success(`Score: ${s}/${TOTAL_QUESTIONS}`);
+    }
+  }, [isSubmitted, answers, answerKeyMap]);
 
   if (paperLoading) {
     return (
@@ -165,7 +175,7 @@ const ExamPage = () => {
             <MCQPanel
               totalQuestions={TOTAL_QUESTIONS}
               answers={answers}
-              correctAnswers={{}}
+              correctAnswers={correctAnswers}
               onSelectAnswer={handleSelectAnswer}
               onSubmit={handleSubmit}
               isSubmitted={isSubmitted}
