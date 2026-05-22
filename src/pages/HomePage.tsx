@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Zap, BookOpen, ClipboardList, ArrowRight, Orbit, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -143,8 +143,11 @@ const HomePage = () => {
 
       {/* Footer */}
       <footer className="border-t border-border/40">
-        <div className="container py-6 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} PhysicsHQ — Built by PRADAAP KUMAR.
+        <div className="container py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+          <p>© {new Date().getFullYear()} PhysicsHQ — Built by PRADAAP KUMAR.</p>
+          <Link to="/about" className="hover:text-foreground transition-colors font-medium">
+            About Me
+          </Link>
         </div>
       </footer>
     </div>
