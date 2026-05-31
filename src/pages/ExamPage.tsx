@@ -1,8 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, lazy, Suspense } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
-import PDFViewer from "@/components/PDFViewer";
+const PDFViewer = lazy(() => import("@/components/PDFViewer"));
 import MCQPanel from "@/components/MCQPanel";
 import ResultSummary from "@/components/ResultSummary";
 import Timer from "@/components/Timer";
@@ -160,7 +160,9 @@ const ExamPage = () => {
       {/* Split view */}
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         <ResizablePanel defaultSize={78} minSize={40}>
-          <PDFViewer url={paper.pdf_url} />
+          <Suspense fallback={<Skeleton className="h-full w-full" />}>
+            <PDFViewer url={paper.pdf_url} />
+          </Suspense>
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={22} minSize={18}>
