@@ -74,11 +74,16 @@ Deno.serve(async (req) => {
       }
     }
 
+    const isPrefetch = Object.keys(answers).length === 0;
     return new Response(
       JSON.stringify({ score, total_questions: totalQuestions, correct_answers: correctAnswers }),
       {
         status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+          ...(isPrefetch ? { "Cache-Control": "public, max-age=300, s-maxage=600" } : {}),
+        },
       }
     );
   } catch {
