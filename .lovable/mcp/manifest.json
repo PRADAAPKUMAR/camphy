@@ -1,0 +1,174 @@
+{
+  "version": 1,
+  "sdk_version": "0.23.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "physics-hq-mcp",
+      "version": "0.1.0",
+      "title": "Physics HQ"
+    },
+    "tools": [
+      {
+        "name": "list_levels",
+        "title": "List levels",
+        "description": "List the physics levels available on Physics HQ (e.g. IGCSE, AS LEVEL, A2 LEVEL) together with how many past papers, topic-wise MCQ practice sets, topic-wise theory questions, and study materials exist for each level.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_papers",
+        "title": "List past papers",
+        "description": "List Cambridge past-paper MCQ practice papers on Physics HQ. Filter by level (IGCSE, AS LEVEL, A2 LEVEL), paper code, session (e.g. May/June, October/November), or year. Returns paper metadata and a URL to the PDF question paper.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "level": {
+              "type": "string",
+              "description": "Filter by level, e.g. 'IGCSE', 'AS LEVEL', 'A2 LEVEL'."
+            },
+            "paper_code": {
+              "type": "string",
+              "description": "Filter by Cambridge paper code (e.g. '9702/12')."
+            },
+            "session": {
+              "type": "string",
+              "description": "Filter by exam session (e.g. 'May/June')."
+            },
+            "year": {
+              "type": "integer",
+              "description": "Filter by year (e.g. 2023)."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "description": "Max rows to return (default 50)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_topic_mcq_practice",
+        "title": "List topic-wise MCQ practice",
+        "description": "List topic-wise MCQ practice papers on Physics HQ. Each entry is a set of multiple-choice questions on a single physics topic, with a PDF and a suggested timer. Optionally filter by level or topic substring.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "level": {
+              "type": "string",
+              "description": "Filter by level (e.g. 'AS LEVEL')."
+            },
+            "topic": {
+              "type": "string",
+              "description": "Case-insensitive substring match on topic (e.g. 'kinematics')."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_topic_theory_questions",
+        "title": "List topic-wise theory questions",
+        "description": "List topic-wise theory (structured) question sets on Physics HQ. Each entry has a question PDF and a matching answer-key PDF. Optionally filter by level or topic substring.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "level": {
+              "type": "string",
+              "description": "Filter by level (e.g. 'A2 LEVEL')."
+            },
+            "topic": {
+              "type": "string",
+              "description": "Case-insensitive substring match on topic."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_study_materials",
+        "title": "List study materials",
+        "description": "List study materials (notes, revision resources) on Physics HQ. Filter by level, subject, or folder path. Each entry links to a file URL (often a Google Drive document).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "level": {
+              "type": "string",
+              "description": "Filter by level (e.g. 'IGCSE')."
+            },
+            "subject": {
+              "type": "string",
+              "description": "Filter by subject."
+            },
+            "folder_path": {
+              "type": "string",
+              "description": "Filter by exact folder path."
+            },
+            "search": {
+              "type": "string",
+              "description": "Case-insensitive substring match on title."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
