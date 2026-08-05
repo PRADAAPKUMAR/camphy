@@ -28,6 +28,15 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Never act as an answer-key oracle: at least one real answer is required,
+    // and only questions the user answered get their correct answer returned.
+    if (Object.keys(answers).length === 0) {
+      return new Response(JSON.stringify({ error: "No answers submitted" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
@@ -54,32 +63,26 @@ Deno.serve(async (req) => {
     for (let q = 1; q <= TOTAL_QUESTIONS; q++) {
       const key = `q${q}`;
       const correctValue = answerKey[key];
-      if (typeof correctValue === "string") {
+      const userValue = answers[String(q)];
+      if (typeof correctValue === "string" && typeof userValue === "string") {
         correctAnswers[String(q)] = correctValue;
-        if (answers[String(q)] === correctValue) {
-          score++;
-        }
+        if (userValue === correctValue) score++;
       }
     }
 
     // Insert attempt
-    // Skip writing an attempt for the pre-fetch path (empty answers) — that
-    // call only needs the answer key, not a phantom 0-score record.
-    const isPrefetch = Object.keys(answers).length === 0;
-    if (!isPrefetch) {
-      const { error: insertError } = await supabase.from("attempts").insert({
-        paper_id,
-        score,
-        total_questions: TOTAL_QUESTIONS,
-        answers,
-      });
+    const { error: insertError } = await supabase.from("attempts").insert({
+      paper_id,
+      score,
+      total_questions: TOTAL_QUESTIONS,
+      answers,
+    });
 
-      if (insertError) {
-        return new Response(JSON.stringify({ error: "Failed to save attempt" }), {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+    if (insertError) {
+      return new Response(JSON.stringify({ error: "Failed to save attempt" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     return new Response(
@@ -89,8 +92,7 @@ Deno.serve(async (req) => {
         headers: {
           ...corsHeaders,
           "Content-Type": "application/json",
-          // Cache the answer-key-only response at the edge / browser briefly.
-          ...(isPrefetch ? { "Cache-Control": "public, max-age=300, s-maxage=600" } : {}),
+          "Cache-Control": "no-store",
         },
       }
     );
