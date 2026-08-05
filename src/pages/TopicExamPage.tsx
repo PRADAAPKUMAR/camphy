@@ -46,50 +46,55 @@ const TopicExamPage = () => {
     enabled: !!paperId,
   });
 
-  // Pre-fetch all answer keys on mount for instant feedback
-  const { data: answerKeyMap } = useQuery({
-    queryKey: ["topicwise_answer_key", paperId],
-    queryFn: async () => {
-      const supabase = await getSupabase();
-      const { data, error } = await supabase.functions.invoke("submit-topic-exam", {
-        body: { paper_id: paperId, answers: {} },
-      });
-      if (error) throw error;
-      const mapped: Record<number, string> = {};
-      for (const [k, v] of Object.entries(data.correct_answers as Record<string, string>)) {
-        mapped[Number(k)] = v;
-      }
-      return mapped;
-    },
-    enabled: !!paperId,
-    staleTime: Infinity,
-  });
-
   const totalQuestions = paper?.total_questions ?? 40;
 
+  // Feedback is fetched per question, only after the user commits an answer.
   const handleSelectAnswer = useCallback((question: number, option: string) => {
     if (isSubmitted || answers[question]) return;
     setAnswers((prev) => ({ ...prev, [question]: option }));
-    // Instant feedback from pre-fetched answer key
-    if (answerKeyMap?.[question]) {
-      setCorrectAnswers((prev) => ({ ...prev, [question]: answerKeyMap[question] }));
-    }
-  }, [isSubmitted, answers, answerKeyMap]);
+    (async () => {
+      try {
+        const supabase = await getSupabase();
+        const { data, error } = await supabase.functions.invoke("check-topic-answer", {
+          body: { paper_id: paperId, question, answer: option },
+        });
+        if (error) throw error;
+        if (data?.correct_answer) {
+          setCorrectAnswers((prev) => ({ ...prev, [question]: data.correct_answer }));
+        }
+      } catch {
+        toast.error("Could not check that answer");
+      }
+    })();
+  }, [isSubmitted, answers, paperId]);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     if (isSubmitted) return;
     setIsSubmitted(true);
 
-    if (answerKeyMap) {
-      let s = 0;
-      for (const [q, userAns] of Object.entries(answers)) {
-        if (answerKeyMap[Number(q)] === userAns) s++;
-      }
-      setScore(s);
-      setCorrectAnswers(answerKeyMap);
-      toast.success(`Score: ${s}/${totalQuestions}`);
+    if (Object.keys(answers).length === 0) {
+      setScore(0);
+      toast.info("No answers submitted");
+      return;
     }
-  }, [isSubmitted, answers, answerKeyMap, totalQuestions]);
+
+    try {
+      const supabase = await getSupabase();
+      const { data, error } = await supabase.functions.invoke("submit-topic-exam", {
+        body: { paper_id: paperId, answers },
+      });
+      if (error) throw error;
+      const mapped: Record<number, string> = {};
+      for (const [k, v] of Object.entries((data.correct_answers ?? {}) as Record<string, string>)) {
+        mapped[Number(k)] = v;
+      }
+      setCorrectAnswers(mapped);
+      setScore(data.score);
+      toast.success(`Score: ${data.score}/${data.total_questions ?? totalQuestions}`);
+    } catch {
+      toast.error("Could not submit your answers");
+    }
+  }, [isSubmitted, answers, paperId, totalQuestions]);
 
   if (paperLoading) {
     return (
