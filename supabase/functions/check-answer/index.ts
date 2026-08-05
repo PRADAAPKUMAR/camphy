@@ -21,15 +21,14 @@ Deno.serve(async (req) => {
     }
 
     const q = Number(question);
-    if (!q || q < 1 || q > 100) {
+    if (!q || q < 1 || q > 40) {
       return new Response(JSON.stringify({ error: "Invalid question number" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // The correct answer is only revealed once the user has actually committed
-    // an answer for this specific question — no raw answer-key lookups.
+    // Only reveal the answer for a question the user has actually answered.
     if (typeof answer !== "string" || !["A", "B", "C", "D"].includes(answer)) {
       return new Response(JSON.stringify({ error: "Invalid answer" }), {
         status: 400,
@@ -37,13 +36,14 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
 
     const colName = `q${q}`;
     const { data: answerKey, error } = await supabase
-      .from("topicwise_mcq_answer_keys")
+      .from("answer_keys")
       .select(colName)
       .eq("paper_id", paper_id)
       .single();
@@ -55,14 +55,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    const correct = answerKey[colName];
+    const correct = (answerKey as Record<string, string>)[colName];
 
     return new Response(
       JSON.stringify({ question: q, submitted: answer, is_correct: answer === correct, correct_answer: correct }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   } catch {
     return new Response(JSON.stringify({ error: "Internal server error" }), {
