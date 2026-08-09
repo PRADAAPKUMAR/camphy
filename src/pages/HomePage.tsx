@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Zap, BookOpen, ClipboardList, ArrowRight, Orbit, Target } from "lucide-react";
+import { Zap, BookOpen, ClipboardList, ArrowRight, Orbit, Target, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const PhysicsBackground = lazy(() => import("@/components/PhysicsBackground"));
@@ -139,15 +139,47 @@ const HomePage = () => {
             </Button>
           </div>
         </div>
+
+        {/* Study Tools */}
+        <div className="mt-6">
+          <div
+            className="glass-card-hover group cursor-pointer rounded-xl p-6"
+            onClick={() => navigate("/study-tools")}
+          >
+            <div
+              className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl border transition-all group-hover:glow-sm"
+              style={{
+                background: "hsl(var(--study-3) / 0.12)",
+                borderColor: "hsl(var(--study-3) / 0.25)",
+                color: "hsl(var(--study-3))",
+              }}
+            >
+              <CalendarClock className="h-6 w-6" />
+            </div>
+            <h3 className="mb-2 text-xl font-bold">Study Tools — Timers & Timetable</h3>
+            <p className="mb-4 max-w-2xl text-sm text-muted-foreground">
+              Run multiple exam timers at once, use focus mode for deep study sessions, and build a
+              colourful daily timetable you can download as a PDF.
+            </p>
+            <Button variant="ghost" className="gap-2 px-0" style={{ color: "hsl(var(--study-3))" }}>
+              Open Study Tools <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       </main>
 
       {/* Footer */}
       <footer className="border-t border-border/40">
         <div className="container py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
           <p>© {new Date().getFullYear()} PhysicsHQ — Built by PRADAAP KUMAR.</p>
-          <Link to="/about" className="hover:text-foreground transition-colors font-medium">
-            About Me
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/study-tools" className="hover:text-foreground transition-colors font-medium">
+              Study Tools
+            </Link>
+            <Link to="/about" className="hover:text-foreground transition-colors font-medium">
+              About Me
+            </Link>
+          </div>
         </div>
       </footer>
     </div>

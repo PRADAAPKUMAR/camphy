@@ -19,6 +19,7 @@ const TopicLevelPage = lazy(() => import("./pages/TopicLevelPage"));
 const TopicExamPage = lazy(() => import("./pages/TopicExamPage"));
 const TopicTheoryPage = lazy(() => import("./pages/TopicTheoryPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
+const StudyToolsPage = lazy(() => import("./pages/StudyToolsPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -95,6 +96,7 @@ const RouterContent = () => {
         <Route path="/topic-exam/:paperId" element={<TopicExamPage />} />
         <Route path="/topic-theory/:questionId" element={<TopicTheoryPage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/study-tools" element={<StudyToolsPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>

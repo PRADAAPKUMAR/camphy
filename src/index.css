@@ -50,6 +50,14 @@
 
     --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+    /* Colourful study palette (timetable / timers) */
+    --study-1: 217 91% 60%;
+    --study-2: 152 60% 45%;
+    --study-3: 32 95% 58%;
+    --study-4: 280 70% 65%;
+    --study-5: 340 80% 62%;
+    --study-6: 190 85% 52%;
   }
 }
 
