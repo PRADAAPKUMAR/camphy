@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Zap, BookOpen, ClipboardList, ArrowRight, Orbit, Target } from "lucide-react";
+import { Zap, BookOpen, ClipboardList, ArrowRight, Orbit, Target, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const PhysicsBackground = lazy(() => import("@/components/PhysicsBackground"));
