@@ -36,14 +36,12 @@ const FocusMode = () => {
     if (switching.current) return;
     switching.current = true;
     beep();
-    setPhase((p) => {
-      const next: Phase = p === "focus" ? "break" : "focus";
-      if (p === "focus") setSessions((s) => s + 1);
-      setLeft((next === "focus" ? focusMin : breakMin) * 60);
-      return next;
-    });
+    const next: Phase = phase === "focus" ? "break" : "focus";
+    if (phase === "focus") setSessions((s) => s + 1);
+    setPhase(next);
+    setLeft((next === "focus" ? focusMin : breakMin) * 60);
     setTimeout(() => { switching.current = false; }, 100);
-  }, [focusMin, breakMin]);
+  }, [phase, focusMin, breakMin]);
 
   useEffect(() => {
     if (!running) return;
