@@ -57,6 +57,7 @@ const RouterContent = () => {
   usePageTransition();
 
   return (
+    <>
     <Suspense fallback={
       <div className="min-h-screen bg-background">
         <div className="border-b border-border/40">
