@@ -1,34 +1,11 @@
-import { useEffect, useRef, useState, useCallback } from "react";
-import { Play, Pause, RotateCcw, X, Plus, Bell, Maximize2 } from "lucide-react";
+import { useState, useSyncExternalStore } from "react";
+import { Play, Pause, RotateCcw, X, Plus, Bell, Maximize2, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { STUDY_COLORS, colorHsl } from "@/lib/study-colors";
+import { colorHsl } from "@/lib/study-colors";
+import { studyTimerStore } from "@/lib/study-timer-store";
+import { PAPER_PRESETS } from "@/lib/paper-presets";
 import FullscreenStage from "./FullscreenStage";
-
-interface TimerItem {
-  id: string;
-  label: string;
-  total: number; // seconds
-  left: number;
-  running: boolean;
-  color: string;
-}
-
-const beep = () => {
-  try {
-    const Ctx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    const ctx = new Ctx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.frequency.value = 880;
-    gain.gain.setValueAtTime(0.15, ctx.currentTime);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.6);
-    setTimeout(() => ctx.close(), 900);
-  } catch { /* audio unavailable */ }
-};
 
 const fmt = (s: number) => {
   const h = Math.floor(s / 3600);
@@ -38,66 +15,12 @@ const fmt = (s: number) => {
   return h > 0 ? `${pad(h)}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`;
 };
 
-const PRESETS = [
-  { label: "Paper 1 — MCQ", minutes: 45 },
-  { label: "Paper 2 — AS Theory", minutes: 75 },
-  { label: "Paper 4 — A2 Theory", minutes: 120 },
-  { label: "Quick Drill", minutes: 15 },
-];
-
 const MultiTimers = () => {
-  const [timers, setTimers] = useState<TimerItem[]>([]);
+  const state = useSyncExternalStore(studyTimerStore.subscribe, studyTimerStore.getSnapshot);
+  const timers = state.timers;
   const [label, setLabel] = useState("");
   const [minutes, setMinutes] = useState("45");
   const [fullId, setFullId] = useState<string | null>(null);
-  const doneRef = useRef<Set<string>>(new Set());
-
-  useEffect(() => {
-    const anyRunning = timers.some((t) => t.running && t.left > 0);
-    if (!anyRunning) return;
-    const id = window.setInterval(() => {
-      setTimers((prev) =>
-        prev.map((t) => (t.running && t.left > 0 ? { ...t, left: t.left - 1 } : t)),
-      );
-    }, 1000);
-    return () => window.clearInterval(id);
-  }, [timers]);
-
-  useEffect(() => {
-    timers.forEach((t) => {
-      if (t.left === 0 && !doneRef.current.has(t.id)) {
-        doneRef.current.add(t.id);
-        beep();
-      }
-    });
-  }, [timers]);
-
-  const addTimer = useCallback((name: string, mins: number) => {
-    const total = Math.max(1, Math.round(mins)) * 60;
-    const idx = Math.floor(Math.random() * STUDY_COLORS.length);
-    setTimers((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        label: name.trim() || `Timer ${prev.length + 1}`,
-        total,
-        left: total,
-        running: true,
-        color: STUDY_COLORS[idx].key,
-      },
-    ]);
-  }, []);
-
-  const toggle = (id: string) =>
-    setTimers((p) => p.map((t) => (t.id === id ? { ...t, running: !t.running } : t)));
-  const reset = (id: string) => {
-    doneRef.current.delete(id);
-    setTimers((p) => p.map((t) => (t.id === id ? { ...t, left: t.total, running: false } : t)));
-  };
-  const remove = (id: string) => {
-    setTimers((p) => p.filter((t) => t.id !== id));
-    setFullId((f) => (f === id ? null : f));
-  };
 
   const fullTimer = timers.find((t) => t.id === fullId) || null;
 
@@ -109,7 +32,7 @@ const MultiTimers = () => {
           className="flex flex-col gap-3 sm:flex-row sm:items-center"
           onSubmit={(e) => {
             e.preventDefault();
-            addTimer(label, Number(minutes) || 45);
+            studyTimerStore.addTimer(label, Number(minutes) || 45);
             setLabel("");
           }}
         >
@@ -133,25 +56,45 @@ const MultiTimers = () => {
           </Button>
         </form>
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          {PRESETS.map((p) => (
-            <button
-              key={p.label}
-              type="button"
-              onClick={() => addTimer(p.label, p.minutes)}
-              className="rounded-full border border-border/60 bg-muted/30 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
-            >
-              {p.label} · {p.minutes}m
-            </button>
+        <div className="mt-5 space-y-4">
+          {PAPER_PRESETS.map((group) => (
+            <div key={group.level}>
+              <p
+                className="mb-2 text-xs font-bold uppercase tracking-wide"
+                style={{ color: `hsl(${group.color})` }}
+              >
+                {group.level}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {group.papers.map((p) => (
+                  <button
+                    key={p.label}
+                    type="button"
+                    onClick={() => studyTimerStore.addTimer(p.label, p.minutes)}
+                    className="rounded-full border px-3 py-1.5 text-xs font-medium transition-colors hover:text-foreground"
+                    style={{
+                      borderColor: `hsl(${group.color} / 0.35)`,
+                      background: `hsl(${group.color} / 0.08)`,
+                      color: `hsl(${group.color})`,
+                    }}
+                  >
+                    {p.label} · {p.minutes}m
+                  </button>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
+        <p className="mt-4 text-xs text-muted-foreground">
+          Timers keep running while you browse other pages. Closing the tab clears them.
+        </p>
       </div>
 
       {timers.length === 0 ? (
         <div className="glass-card rounded-2xl p-10 text-center">
           <Bell className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">
-            No timers running. Add one above or tap a preset to time a full paper.
+            No timers running. Add one above or tap a paper preset to time a full paper.
           </p>
         </div>
       ) : (
@@ -177,7 +120,7 @@ const MultiTimers = () => {
                       <Maximize2 className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => remove(t.id)}
+                      onClick={() => studyTimerStore.removeTimer(t.id)}
                       aria-label="Remove timer"
                       className="text-muted-foreground transition-colors hover:text-destructive"
                     >
@@ -200,18 +143,44 @@ const MultiTimers = () => {
                   />
                 </div>
 
-                <div className="mt-4 flex gap-2">
+                <div className="mt-3 flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 gap-1 px-2 text-xs"
+                    onClick={() => studyTimerStore.adjustTimer(t.id, -1)}
+                    aria-label="Subtract one minute"
+                  >
+                    <Minus className="h-3.5 w-3.5" /> 1 min
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 gap-1 px-2 text-xs"
+                    onClick={() => studyTimerStore.adjustTimer(t.id, 1)}
+                    aria-label="Add one minute"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> 1 min
+                  </Button>
+                </div>
+
+                <div className="mt-3 flex gap-2">
                   <Button
                     size="sm"
                     variant="secondary"
                     className="flex-1 gap-1.5"
-                    onClick={() => toggle(t.id)}
+                    onClick={() => studyTimerStore.toggleTimer(t.id)}
                     disabled={finished}
                   >
                     {t.running ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
                     {t.running ? "Pause" : "Start"}
                   </Button>
-                  <Button size="sm" variant="outline" className="gap-1.5" onClick={() => reset(t.id)}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1.5"
+                    onClick={() => studyTimerStore.resetTimer(t.id)}
+                  >
                     <RotateCcw className="h-3.5 w-3.5" /> Reset
                   </Button>
                 </div>
@@ -252,18 +221,39 @@ const MultiTimers = () => {
                 }}
               />
             </div>
-            <div className="mt-10 flex gap-3">
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+              <Button
+                size="lg"
+                variant="outline"
+                className="gap-2"
+                onClick={() => studyTimerStore.adjustTimer(fullTimer.id, -1)}
+              >
+                <Minus className="h-4 w-4" /> 1 min
+              </Button>
               <Button
                 size="lg"
                 variant="secondary"
                 className="gap-2"
-                onClick={() => toggle(fullTimer.id)}
+                onClick={() => studyTimerStore.toggleTimer(fullTimer.id)}
                 disabled={fullTimer.left === 0}
               >
                 {fullTimer.running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                 {fullTimer.running ? "Pause" : "Start"}
               </Button>
-              <Button size="lg" variant="outline" className="gap-2" onClick={() => reset(fullTimer.id)}>
+              <Button
+                size="lg"
+                variant="outline"
+                className="gap-2"
+                onClick={() => studyTimerStore.adjustTimer(fullTimer.id, 1)}
+              >
+                <Plus className="h-4 w-4" /> 1 min
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="gap-2"
+                onClick={() => studyTimerStore.resetTimer(fullTimer.id)}
+              >
                 <RotateCcw className="h-4 w-4" /> Reset
               </Button>
             </div>

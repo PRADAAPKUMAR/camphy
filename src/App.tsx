@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { usePageTransition } from "@/hooks/use-page-transition";
+import RunningTimerBar from "@/components/study/RunningTimerBar";
 
 const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
 const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
@@ -56,6 +57,7 @@ const RouterContent = () => {
   usePageTransition();
 
   return (
+    <>
     <Suspense fallback={
       <div className="min-h-screen bg-background">
         <div className="border-b border-border/40">
@@ -100,6 +102,8 @@ const RouterContent = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
+      <RunningTimerBar />
+    </>
   );
 };
 
