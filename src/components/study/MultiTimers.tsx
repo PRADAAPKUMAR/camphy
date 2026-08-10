@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Play, Pause, RotateCcw, X, Plus, Bell } from "lucide-react";
+import { Play, Pause, RotateCcw, X, Plus, Bell, Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { STUDY_COLORS, colorHsl } from "@/lib/study-colors";
+import FullscreenStage from "./FullscreenStage";
 
 interface TimerItem {
   id: string;
@@ -48,6 +49,7 @@ const MultiTimers = () => {
   const [timers, setTimers] = useState<TimerItem[]>([]);
   const [label, setLabel] = useState("");
   const [minutes, setMinutes] = useState("45");
+  const [fullId, setFullId] = useState<string | null>(null);
   const doneRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
@@ -92,7 +94,12 @@ const MultiTimers = () => {
     doneRef.current.delete(id);
     setTimers((p) => p.map((t) => (t.id === id ? { ...t, left: t.total, running: false } : t)));
   };
-  const remove = (id: string) => setTimers((p) => p.filter((t) => t.id !== id));
+  const remove = (id: string) => {
+    setTimers((p) => p.filter((t) => t.id !== id));
+    setFullId((f) => (f === id ? null : f));
+  };
+
+  const fullTimer = timers.find((t) => t.id === fullId) || null;
 
   return (
     <div className="space-y-6">
@@ -161,13 +168,22 @@ const MultiTimers = () => {
               >
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm font-semibold leading-tight">{t.label}</p>
-                  <button
-                    onClick={() => remove(t.id)}
-                    aria-label="Remove timer"
-                    className="text-muted-foreground transition-colors hover:text-destructive"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <button
+                      onClick={() => setFullId(t.id)}
+                      aria-label="Full screen timer"
+                      className="text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      <Maximize2 className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => remove(t.id)}
+                      aria-label="Remove timer"
+                      className="text-muted-foreground transition-colors hover:text-destructive"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
 
                 <p
@@ -207,6 +223,56 @@ const MultiTimers = () => {
           })}
         </div>
       )}
+
+      <FullscreenStage open={!!fullTimer} onClose={() => setFullId(null)}>
+        {fullTimer && (
+          <>
+            <p className="mb-6 text-center text-lg font-semibold text-muted-foreground">
+              {fullTimer.label}
+            </p>
+            <p
+              className={`font-mono text-[clamp(3.5rem,17vw,12rem)] font-bold leading-none tabular-nums ${
+                fullTimer.left === 0 ? "animate-pulse" : ""
+              }`}
+              style={{
+                color:
+                  fullTimer.left === 0
+                    ? `hsl(var(--destructive))`
+                    : `hsl(${colorHsl(fullTimer.color)})`,
+              }}
+            >
+              {fmt(fullTimer.left)}
+            </p>
+            <div className="mt-10 h-3 w-full max-w-xl overflow-hidden rounded-full bg-muted/50">
+              <div
+                className="h-full rounded-full transition-[width] duration-1000 ease-linear"
+                style={{
+                  width: `${fullTimer.total ? (fullTimer.left / fullTimer.total) * 100 : 0}%`,
+                  background: `hsl(${colorHsl(fullTimer.color)})`,
+                }}
+              />
+            </div>
+            <div className="mt-10 flex gap-3">
+              <Button
+                size="lg"
+                variant="secondary"
+                className="gap-2"
+                onClick={() => toggle(fullTimer.id)}
+                disabled={fullTimer.left === 0}
+              >
+                {fullTimer.running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                {fullTimer.running ? "Pause" : "Start"}
+              </Button>
+              <Button size="lg" variant="outline" className="gap-2" onClick={() => reset(fullTimer.id)}>
+                <RotateCcw className="h-4 w-4" /> Reset
+              </Button>
+            </div>
+            {fullTimer.left === 0 && (
+              <p className="mt-6 text-sm font-semibold text-destructive">Time up — pens down!</p>
+            )}
+          </>
+        )}
+      </FullscreenStage>
     </div>
   );
 };

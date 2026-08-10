@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Play, Pause, RotateCcw, Coffee, Brain } from "lucide-react";
+import { Play, Pause, RotateCcw, Coffee, Brain, Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import FullscreenStage from "./FullscreenStage";
 
 type Phase = "focus" | "break";
 
@@ -28,6 +29,7 @@ const FocusMode = () => {
   const [left, setLeft] = useState(25 * 60);
   const [running, setRunning] = useState(false);
   const [sessions, setSessions] = useState(0);
+  const [full, setFull] = useState(false);
   const switching = useRef(false);
 
   const total = (phase === "focus" ? focusMin : breakMin) * 60;
@@ -71,14 +73,25 @@ const FocusMode = () => {
   const s = String(left % 60).padStart(2, "0");
 
   return (
+    <>
     <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
       <div className="glass-card flex flex-col items-center rounded-2xl p-8">
-        <div
-          className="mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold"
-          style={{ background: `hsl(${ring} / 0.12)`, color: `hsl(${ring})` }}
-        >
-          {isFocus ? <Brain className="h-3.5 w-3.5" /> : <Coffee className="h-3.5 w-3.5" />}
-          {isFocus ? "Focus session" : "Break time"}
+        <div className="mb-6 flex items-center gap-2">
+          <div
+            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold"
+            style={{ background: `hsl(${ring} / 0.12)`, color: `hsl(${ring})` }}
+          >
+            {isFocus ? <Brain className="h-3.5 w-3.5" /> : <Coffee className="h-3.5 w-3.5" />}
+            {isFocus ? "Focus session" : "Break time"}
+          </div>
+          <button
+            type="button"
+            onClick={() => setFull(true)}
+            aria-label="Full screen focus timer"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/30 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+          >
+            <Maximize2 className="h-3.5 w-3.5" /> Full screen
+          </button>
         </div>
 
         <div
@@ -177,6 +190,47 @@ const FocusMode = () => {
         </div>
       </div>
     </div>
+
+    <FullscreenStage open={full} onClose={() => setFull(false)}>
+      <div
+        className="mb-8 inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold"
+        style={{ background: `hsl(${ring} / 0.12)`, color: `hsl(${ring})` }}
+      >
+        {isFocus ? <Brain className="h-4 w-4" /> : <Coffee className="h-4 w-4" />}
+        {isFocus ? "Focus session" : "Break time"}
+      </div>
+      <div
+        className="relative flex h-[min(70vw,26rem)] w-[min(70vw,26rem)] items-center justify-center rounded-full"
+        style={{
+          background: `conic-gradient(hsl(${ring}) ${pct}%, hsl(var(--muted) / 0.5) ${pct}% 100%)`,
+        }}
+      >
+        <div className="flex h-[92%] w-[92%] flex-col items-center justify-center rounded-full bg-card">
+          <span
+            className="font-mono text-[clamp(3rem,12vw,8rem)] font-bold leading-none tabular-nums"
+            style={{ color: `hsl(${ring})` }}
+          >
+            {m}:{s}
+          </span>
+          <span className="mt-3 text-sm text-muted-foreground">
+            {sessions} session{sessions === 1 ? "" : "s"} done
+          </span>
+        </div>
+      </div>
+      <div className="mt-10 flex gap-3">
+        <Button size="lg" className="gap-2" onClick={() => setRunning((r) => !r)}>
+          {running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+          {running ? "Pause" : "Start"}
+        </Button>
+        <Button size="lg" variant="outline" className="gap-2" onClick={reset}>
+          <RotateCcw className="h-4 w-4" /> Reset
+        </Button>
+        <Button size="lg" variant="secondary" onClick={switchPhase}>
+          Skip
+        </Button>
+      </div>
+    </FullscreenStage>
+    </>
   );
 };
 
