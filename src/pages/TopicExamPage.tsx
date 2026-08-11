@@ -6,6 +6,8 @@ const getSupabase = () => import("@/integrations/supabase/client").then(m => m.s
 import MCQPanel from "@/components/MCQPanel";
 import ResultSummary from "@/components/ResultSummary";
 import Timer from "@/components/Timer";
+import ExplanationDialog from "@/components/ExplanationDialog";
+import { useExplanation } from "@/hooks/use-explanation";
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -30,6 +32,7 @@ const TopicExamPage = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState<Record<number, string>>({});
+  const explanation = useExplanation(paperId ? { topic_paper_id: paperId } : null);
 
   const { data: paper, isLoading: paperLoading } = useQuery({
     queryKey: ["topicwise_mcq_paper", paperId],
@@ -193,10 +196,20 @@ const TopicExamPage = () => {
               onSelectAnswer={handleSelectAnswer}
               onSubmit={handleSubmit}
               isSubmitted={isSubmitted}
+              onExplain={explanation.openExplanation}
             />
           )}
         </ResizablePanel>
       </ResizablePanelGroup>
+
+      <ExplanationDialog
+        open={explanation.open}
+        onOpenChange={explanation.setOpen}
+        question={explanation.question}
+        userAnswer={explanation.question ? answers[explanation.question] : undefined}
+        isLoading={explanation.isLoading}
+        data={explanation.data}
+      />
     </div>
   );
 };
