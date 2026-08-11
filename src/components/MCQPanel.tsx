@@ -1,7 +1,7 @@
 import { memo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CircleCheck, CircleX } from "lucide-react";
+import { CircleCheck, CircleX, Lightbulb } from "lucide-react";
 
 const OPTIONS = ["A", "B", "C", "D"] as const;
 
@@ -12,6 +12,7 @@ interface MCQPanelProps {
   onSelectAnswer: (question: number, option: string) => void;
   onSubmit: () => void;
   isSubmitted: boolean;
+  onExplain?: (question: number) => void;
 }
 
 interface QuestionRowProps {
@@ -20,9 +21,10 @@ interface QuestionRowProps {
   correctAnswer: string | undefined;
   onSelectAnswer: (question: number, option: string) => void;
   isSubmitted: boolean;
+  onExplain?: (question: number) => void;
 }
 
-const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubmitted }: QuestionRowProps) => {
+const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubmitted, onExplain }: QuestionRowProps) => {
   const isSelected = !!userAnswer;
   const hasResult = correctAnswer !== undefined;
   const isCorrect = isSelected && hasResult && userAnswer === correctAnswer;
@@ -78,15 +80,26 @@ const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubm
           );
         })}
       </div>
-      {hasResult && (
-        <span className="w-5">
-          {isCorrect ? (
+      <span className="flex w-14 items-center justify-end gap-1">
+        {hasResult && (
+          isCorrect ? (
             <CircleCheck className="h-4 w-4 text-success" />
           ) : isWrong ? (
             <CircleX className="h-4 w-4 text-destructive" />
-          ) : null}
-        </span>
-      )}
+          ) : null
+        )}
+        {onExplain && hasResult && (
+          <button
+            type="button"
+            onClick={() => onExplain(q)}
+            title={`Explanation for question ${q}`}
+            aria-label={`Explanation for question ${q}`}
+            className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors hover:bg-primary/25"
+          >
+            <Lightbulb className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </span>
     </div>
   );
 });
@@ -100,6 +113,7 @@ const MCQPanel = memo(({
   onSelectAnswer,
   onSubmit,
   isSubmitted,
+  onExplain,
 }: MCQPanelProps) => {
   const answeredCount = Object.keys(answers).length;
   const progress = Math.round((answeredCount / totalQuestions) * 100);
@@ -138,6 +152,7 @@ const MCQPanel = memo(({
               correctAnswer={correctAnswers[q]}
               onSelectAnswer={handleSelectAnswer}
               isSubmitted={isSubmitted}
+              onExplain={onExplain}
             />
           ))}
         </div>
