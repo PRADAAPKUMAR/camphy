@@ -51,10 +51,33 @@ const TopicExamPage = () => {
 
   const totalQuestions = paper?.total_questions ?? 40;
 
-  // Feedback is fetched per question, only after the user commits an answer.
+  // Prefetch full key once so feedback is instant on selection.
+  const { data: answerKeyMap } = useQuery({
+    queryKey: ["topic-answer-key", paperId],
+    queryFn: async () => {
+      const supabase = await getSupabase();
+      const { data, error } = await supabase.functions.invoke("get-answer-key", {
+        body: { paper_id: paperId, kind: "topic" },
+      });
+      if (error) throw error;
+      const map: Record<number, string> = {};
+      for (const [k, v] of Object.entries((data?.correct_answers ?? {}) as Record<string, string>)) {
+        map[Number(k)] = v;
+      }
+      return map;
+    },
+    enabled: !!paperId,
+    staleTime: Infinity,
+  });
+
   const handleSelectAnswer = useCallback((question: number, option: string) => {
     if (isSubmitted || answers[question]) return;
     setAnswers((prev) => ({ ...prev, [question]: option }));
+    const known = answerKeyMap?.[question];
+    if (known) {
+      setCorrectAnswers((prev) => ({ ...prev, [question]: known }));
+      return;
+    }
     (async () => {
       try {
         const supabase = await getSupabase();
@@ -69,7 +92,7 @@ const TopicExamPage = () => {
         toast.error("Could not check that answer");
       }
     })();
-  }, [isSubmitted, answers, paperId]);
+  }, [isSubmitted, answers, paperId, answerKeyMap]);
 
   const handleSubmit = useCallback(async () => {
     if (isSubmitted) return;
@@ -95,9 +118,19 @@ const TopicExamPage = () => {
       setScore(data.score);
       toast.success(`Score: ${data.score}/${data.total_questions ?? totalQuestions}`);
     } catch {
-      toast.error("Could not submit your answers");
+      if (answerKeyMap) {
+        let s = 0;
+        for (const [q, a] of Object.entries(answers)) {
+          if (answerKeyMap[Number(q)] === a) s++;
+        }
+        setCorrectAnswers(answerKeyMap);
+        setScore(s);
+        toast.success(`Score: ${s}/${totalQuestions}`);
+      } else {
+        toast.error("Could not submit your answers");
+      }
     }
-  }, [isSubmitted, answers, paperId, totalQuestions]);
+  }, [isSubmitted, answers, paperId, totalQuestions, answerKeyMap]);
 
   if (paperLoading) {
     return (
