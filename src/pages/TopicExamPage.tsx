@@ -187,6 +187,7 @@ const TopicExamPage = () => {
               totalQuestions={totalQuestions}
               answers={answers}
               correctAnswers={correctAnswers}
+              onExplain={explanation.openExplanation}
             />
           ) : (
             <MCQPanel

@@ -182,6 +182,7 @@ const ExamPage = () => {
               totalQuestions={TOTAL_QUESTIONS}
               answers={answers}
               correctAnswers={correctAnswers}
+              onExplain={explanation.openExplanation}
             />
           ) : (
             <MCQPanel
