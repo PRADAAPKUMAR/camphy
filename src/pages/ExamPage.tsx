@@ -6,6 +6,8 @@ const PDFViewer = lazy(() => import("@/components/PDFViewer"));
 import MCQPanel from "@/components/MCQPanel";
 import ResultSummary from "@/components/ResultSummary";
 import Timer from "@/components/Timer";
+import ExplanationDialog from "@/components/ExplanationDialog";
+import { useExplanation } from "@/hooks/use-explanation";
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -32,6 +34,7 @@ const ExamPage = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState<Record<number, string>>({});
+  const explanation = useExplanation(paperId ? { paper_id: paperId } : null);
 
   const { data: paper, isLoading: paperLoading } = useQuery({
     queryKey: ["paper", paperId],
@@ -179,6 +182,7 @@ const ExamPage = () => {
               totalQuestions={TOTAL_QUESTIONS}
               answers={answers}
               correctAnswers={correctAnswers}
+              onExplain={explanation.openExplanation}
             />
           ) : (
             <MCQPanel
@@ -188,10 +192,20 @@ const ExamPage = () => {
               onSelectAnswer={handleSelectAnswer}
               onSubmit={handleSubmit}
               isSubmitted={isSubmitted}
+              onExplain={explanation.openExplanation}
             />
           )}
         </ResizablePanel>
       </ResizablePanelGroup>
+
+      <ExplanationDialog
+        open={explanation.open}
+        onOpenChange={explanation.setOpen}
+        question={explanation.question}
+        userAnswer={explanation.question ? answers[explanation.question] : undefined}
+        isLoading={explanation.isLoading}
+        data={explanation.data}
+      />
     </div>
   );
 };

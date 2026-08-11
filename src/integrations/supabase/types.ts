@@ -225,6 +225,66 @@ export type Database = {
         }
         Relationships: []
       }
+      question_explanations: {
+        Row: {
+          correct_option: string | null
+          created_at: string
+          explanation: string | null
+          id: string
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          paper_id: string | null
+          question_number: number
+          topic_paper_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          correct_option?: string | null
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          paper_id?: string | null
+          question_number: number
+          topic_paper_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          correct_option?: string | null
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          paper_id?: string | null
+          question_number?: number
+          topic_paper_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_explanations_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "papers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_explanations_topic_paper_id_fkey"
+            columns: ["topic_paper_id"]
+            isOneToOne: false
+            referencedRelation: "topicwise_mcq_papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       study_materials: {
         Row: {
           created_at: string
