@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CircleCheck, CircleX, Undo2, Award } from "lucide-react";
+import { CircleCheck, CircleX, Undo2, Award, Lightbulb } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const OPTIONS = ["A", "B", "C", "D"] as const;
@@ -11,9 +11,10 @@ interface ResultSummaryProps {
   totalQuestions: number;
   answers: Record<number, string>;
   correctAnswers: Record<number, string>;
+  onExplain?: (question: number) => void;
 }
 
-const ResultRow = memo(({ q, userAnswer, correct }: { q: number; userAnswer: string | undefined; correct: string | undefined }) => {
+const ResultRow = memo(({ q, userAnswer, correct, onExplain }: { q: number; userAnswer: string | undefined; correct: string | undefined; onExplain?: (question: number) => void }) => {
   const isCorrect = userAnswer === correct;
 
   return (
@@ -50,13 +51,24 @@ const ResultRow = memo(({ q, userAnswer, correct }: { q: number; userAnswer: str
           );
         })}
       </div>
-      <span className="ml-auto">
+      <span className="ml-auto flex items-center gap-1">
         {isCorrect ? (
            <CircleCheck className="h-4 w-4 text-success" />
          ) : userAnswer ? (
            <CircleX className="h-4 w-4 text-destructive" />
         ) : (
           <span className="text-xs text-muted-foreground">—</span>
+        )}
+        {onExplain && (
+          <button
+            type="button"
+            onClick={() => onExplain(q)}
+            title={`Explanation for question ${q}`}
+            aria-label={`Explanation for question ${q}`}
+            className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors hover:bg-primary/25"
+          >
+            <Lightbulb className="h-3.5 w-3.5" />
+          </button>
         )}
       </span>
     </div>
@@ -70,6 +82,7 @@ const ResultSummary = memo(({
   totalQuestions,
   answers,
   correctAnswers,
+  onExplain,
 }: ResultSummaryProps) => {
   const navigate = useNavigate();
   const percentage = Math.round((score / totalQuestions) * 100);
@@ -110,6 +123,7 @@ const ResultSummary = memo(({
               q={q}
               userAnswer={answers[q]}
               correct={correctAnswers[q]}
+              onExplain={onExplain}
             />
           ))}
         </div>
