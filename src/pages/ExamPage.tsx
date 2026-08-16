@@ -203,12 +203,8 @@ const ExamPage = () => {
     );
   }
 
-  return (
-    <div className="flex h-screen flex-col bg-background">
-      {/* Top bar */}
-      <div className="flex items-center justify-between border-b bg-card px-5 py-3 shadow-sm">
-        <div className="flex items-center gap-4">
-          <Breadcrumb>
+  const breadcrumb = (
+    <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild><Link to="/papers">Levels</Link></BreadcrumbLink>
@@ -222,33 +218,81 @@ const ExamPage = () => {
                 <BreadcrumbPage>{paper.paper_code} — {paper.session} {paper.year}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-        <Timer
-          durationMinutes={paper.level.toUpperCase() === "AS LEVEL" ? 75 : 45}
-          onTimeUp={handleSubmit}
-          isRunning={!isSubmitted}
+    </Breadcrumb>
+  );
+
+  const timerEl = (
+    <Timer
+      durationMinutes={paper.level.toUpperCase() === "AS LEVEL" ? 75 : 45}
+      onTimeUp={handleSubmit}
+      isRunning={!isSubmitted}
+    />
+  );
+
+  const pdfEl = (
+    <Suspense fallback={<Skeleton className="h-full w-full" />}>
+      <PDFViewer url={paper.pdf_url} />
+    </Suspense>
+  );
+
+  const resultPanel = isSubmitted && Object.keys(correctAnswers).length > 0 ? (
+    <ResultSummary
+      score={score}
+      totalQuestions={TOTAL_QUESTIONS}
+      answers={answers}
+      correctAnswers={correctAnswers}
+      onExplain={explanation.openExplanation}
+    />
+  ) : null;
+
+  const explanationDialog = (
+    <ExplanationDialog
+      open={explanation.open}
+      onOpenChange={explanation.setOpen}
+      question={explanation.question}
+      userAnswer={explanation.question ? answers[explanation.question] : undefined}
+      isLoading={explanation.isLoading}
+      data={explanation.data}
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        <MobileExamShell
+          breadcrumb={breadcrumb}
+          timer={timerEl}
+          pdf={pdfEl}
+          totalQuestions={TOTAL_QUESTIONS}
+          answers={answers}
+          correctAnswers={correctAnswers}
+          onSelectAnswer={handleSelectAnswer}
+          onSubmit={handleSubmit}
+          isSubmitted={isSubmitted}
+          onExplain={explanation.openExplanation}
+          resultPanel={resultPanel ?? undefined}
         />
+        {explanationDialog}
+      </>
+    );
+  }
+
+  return (
+    <div className="flex h-screen flex-col bg-background">
+      {/* Top bar */}
+      <div className="flex items-center justify-between border-b bg-card px-5 py-3 shadow-sm">
+        <div className="flex items-center gap-4">{breadcrumb}</div>
+        {timerEl}
       </div>
 
       {/* Split view */}
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         <ResizablePanel defaultSize={78} minSize={40}>
-          <Suspense fallback={<Skeleton className="h-full w-full" />}>
-            <PDFViewer url={paper.pdf_url} />
-          </Suspense>
+          {pdfEl}
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={22} minSize={18}>
-          {isSubmitted && Object.keys(correctAnswers).length > 0 ? (
-            <ResultSummary
-              score={score}
-              totalQuestions={TOTAL_QUESTIONS}
-              answers={answers}
-              correctAnswers={correctAnswers}
-              onExplain={explanation.openExplanation}
-            />
-          ) : (
+          {resultPanel ?? (
             <MCQPanel
               totalQuestions={TOTAL_QUESTIONS}
               answers={answers}
@@ -262,14 +306,7 @@ const ExamPage = () => {
         </ResizablePanel>
       </ResizablePanelGroup>
 
-      <ExplanationDialog
-        open={explanation.open}
-        onOpenChange={explanation.setOpen}
-        question={explanation.question}
-        userAnswer={explanation.question ? answers[explanation.question] : undefined}
-        isLoading={explanation.isLoading}
-        data={explanation.data}
-      />
+      {explanationDialog}
     </div>
   );
 };
