@@ -26,6 +26,31 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 const TOTAL_QUESTIONS = 40;
+const CACHE_TTL = 30 * 60 * 1000;
+const cacheKey = (paperId: string) => `physicshq:answer-key:${paperId}`;
+
+const readCachedKey = (paperId?: string): Record<number, string> | undefined => {
+  if (!paperId) return undefined;
+  try {
+    const raw = sessionStorage.getItem(cacheKey(paperId));
+    if (!raw) return undefined;
+    const parsed = JSON.parse(raw) as { timestamp: number; answers: Record<string, string> };
+    if (!parsed?.timestamp || Date.now() - parsed.timestamp > CACHE_TTL) return undefined;
+    const map: Record<number, string> = {};
+    for (const [k, v] of Object.entries(parsed.answers ?? {})) map[Number(k)] = v;
+    return Object.keys(map).length ? map : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const writeCachedKey = (paperId: string, answers: Record<number, string>) => {
+  try {
+    sessionStorage.setItem(cacheKey(paperId), JSON.stringify({ timestamp: Date.now(), answers }));
+  } catch {
+    // ignore quota / privacy-mode failures
+  }
+};
 
 const ExamPage = () => {
   const { paperId } = useParams<{ paperId: string }>();
@@ -64,10 +89,12 @@ const ExamPage = () => {
       for (const [k, v] of Object.entries((data?.correct_answers ?? {}) as Record<string, string>)) {
         map[Number(k)] = v;
       }
+      if (paperId) writeCachedKey(paperId, map);
       return map;
     },
     enabled: !!paperId,
     staleTime: Infinity,
+    initialData: () => readCachedKey(paperId),
   });
 
   // The correct answer for a question is only revealed after the user commits
