@@ -26,6 +26,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 const TopicExamPage = () => {
+  const CACHE_TTL = 30 * 60 * 1000;
   const { paperId } = useParams<{ paperId: string }>();
   const navigate = useNavigate();
   const [answers, setAnswers] = useState<Record<number, string>>({});
