@@ -52,7 +52,7 @@ const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubm
           const isWrongSelection = isThisSelected && isWrong;
 
           let className =
-            "flex h-10 w-10 items-center justify-center rounded-lg text-sm font-semibold transition-all duration-150 ";
+            "flex h-11 w-11 md:h-10 md:w-10 items-center justify-center rounded-lg text-sm font-semibold transition-all duration-150 ";
 
           if (hasResult) {
             if (isCorrectOpt) {
