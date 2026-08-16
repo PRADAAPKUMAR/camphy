@@ -25,8 +25,33 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
 
+const CACHE_TTL = 30 * 60 * 1000;
+const cacheKey = (paperId: string) => `physicshq:topic-answer-key:${paperId}`;
+
+const readCachedKey = (paperId?: string): Record<number, string> | undefined => {
+  if (!paperId) return undefined;
+  try {
+    const raw = sessionStorage.getItem(cacheKey(paperId));
+    if (!raw) return undefined;
+    const parsed = JSON.parse(raw) as { timestamp: number; answers: Record<string, string> };
+    if (!parsed?.timestamp || Date.now() - parsed.timestamp > CACHE_TTL) return undefined;
+    const map: Record<number, string> = {};
+    for (const [k, v] of Object.entries(parsed.answers ?? {})) map[Number(k)] = v;
+    return Object.keys(map).length ? map : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const writeCachedKey = (paperId: string, answers: Record<number, string>) => {
+  try {
+    sessionStorage.setItem(cacheKey(paperId), JSON.stringify({ timestamp: Date.now(), answers }));
+  } catch {
+    // ignore quota / privacy-mode failures
+  }
+};
+
 const TopicExamPage = () => {
-  const CACHE_TTL = 30 * 60 * 1000;
   const { paperId } = useParams<{ paperId: string }>();
   const navigate = useNavigate();
   const [answers, setAnswers] = useState<Record<number, string>>({});
@@ -65,10 +90,12 @@ const TopicExamPage = () => {
       for (const [k, v] of Object.entries((data?.correct_answers ?? {}) as Record<string, string>)) {
         map[Number(k)] = v;
       }
+      if (paperId) writeCachedKey(paperId, map);
       return map;
     },
     enabled: !!paperId,
     staleTime: Infinity,
+    initialData: () => readCachedKey(paperId),
   });
 
   const handleSelectAnswer = useCallback((question: number, option: string) => {
