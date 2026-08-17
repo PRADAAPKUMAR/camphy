@@ -202,11 +202,8 @@ const TopicExamPage = () => {
     );
   }
 
-  return (
-    <div className="flex h-screen flex-col bg-background">
-      <div className="flex items-center justify-between border-b bg-card px-5 py-3 shadow-sm">
-        <div className="flex items-center gap-4">
-          <Breadcrumb>
+  const breadcrumb = (
+    <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild><Link to="/topic-practice">Topics</Link></BreadcrumbLink>
@@ -222,38 +219,85 @@ const TopicExamPage = () => {
                 <BreadcrumbPage>{paper.topic}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-        <Timer
-          durationMinutes={paper.timer_minutes}
-          onTimeUp={handleSubmit}
-          isRunning={!isSubmitted}
+    </Breadcrumb>
+  );
+
+  const timerEl = (
+    <Timer
+      durationMinutes={paper.timer_minutes}
+      onTimeUp={handleSubmit}
+      isRunning={!isSubmitted}
+    />
+  );
+
+  const pdfEl = (
+    <div className="flex h-full flex-col bg-muted/30">
+      <iframe
+        src={paper.pdf_url.replace(/\/file\/d\/([^/]+).*/, "/file/d/$1/preview")}
+        className="h-full w-full border-0"
+        title="Google Drive Viewer"
+        allow="autoplay"
+        sandbox="allow-scripts allow-same-origin allow-popups"
+      />
+    </div>
+  );
+
+  const resultPanel = isSubmitted && Object.keys(correctAnswers).length > 0 ? (
+    <ResultSummary
+      score={score}
+      totalQuestions={totalQuestions}
+      answers={answers}
+      correctAnswers={correctAnswers}
+      onExplain={explanation.openExplanation}
+    />
+  ) : null;
+
+  const explanationDialog = (
+    <ExplanationDialog
+      open={explanation.open}
+      onOpenChange={explanation.setOpen}
+      question={explanation.question}
+      userAnswer={explanation.question ? answers[explanation.question] : undefined}
+      isLoading={explanation.isLoading}
+      data={explanation.data}
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        <MobileExamShell
+          breadcrumb={breadcrumb}
+          timer={timerEl}
+          pdf={pdfEl}
+          totalQuestions={totalQuestions}
+          answers={answers}
+          correctAnswers={correctAnswers}
+          onSelectAnswer={handleSelectAnswer}
+          onSubmit={handleSubmit}
+          isSubmitted={isSubmitted}
+          onExplain={explanation.openExplanation}
+          resultPanel={resultPanel ?? undefined}
         />
+        {explanationDialog}
+      </>
+    );
+  }
+
+  return (
+    <div className="flex h-screen flex-col bg-background">
+      <div className="flex items-center justify-between border-b bg-card px-5 py-3 shadow-sm">
+        <div className="flex items-center gap-4">{breadcrumb}</div>
+        {timerEl}
       </div>
 
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         <ResizablePanel defaultSize={78} minSize={40}>
-          <div className="flex h-full flex-col bg-muted/30">
-            <iframe
-              src={paper.pdf_url.replace(/\/file\/d\/([^/]+).*/, "/file/d/$1/preview")}
-              className="h-full w-full border-0"
-              title="Google Drive Viewer"
-              allow="autoplay"
-              sandbox="allow-scripts allow-same-origin allow-popups"
-            />
-          </div>
+          {pdfEl}
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={22} minSize={18}>
-          {isSubmitted && Object.keys(correctAnswers).length > 0 ? (
-            <ResultSummary
-              score={score}
-              totalQuestions={totalQuestions}
-              answers={answers}
-              correctAnswers={correctAnswers}
-              onExplain={explanation.openExplanation}
-            />
-          ) : (
+          {resultPanel ?? (
             <MCQPanel
               totalQuestions={totalQuestions}
               answers={answers}
@@ -267,14 +311,7 @@ const TopicExamPage = () => {
         </ResizablePanel>
       </ResizablePanelGroup>
 
-      <ExplanationDialog
-        open={explanation.open}
-        onOpenChange={explanation.setOpen}
-        question={explanation.question}
-        userAnswer={explanation.question ? answers[explanation.question] : undefined}
-        isLoading={explanation.isLoading}
-        data={explanation.data}
-      />
+      {explanationDialog}
     </div>
   );
 };
