@@ -24,6 +24,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsMobile } from "@/hooks/use-mobile";
+import MobileExamShell from "@/components/MobileExamShell";
 
 const CACHE_TTL = 30 * 60 * 1000;
 const cacheKey = (paperId: string) => `physicshq:topic-answer-key:${paperId}`;
@@ -54,6 +56,7 @@ const writeCachedKey = (paperId: string, answers: Record<number, string>) => {
 const TopicExamPage = () => {
   const { paperId } = useParams<{ paperId: string }>();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [score, setScore] = useState(0);
