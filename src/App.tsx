@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { usePageTransition } from "@/hooks/use-page-transition";
 import RunningTimerBar from "@/components/study/RunningTimerBar";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
 const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
@@ -115,6 +116,7 @@ const App = () => (
         <BrowserRouter>
           <RouterContent />
         </BrowserRouter>
+        <SpeedInsights />
       </TooltipProvider>
     </Suspense>
   </QueryClientProvider>
