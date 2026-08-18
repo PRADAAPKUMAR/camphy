@@ -26,6 +26,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileExamShell from "@/components/MobileExamShell";
+import { savePerformanceRecord } from "@/lib/performance-history";
 
 const TOTAL_QUESTIONS = 40;
 const CACHE_TTL = 30 * 60 * 1000;
@@ -102,6 +103,21 @@ const ExamPage = () => {
 
   // The correct answer for a question is only revealed after the user commits
   // an answer for that question.
+  const recordPerformance = useCallback((finalScore: number) => {
+    if (!paperId || !paper) return;
+    savePerformanceRecord({
+      paperId,
+      paperCode: paper.paper_code ?? "Paper",
+      level: paper.level ?? "",
+      year: paper.year ?? null,
+      session: paper.session ?? null,
+      score: finalScore,
+      totalQuestions: TOTAL_QUESTIONS,
+      percentage: Math.round((finalScore / TOTAL_QUESTIONS) * 100),
+      completedAt: new Date().toISOString(),
+    });
+  }, [paperId, paper]);
+
   const handleSelectAnswer = useCallback((question: number, option: string) => {
     if (isSubmitted || answers[question]) return;
     setAnswers((prev) => ({ ...prev, [question]: option }));
@@ -148,6 +164,7 @@ const ExamPage = () => {
       }
       setCorrectAnswers(mapped);
       setScore(data.score);
+      recordPerformance(data.score);
       toast.success(`Score: ${data.score}/${TOTAL_QUESTIONS}`);
     } catch {
       if (answerKeyMap) {
@@ -157,12 +174,13 @@ const ExamPage = () => {
         }
         setCorrectAnswers(answerKeyMap);
         setScore(s);
+        recordPerformance(s);
         toast.success(`Score: ${s}/${TOTAL_QUESTIONS}`);
       } else {
         toast.error("Could not submit your answers");
       }
     }
-  }, [isSubmitted, answers, paperId, answerKeyMap]);
+  }, [isSubmitted, answers, paperId, answerKeyMap, recordPerformance]);
 
   if (paperLoading) {
     return (
