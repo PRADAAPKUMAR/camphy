@@ -1,6 +1,6 @@
 import { lazy, Suspense, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, BarChart3, Target, ListChecks, Trophy, Trash2, TrendingUp } from "lucide-react";
+import { ArrowLeft, BarChart3, Target, ListChecks, Trophy, Trash2, TrendingUp, FileText, Layers, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -18,6 +18,7 @@ import {
   readPerformanceHistory,
   clearPerformanceHistory,
   normalizeLevel,
+  practiceTypeOf,
   type PerformanceRecord,
 } from "@/lib/performance-history";
 
@@ -25,14 +26,28 @@ const PhysicsBackground = lazy(() => import("@/components/PhysicsBackground"));
 const ScoreTrendChart = lazy(() => import("@/components/performance/ScoreTrendChart"));
 
 const StatCard = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-  <div className="glass-card rounded-2xl p-5">
-    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
+  <div className="glass-card rounded-2xl p-4 sm:p-5">
+    <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary sm:h-10 sm:w-10">
       {icon}
     </div>
-    <p className="text-2xl font-bold">{value}</p>
-    <p className="text-xs text-muted-foreground">{label}</p>
+    <p className="text-xl font-bold sm:text-2xl">{value}</p>
+    <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">{label}</p>
   </div>
 );
+
+const SectionTitle = ({ children }: { children: React.ReactNode }) => (
+  <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">{children}</h2>
+);
+
+const summarize = (records: PerformanceRecord[]) => {
+  const total = records.reduce((s, r) => s + (r.totalQuestions || 0), 0);
+  const score = records.reduce((s, r) => s + (r.score || 0), 0);
+  return {
+    attempts: records.length,
+    accuracy: total ? Math.round((score / total) * 100) : 0,
+    questions: total,
+  };
+};
 
 const fmtDate = (iso: string) => {
   const d = new Date(iso);
@@ -63,6 +78,16 @@ const PerformancePage = () => {
       average: avg(pcts),
     };
   }, [history]);
+
+  const paperRecords = useMemo(() => history.filter((r) => practiceTypeOf(r) === "paper"), [history]);
+  const topicRecords = useMemo(() => history.filter((r) => practiceTypeOf(r) === "topic"), [history]);
+  const paperSummary = useMemo(() => summarize(paperRecords), [paperRecords]);
+  const topicSummary = useMemo(() => summarize(topicRecords), [topicRecords]);
+  const showSplit = paperRecords.length > 0 && topicRecords.length > 0;
+  const topicNames = useMemo(
+    () => Array.from(new Set(topicRecords.map((r) => r.topic).filter(Boolean) as string[])).slice(0, 4),
+    [topicRecords],
+  );
 
   const byLevel = useMemo(() => {
     const map = new Map<string, { level: string; attempts: number; score: number; total: number }>();
@@ -123,8 +148,8 @@ const PerformancePage = () => {
                 <BarChart3 className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h1 className="text-3xl font-extrabold tracking-tight">Performance</h1>
-                <p className="text-sm text-muted-foreground">
+                <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Physics Performance</h1>
+                <p className="text-xs text-muted-foreground sm:text-sm">
                   Your practice progress, stored privately on this device.
                 </p>
               </div>
@@ -170,19 +195,54 @@ const PerformancePage = () => {
           </div>
         ) : (
           <div className="space-y-10">
-            <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-              <StatCard icon={<Target className="h-5 w-5" />} label="Overall Accuracy" value={`${stats.accuracy}%`} />
-              <StatCard icon={<ListChecks className="h-5 w-5" />} label="Papers Attempted" value={`${stats.papers}`} />
-              <StatCard icon={<BarChart3 className="h-5 w-5" />} label="Questions Attempted" value={`${stats.questions}`} />
-              <StatCard icon={<Trophy className="h-5 w-5" />} label="Best Score" value={`${stats.best}%`} />
+            <section>
+              <SectionTitle>Overall Performance</SectionTitle>
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+                <StatCard icon={<Target className="h-5 w-5" />} label="Overall Accuracy" value={`${stats.accuracy}%`} />
+                <StatCard icon={<ListChecks className="h-5 w-5" />} label="Papers Attempted" value={`${stats.papers}`} />
+                <StatCard icon={<BarChart3 className="h-5 w-5" />} label="Questions Attempted" value={`${stats.questions}`} />
+                <StatCard icon={<Trophy className="h-5 w-5" />} label="Best Score" value={`${stats.best}%`} />
+              </div>
+
+              {showSplit && (
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 sm:gap-4">
+                  <div className="glass-card rounded-2xl p-4 sm:p-5">
+                    <div className="mb-2 flex items-center gap-2 text-sm font-bold">
+                      <FileText className="h-4 w-4 text-primary" /> Past Paper Performance
+                    </div>
+                    <p className="text-2xl font-bold gradient-text">{paperSummary.accuracy}%</p>
+                    <p className="text-xs text-muted-foreground">
+                      {paperSummary.attempts} attempt{paperSummary.attempts !== 1 ? "s" : ""} ·{" "}
+                      {paperSummary.questions} questions
+                    </p>
+                  </div>
+                  <div className="glass-card rounded-2xl p-4 sm:p-5">
+                    <div className="mb-2 flex items-center gap-2 text-sm font-bold">
+                      <Layers className="h-4 w-4 text-primary" /> Topic Practice Performance
+                    </div>
+                    <p className="text-2xl font-bold gradient-text">{topicSummary.accuracy}%</p>
+                    <p className="text-xs text-muted-foreground">
+                      {topicSummary.attempts} attempt{topicSummary.attempts !== 1 ? "s" : ""} ·{" "}
+                      {topicSummary.questions} questions
+                    </p>
+                    {topicNames.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {topicNames.map((t) => (
+                          <Badge key={t} variant="secondary" className="bg-secondary/60 text-[11px]">
+                            {t}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </section>
 
             {byLevel.length > 0 && (
               <section>
-                <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                  Performance by level
-                </h2>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <SectionTitle>Performance by Level</SectionTitle>
+                <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
                   {byLevel.map((l) => {
                     const pct = l.total ? Math.round((l.score / l.total) * 100) : 0;
                     return (
@@ -205,19 +265,18 @@ const PerformancePage = () => {
             )}
 
             <div className="grid gap-6 lg:grid-cols-5">
-              <section className="glass-card rounded-2xl p-5 lg:col-span-3">
-                <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                  Score trend
-                </h2>
+              <section className="glass-card overflow-hidden rounded-2xl p-4 sm:p-5 lg:col-span-3">
+                <SectionTitle>Score Trend</SectionTitle>
                 <Suspense fallback={<div className="h-64 animate-pulse rounded-xl bg-muted/20" />}>
-                  <ScoreTrendChart data={trend} />
+                  <div className="-mx-1 w-full">
+                    <ScoreTrendChart data={trend} />
+                  </div>
                 </Suspense>
+                <p className="mt-3 text-xs text-muted-foreground">Your last {trend.length} attempts, oldest to newest.</p>
               </section>
 
-              <section className="glass-card rounded-2xl p-5 lg:col-span-2">
-                <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                  Your progress
-                </h2>
+              <section className="glass-card rounded-2xl p-4 sm:p-5 lg:col-span-2">
+                <SectionTitle>Your Progress</SectionTitle>
                 <dl className="space-y-3 text-sm">
                   {[
                     ["Average Score", `${stats.average}%`],
@@ -253,26 +312,34 @@ const PerformancePage = () => {
             </div>
 
             <section>
-              <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                Recent attempts
-              </h2>
-              <div className="space-y-3">
-                {sorted.slice(0, 10).map((r, i) => (
+              <SectionTitle>Recent Attempts</SectionTitle>
+              <div className="space-y-2.5">
+                {sorted.slice(0, 10).map((r, i) => {
+                  const type = practiceTypeOf(r);
+                  return (
                   <div
                     key={`${r.paperId}-${r.completedAt}-${i}`}
-                    className="glass-card flex flex-wrap items-center justify-between gap-3 rounded-xl px-4 py-3"
+                    className="glass-card flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-xl px-3 py-2.5 sm:px-4 sm:py-3"
                   >
-                    <div className="min-w-0">
-                      <p className="truncate font-semibold">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold sm:text-base">
                         {r.paperCode}
                         {r.session || r.year ? ` — ${[r.session, r.year].filter(Boolean).join(" ")}` : ""}
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        {normalizeLevel(r.level)} · {fmtDate(r.completedAt)}
-                      </p>
+                      <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground sm:text-xs">
+                        <Badge
+                          variant="outline"
+                          className="border-border/50 px-1.5 py-0 text-[10px] font-medium"
+                        >
+                          {type === "topic" ? "Topic Practice" : "Past Paper"}
+                        </Badge>
+                        <span>
+                          {normalizeLevel(r.level)} · {fmtDate(r.completedAt)}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-muted-foreground">
+                    <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+                      <span className="text-xs text-muted-foreground sm:text-sm">
                         {r.score}/{r.totalQuestions}
                       </span>
                       <Badge variant="outline" className="border-border/40 text-xs">
@@ -280,7 +347,32 @@ const PerformancePage = () => {
                       </Badge>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
+              </div>
+            </section>
+
+            <section>
+              <SectionTitle>Keep Improving</SectionTitle>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Link
+                  to="/papers"
+                  className="glass-card flex items-center justify-between gap-3 rounded-xl px-4 py-3.5 transition-colors hover:border-primary/40"
+                >
+                  <span className="flex items-center gap-2 text-sm font-semibold">
+                    <FileText className="h-4 w-4 text-primary" /> Practice Past Papers
+                  </span>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                </Link>
+                <Link
+                  to="/topic-practice"
+                  className="glass-card flex items-center justify-between gap-3 rounded-xl px-4 py-3.5 transition-colors hover:border-primary/40"
+                >
+                  <span className="flex items-center gap-2 text-sm font-semibold">
+                    <Layers className="h-4 w-4 text-primary" /> Practice by Topic
+                  </span>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                </Link>
               </div>
             </section>
           </div>
