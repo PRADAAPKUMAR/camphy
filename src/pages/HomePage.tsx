@@ -7,15 +7,13 @@ import {
   ClipboardList,
   ArrowRight,
   Target,
-  CalendarClock,
   BarChart3,
   Lightbulb,
   Menu,
   X,
-  Microscope,
-  FlaskConical,
-  Atom,
-  GraduationCap,
+  MoreHorizontal,
+  CalendarClock,
+  User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { normalizeLevel } from "@/lib/performance-history";
@@ -24,29 +22,24 @@ const PhysicsBackground = lazy(() => import("@/components/PhysicsBackground"));
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
-const NAV = [
+/** Primary nav items shown directly on desktop. */
+const PRIMARY_NAV = [
   { label: "Papers", to: "/papers" },
   { label: "Topic Practice", to: "/topic-practice" },
   { label: "Study Materials", to: "/materials" },
   { label: "Performance", to: "/performance" },
-  { label: "Study Tools", to: "/study-tools" },
 ];
 
-const levelIcons: Record<string, React.ReactNode> = {
-  IGCSE: <Microscope className="h-5 w-5" />,
-  "AS Level": <FlaskConical className="h-5 w-5" />,
-  "A2 Level": <Atom className="h-5 w-5" />,
-};
-
-const levelBlurbs: Record<string, string> = {
-  IGCSE: "Cambridge IGCSE Physics papers, topic questions and notes.",
-  "AS Level": "Cambridge AS Level Physics practice and revision resources.",
-  "A2 Level": "Cambridge A2 Level Physics practice and revision resources.",
-};
+/** Less frequently used items tucked into a "More" menu. */
+const SECONDARY_NAV = [
+  { label: "Study Tools", to: "/study-tools" },
+  { label: "About", to: "/about" },
+];
 
 const HomePage = () => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const { data } = useQuery({
     queryKey: ["home_counts"],
@@ -68,16 +61,10 @@ const HomePage = () => {
     staleTime: 10 * 60 * 1000,
   });
 
-  const levels = useMemo(() => {
-    const order = ["IGCSE", "AS Level", "A2 Level"];
-    const set = new Map<string, string>();
-    (data?.levels ?? []).forEach((raw) => {
-      const display = normalizeLevel(raw);
-      if (!set.has(display)) set.set(display, raw);
-    });
-    return Array.from(set.entries())
-      .map(([display, raw]) => ({ display, raw }))
-      .sort((a, b) => order.indexOf(a.display) - order.indexOf(b.display));
+  const levelsCount = useMemo(() => {
+    const set = new Set<string>();
+    (data?.levels ?? []).forEach((raw) => set.add(normalizeLevel(raw)));
+    return set.size;
   }, [data?.levels]);
 
   const primaryActions = [
@@ -90,21 +77,21 @@ const HomePage = () => {
     },
     {
       title: "Topic Practice",
-      desc: "Practice Physics questions organized by topic.",
+      desc: "Practice Physics questions by topic.",
       to: "/topic-practice",
       icon: <Target className="h-6 w-6" />,
       tone: "success",
     },
     {
       title: "Study Materials",
-      desc: "Physics notes, revision resources and study materials.",
+      desc: "Access Physics notes and revision resources.",
       to: "/materials",
       icon: <BookOpen className="h-6 w-6" />,
       tone: "accent",
     },
     {
       title: "Performance",
-      desc: "Track your practice progress.",
+      desc: "Track your practice progress on this device.",
       to: "/performance",
       icon: <BarChart3 className="h-6 w-6" />,
       tone: "primary",
@@ -121,10 +108,10 @@ const HomePage = () => {
   };
 
   const capabilities = [
-    { title: "Practice", desc: "Past papers and topic-wise questions.", icon: <ClipboardList className="h-5 w-5" /> },
-    { title: "Revise", desc: "Study materials and Physics resources.", icon: <BookOpen className="h-5 w-5" /> },
-    { title: "Understand", desc: "Question explanations and worked reasoning.", icon: <Lightbulb className="h-5 w-5" /> },
-    { title: "Track", desc: "Monitor your practice performance.", icon: <BarChart3 className="h-5 w-5" /> },
+    { title: "Practice", icon: <ClipboardList className="h-5 w-5" /> },
+    { title: "Revise", icon: <BookOpen className="h-5 w-5" /> },
+    { title: "Understand", icon: <Lightbulb className="h-5 w-5" /> },
+    { title: "Track", icon: <BarChart3 className="h-5 w-5" /> },
   ];
 
   return (
@@ -142,8 +129,10 @@ const HomePage = () => {
             </span>
             Physics<span className="gradient-text">HQ</span>
           </Link>
+
+          {/* Desktop: primary items + compact "More" dropdown */}
           <div className="hidden items-center gap-1 md:flex">
-            {NAV.map((n) => (
+            {PRIMARY_NAV.map((n) => (
               <Link
                 key={n.to}
                 to={n.to}
@@ -152,7 +141,34 @@ const HomePage = () => {
                 {n.label}
               </Link>
             ))}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setMoreOpen((v) => !v)}
+                onBlur={() => setTimeout(() => setMoreOpen(false), 120)}
+                className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground"
+                aria-label="More"
+                aria-expanded={moreOpen}
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </button>
+              {moreOpen && (
+                <div className="absolute right-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-xl border border-border/40 bg-card/95 p-1 shadow-lg backdrop-blur">
+                  {SECONDARY_NAV.map((n) => (
+                    <Link
+                      key={n.to}
+                      to={n.to}
+                      className="block rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground"
+                    >
+                      {n.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+
+          {/* Mobile: compact hamburger menu */}
           <Button
             variant="ghost"
             size="icon"
@@ -165,7 +181,17 @@ const HomePage = () => {
         </div>
         {menuOpen && (
           <div className="container flex flex-col gap-1 pb-4 md:hidden">
-            {NAV.map((n) => (
+            {PRIMARY_NAV.map((n) => (
+              <Link
+                key={n.to}
+                to={n.to}
+                onClick={() => setMenuOpen(false)}
+                className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground"
+              >
+                {n.label}
+              </Link>
+            ))}
+            {SECONDARY_NAV.map((n) => (
               <Link
                 key={n.to}
                 to={n.to}
@@ -194,44 +220,29 @@ const HomePage = () => {
         </div>
 
         <div className="container relative text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border/40 bg-muted/20 px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-            <GraduationCap className="h-3.5 w-3.5 text-primary" /> Cambridge IGCSE · AS &amp; A Level
-          </span>
-          <h1 className="mt-6 text-4xl font-extrabold tracking-tight sm:text-6xl">
+          <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl">
             Physics<span className="gradient-text">HQ</span>
           </h1>
           <p className="mt-3 text-xl font-semibold sm:text-2xl">Master Physics. Practice Smarter.</p>
           <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground">
-            Cambridge IGCSE and AS &amp; A Level Physics learning, revision and examination practice.
+            Cambridge IGCSE & AS Level Physics learning, revision and examination practice.
           </p>
 
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Button size="lg" className="gap-2" onClick={() => navigate("/papers")}>
-              Start Practicing <ArrowRight className="h-4 w-4" />
-            </Button>
-            <Button size="lg" variant="outline" className="gap-2" onClick={() => navigate("/materials")}>
-              Browse Study Materials
-            </Button>
-          </div>
-
-          {/* Statistics */}
-          <div className="mt-10 flex flex-wrap justify-center gap-x-10 gap-y-6">
-            {[
-              { value: data ? `${data.papers}+` : "—", label: "Past Papers" },
-              { value: data ? `${data.topics}+` : "—", label: "Topic Question Sets" },
-              { value: data ? `${data.materials}+` : "—", label: "Study Resources" },
-            ].map((s) => (
-              <div key={s.label} className="text-center">
-                <p className="text-2xl font-bold gradient-text sm:text-3xl">{s.value}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{s.label}</p>
-              </div>
-            ))}
+          {/* Quiet stats row */}
+          <div className="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-3 text-xs text-muted-foreground">
+            <span>{data ? `${data.papers}+ past papers` : "Past papers"}</span>
+            <span className="text-border/60">·</span>
+            <span>{data ? `${data.topics}+ topic sets` : "Topic sets"}</span>
+            <span className="text-border/60">·</span>
+            <span>{data ? `${data.materials}+ resources` : "Resources"}</span>
+            <span className="text-border/60">·</span>
+            <span>{levelsCount || 3} levels</span>
           </div>
         </div>
       </header>
 
       <main className="container relative py-14">
-        {/* Primary actions */}
+        {/* Four primary destinations */}
         <section>
           <h2 className="mb-6 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             Start here
@@ -259,49 +270,24 @@ const HomePage = () => {
           </div>
         </section>
 
-        {/* Choose your level */}
-        {levels.length > 0 && (
-          <section className="mt-16">
-            <h2 className="mb-6 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Choose your level
-            </h2>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {levels.map((l) => (
-                <button
-                  key={l.display}
-                  type="button"
-                  onClick={() => navigate(`/papers/${encodeURIComponent(l.raw)}`)}
-                  className="glass-card-hover group rounded-xl p-6 text-left"
-                >
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
-                    {levelIcons[l.display] ?? <Zap className="h-5 w-5" />}
-                  </div>
-                  <h3 className="mb-1 text-lg font-bold">{l.display} Physics</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {levelBlurbs[l.display] ?? `Cambridge ${l.display} Physics practice.`}
-                  </p>
-                </button>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* What students can do */}
-        <section className="mt-16">
-          <h2 className="mb-6 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-            What you can do here
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Supporting message */}
+        <section className="mt-16 text-center">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
             {capabilities.map((c) => (
-              <div key={c.title} className="glass-card rounded-xl p-5">
-                <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg border border-border/40 bg-muted/20 text-primary">
+              <div
+                key={c.title}
+                className="flex items-center gap-2 text-sm font-semibold text-foreground"
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-border/40 bg-muted/20 text-primary">
                   {c.icon}
-                </div>
-                <h3 className="mb-1 font-bold">{c.title}</h3>
-                <p className="text-sm text-muted-foreground">{c.desc}</p>
+                </span>
+                {c.title}
               </div>
             ))}
           </div>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Designed for Cambridge IGCSE & AS Level Physics.
+          </p>
         </section>
 
         {/* Study tools — secondary */}
@@ -341,7 +327,7 @@ const HomePage = () => {
       {/* Footer */}
       <footer className="border-t border-border/40">
         <div className="container flex flex-col items-center justify-between gap-3 py-6 text-xs text-muted-foreground sm:flex-row">
-          <p>© {new Date().getFullYear()} PhysicsHQ — Built by PRADAAP KUMAR. Free access for all students.</p>
+          <p>© {new Date().getFullYear()} PhysicsHQ — Built by PRADAAP KUMAR.</p>
           <div className="flex items-center gap-4">
             <Link to="/performance" className="font-medium transition-colors hover:text-foreground">
               Performance
@@ -349,8 +335,8 @@ const HomePage = () => {
             <Link to="/study-tools" className="font-medium transition-colors hover:text-foreground">
               Study Tools
             </Link>
-            <Link to="/about" className="font-medium transition-colors hover:text-foreground">
-              About Me
+            <Link to="/about" className="inline-flex items-center gap-1 font-medium transition-colors hover:text-foreground">
+              <User className="h-3 w-3" /> About Me
             </Link>
           </div>
         </div>
