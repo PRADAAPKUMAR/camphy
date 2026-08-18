@@ -115,6 +115,7 @@ const ExamPage = () => {
       totalQuestions: TOTAL_QUESTIONS,
       percentage: Math.round((finalScore / TOTAL_QUESTIONS) * 100),
       completedAt: new Date().toISOString(),
+      practiceType: "paper",
     });
   }, [paperId, paper]);
 

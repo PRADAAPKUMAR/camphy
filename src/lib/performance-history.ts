@@ -10,7 +10,14 @@ export interface PerformanceRecord {
   totalQuestions: number;
   percentage: number;
   completedAt: string;
+  /** "paper" = past paper attempt, "topic" = topic practice attempt. Legacy records default to "paper". */
+  practiceType?: "paper" | "topic";
+  /** Topic name for topic-practice attempts only. */
+  topic?: string | null;
 }
+
+export const practiceTypeOf = (r: PerformanceRecord): "paper" | "topic" =>
+  r.practiceType === "topic" ? "topic" : "paper";
 
 export const normalizeLevel = (level: string) => {
   const l = (level ?? "").trim().toUpperCase();
