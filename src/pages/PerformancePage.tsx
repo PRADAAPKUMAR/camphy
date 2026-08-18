@@ -24,6 +24,7 @@ import {
 
 const PhysicsBackground = lazy(() => import("@/components/PhysicsBackground"));
 const ScoreTrendChart = lazy(() => import("@/components/performance/ScoreTrendChart"));
+const TopicPerformance = lazy(() => import("@/components/performance/TopicPerformance"));
 
 const StatCard = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
   <div className="glass-card rounded-2xl p-4 sm:p-5">
@@ -310,6 +311,10 @@ const PerformancePage = () => {
                 )}
               </section>
             </div>
+
+            <Suspense fallback={null}>
+              <TopicPerformance records={history} />
+            </Suspense>
 
             <section>
               <SectionTitle>Recent Attempts</SectionTitle>

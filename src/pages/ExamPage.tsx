@@ -27,6 +27,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileExamShell from "@/components/MobileExamShell";
 import { savePerformanceRecord } from "@/lib/performance-history";
+import { syllabusVersionForLevel } from "@/lib/syllabus";
 
 const TOTAL_QUESTIONS = 40;
 const CACHE_TTL = 30 * 60 * 1000;
@@ -103,7 +104,7 @@ const ExamPage = () => {
 
   // The correct answer for a question is only revealed after the user commits
   // an answer for that question.
-  const recordPerformance = useCallback((finalScore: number) => {
+  const recordPerformance = useCallback((finalScore: number, key?: Record<number, string>) => {
     if (!paperId || !paper) return;
     savePerformanceRecord({
       paperId,
@@ -116,8 +117,14 @@ const ExamPage = () => {
       percentage: Math.round((finalScore / TOTAL_QUESTIONS) * 100),
       completedAt: new Date().toISOString(),
       practiceType: "paper",
+      syllabusVersion: syllabusVersionForLevel(paper.level),
+      questionResults: key
+        ? Object.fromEntries(
+            Object.entries(answers).map(([q, a]) => [Number(q), key[Number(q)] === a]),
+          )
+        : undefined,
     });
-  }, [paperId, paper]);
+  }, [paperId, paper, answers]);
 
   const handleSelectAnswer = useCallback((question: number, option: string) => {
     if (isSubmitted || answers[question]) return;
@@ -165,7 +172,7 @@ const ExamPage = () => {
       }
       setCorrectAnswers(mapped);
       setScore(data.score);
-      recordPerformance(data.score);
+      recordPerformance(data.score, mapped);
       toast.success(`Score: ${data.score}/${TOTAL_QUESTIONS}`);
     } catch {
       if (answerKeyMap) {
@@ -175,7 +182,7 @@ const ExamPage = () => {
         }
         setCorrectAnswers(answerKeyMap);
         setScore(s);
-        recordPerformance(s);
+        recordPerformance(s, answerKeyMap);
         toast.success(`Score: ${s}/${TOTAL_QUESTIONS}`);
       } else {
         toast.error("Could not submit your answers");

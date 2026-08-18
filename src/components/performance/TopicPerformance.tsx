@@ -37,7 +37,11 @@ const TopicPerformance = ({ records }: { records: PerformanceRecord[] }) => {
   if (totalMappedQuestions(rows) < MIN_MAPPED_QUESTIONS) return null;
 
   return (
-    <div className="space-y-2.5">
+    <section>
+      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        Topic Accuracy
+      </h2>
+      <div className="space-y-2.5">
       {rows.map((r) => (
         <div
           key={r.topicId}
@@ -63,8 +67,12 @@ const TopicPerformance = ({ records }: { records: PerformanceRecord[] }) => {
             </Badge>
           </div>
         </div>
-      ))}
-    </div>
+        ))}
+      </div>
+      <p className="mt-3 text-xs text-muted-foreground">
+        Based only on past-paper questions with a verified syllabus topic mapping.
+      </p>
+    </section>
   );
 };
 

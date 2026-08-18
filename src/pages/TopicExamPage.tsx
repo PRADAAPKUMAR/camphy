@@ -27,6 +27,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileExamShell from "@/components/MobileExamShell";
 import { savePerformanceRecord } from "@/lib/performance-history";
+import { syllabusVersionForLevel } from "@/lib/syllabus";
+import { useTopicPracticeMap } from "@/hooks/use-syllabus";
 
 const CACHE_TTL = 30 * 60 * 1000;
 const cacheKey = (paperId: string) => `physicshq:topic-answer-key:${paperId}`;
@@ -81,6 +83,8 @@ const TopicExamPage = () => {
 
   const totalQuestions = paper?.total_questions ?? 40;
 
+  const { data: topicMap } = useTopicPracticeMap();
+
   const recordAttempt = useCallback(
     (finalScore: number, total: number) => {
       if (!paperId || !paper) return;
@@ -96,9 +100,13 @@ const TopicExamPage = () => {
         completedAt: new Date().toISOString(),
         practiceType: "topic",
         topic: paper.topic ?? null,
+        syllabusVersion: syllabusVersionForLevel(paper.level),
+        primaryTopicId:
+          topicMap?.find((m) => m.topic === paper.topic && m.level === paper.level)
+            ?.syllabus_topic_id ?? null,
       });
     },
-    [paperId, paper],
+    [paperId, paper, topicMap],
   );
 
   // Prefetch full key once so feedback is instant on selection.
