@@ -26,6 +26,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIsMobile } from "@/hooks/use-mobile";
 import MobileExamShell from "@/components/MobileExamShell";
+import { savePerformanceRecord } from "@/lib/performance-history";
 
 const CACHE_TTL = 30 * 60 * 1000;
 const cacheKey = (paperId: string) => `physicshq:topic-answer-key:${paperId}`;
@@ -79,6 +80,26 @@ const TopicExamPage = () => {
   });
 
   const totalQuestions = paper?.total_questions ?? 40;
+
+  const recordAttempt = useCallback(
+    (finalScore: number, total: number) => {
+      if (!paperId || !paper) return;
+      savePerformanceRecord({
+        paperId,
+        paperCode: paper.topic ?? "Topic Practice",
+        level: paper.level ?? "",
+        year: null,
+        session: null,
+        score: finalScore,
+        totalQuestions: total,
+        percentage: total ? Math.round((finalScore / total) * 100) : 0,
+        completedAt: new Date().toISOString(),
+        practiceType: "topic",
+        topic: paper.topic ?? null,
+      });
+    },
+    [paperId, paper],
+  );
 
   // Prefetch full key once so feedback is instant on selection.
   const { data: answerKeyMap } = useQuery({
@@ -147,6 +168,7 @@ const TopicExamPage = () => {
       }
       setCorrectAnswers(mapped);
       setScore(data.score);
+      recordAttempt(data.score, data.total_questions ?? totalQuestions);
       toast.success(`Score: ${data.score}/${data.total_questions ?? totalQuestions}`);
     } catch {
       if (answerKeyMap) {
@@ -156,12 +178,13 @@ const TopicExamPage = () => {
         }
         setCorrectAnswers(answerKeyMap);
         setScore(s);
+        recordAttempt(s, totalQuestions);
         toast.success(`Score: ${s}/${totalQuestions}`);
       } else {
         toast.error("Could not submit your answers");
       }
     }
-  }, [isSubmitted, answers, paperId, totalQuestions, answerKeyMap]);
+  }, [isSubmitted, answers, paperId, totalQuestions, answerKeyMap, recordAttempt]);
 
   if (paperLoading) {
     return (
