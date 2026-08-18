@@ -23,6 +23,7 @@ const TopicExamPage = lazy(() => import("./pages/TopicExamPage"));
 const TopicTheoryPage = lazy(() => import("./pages/TopicTheoryPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const StudyToolsPage = lazy(() => import("./pages/StudyToolsPage"));
+const PerformancePage = lazy(() => import("./pages/PerformancePage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -101,6 +102,7 @@ const RouterContent = () => {
         <Route path="/topic-theory/:questionId" element={<TopicTheoryPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/study-tools" element={<StudyToolsPage />} />
+        <Route path="/performance" element={<PerformancePage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
