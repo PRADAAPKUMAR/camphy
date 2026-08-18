@@ -285,6 +285,51 @@ export type Database = {
           },
         ]
       }
+      question_topic_mapping: {
+        Row: {
+          created_at: string
+          id: string
+          mapping_type: string
+          paper_id: string
+          question_number: number
+          syllabus_topic_id: string
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mapping_type?: string
+          paper_id: string
+          question_number: number
+          syllabus_topic_id: string
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mapping_type?: string
+          paper_id?: string
+          question_number?: number
+          syllabus_topic_id?: string
+          verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_topic_mapping_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "papers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_topic_mapping_syllabus_topic_id_fkey"
+            columns: ["syllabus_topic_id"]
+            isOneToOne: false
+            referencedRelation: "syllabus_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       study_materials: {
         Row: {
           created_at: string
@@ -320,6 +365,122 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      syllabus_topics: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          id: string
+          is_active: boolean
+          level: string | null
+          parent_topic_id: string | null
+          syllabus_version_id: string
+          topic_code: string
+          topic_name: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean
+          level?: string | null
+          parent_topic_id?: string | null
+          syllabus_version_id: string
+          topic_code: string
+          topic_name: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean
+          level?: string | null
+          parent_topic_id?: string | null
+          syllabus_version_id?: string
+          topic_code?: string
+          topic_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syllabus_topics_parent_topic_id_fkey"
+            columns: ["parent_topic_id"]
+            isOneToOne: false
+            referencedRelation: "syllabus_topics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_topics_syllabus_version_id_fkey"
+            columns: ["syllabus_version_id"]
+            isOneToOne: false
+            referencedRelation: "syllabus_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      syllabus_versions: {
+        Row: {
+          created_at: string
+          id: string
+          is_current: boolean
+          level: string | null
+          official_source_url: string | null
+          qualification: string | null
+          syllabus_code: string
+          syllabus_version: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_current?: boolean
+          level?: string | null
+          official_source_url?: string | null
+          qualification?: string | null
+          syllabus_code: string
+          syllabus_version: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_current?: boolean
+          level?: string | null
+          official_source_url?: string | null
+          qualification?: string | null
+          syllabus_code?: string
+          syllabus_version?: string
+        }
+        Relationships: []
+      }
+      topic_practice_syllabus_map: {
+        Row: {
+          created_at: string
+          id: string
+          level: string
+          syllabus_topic_id: string
+          topic: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          level: string
+          syllabus_topic_id: string
+          topic: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          level?: string
+          syllabus_topic_id?: string
+          topic?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topic_practice_syllabus_map_syllabus_topic_id_fkey"
+            columns: ["syllabus_topic_id"]
+            isOneToOne: false
+            referencedRelation: "syllabus_topics"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       topicwise_mcq_answer_keys: {
         Row: {
