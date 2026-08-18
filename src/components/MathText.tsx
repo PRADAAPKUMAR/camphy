@@ -25,14 +25,16 @@ const MathText = memo(({ text, className = "" }: { text: string; className?: str
   const parts = text.split(/(\$\$[\s\S]*?\$\$|\$[^$\n]*?\$)/g).filter(Boolean);
 
   return (
-    <div className={`space-y-2 text-sm leading-relaxed [&_.katex]:text-[1.02em] ${className}`}>
-      <p className="whitespace-pre-wrap">
+    <div
+      className={`space-y-2 text-sm leading-relaxed break-words [overflow-wrap:anywhere] [&_.katex]:text-[1.02em] [&_.katex-display]:my-2 [&_.katex-display]:overflow-x-auto [&_.katex-display]:overflow-y-hidden [&_.katex-display]:py-1 ${className}`}
+    >
+      <p className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
         {parts.map((part, i) => {
           if (part.startsWith("$$") && part.endsWith("$$")) {
             return (
               <span
                 key={i}
-                className="my-2 block overflow-x-auto text-center"
+                className="my-2 block w-full overflow-x-auto overflow-y-hidden py-1 text-center"
                 dangerouslySetInnerHTML={{ __html: renderSegment(part.slice(2, -2), true) }}
               />
             );
@@ -41,6 +43,7 @@ const MathText = memo(({ text, className = "" }: { text: string; className?: str
             return (
               <span
                 key={i}
+                className="inline-block align-middle"
                 dangerouslySetInnerHTML={{ __html: renderSegment(part.slice(1, -1), false) }}
               />
             );
