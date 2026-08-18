@@ -14,6 +14,15 @@ export interface PerformanceRecord {
   practiceType?: "paper" | "topic";
   /** Topic name for topic-practice attempts only. */
   topic?: string | null;
+  /** e.g. "0625 2026-2028" / "9702 2025-2027". Optional on legacy records. */
+  syllabusVersion?: string | null;
+  /** syllabus_topics.id when the attempt maps to a single syllabus topic. */
+  primaryTopicId?: string | null;
+  /**
+   * Per-question outcome, kept so topic accuracy can be derived later from
+   * verified question_topic_mapping rows. Keyed by question number.
+   */
+  questionResults?: Record<number, boolean>;
 }
 
 export const practiceTypeOf = (r: PerformanceRecord): "paper" | "topic" =>
