@@ -37,7 +37,7 @@ const ExplanationDialog = ({ open, onOpenChange, question, userAnswer, isLoading
           </DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="min-h-0 flex-1 px-4 py-5 sm:px-6">
+        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-4 py-5 sm:px-6 [scrollbar-width:thin]">
           {isLoading ? (
             <div className="space-y-3">
               <Skeleton className="h-4 w-3/4" />
