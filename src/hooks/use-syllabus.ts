@@ -6,6 +6,7 @@ import {
   fetchSyllabusTopics,
   fetchSyllabusVersions,
   fetchTopicPracticeMap,
+  fetchTopicsByIds,
   syllabusCodeForLevel,
   type SyllabusCode,
 } from "@/lib/syllabus";
@@ -52,3 +53,12 @@ export const usePaperMappings = (paperIds: string[], enabled = true) =>
 
 export const useTopicPracticeMap = () =>
   useQuery({ queryKey: ["topic-practice-syllabus-map"], queryFn: fetchTopicPracticeMap, ...STATIC });
+
+/** Resolves mapped topic ids (any syllabus version) plus their parent topics. */
+export const useTopicsByIds = (ids: string[], enabled = true) =>
+  useQuery({
+    queryKey: ["syllabus-topics-by-id", [...ids].sort().join(",")],
+    queryFn: () => fetchTopicsByIds(ids),
+    enabled: enabled && ids.length > 0,
+    ...STATIC,
+  });
