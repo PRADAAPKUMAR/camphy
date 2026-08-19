@@ -156,6 +156,45 @@ export const fetchPaperMappings = async (paperIds: string[]): Promise<QuestionTo
 };
 
 /** topic-practice topic name -> syllabus topic bridge. */
+export interface TopicLookup {
+  /** topic id -> topic (mapped topics + their ancestors, across all syllabus versions) */
+  topics: Record<string, SyllabusTopic>;
+  /** syllabus_version_id -> syllabus_code */
+  versionCode: Record<string, string>;
+}
+
+/**
+ * Topics referenced by question mappings can belong to older syllabus versions,
+ * so they must be looked up by id (never filtered to the current version) —
+ * otherwise they render as "Unknown topic".
+ */
+export const fetchTopicsByIds = async (ids: string[]): Promise<TopicLookup> => {
+  const empty: TopicLookup = { topics: {}, versionCode: {} };
+  if (!ids.length) return empty;
+
+  const topics: Record<string, SyllabusTopic> = {};
+  let pending = Array.from(new Set(ids));
+  // walk up the parent chain (subtopic -> topic) in at most a few rounds
+  for (let depth = 0; depth < 4 && pending.length; depth++) {
+    const { data, error } = await db.from("syllabus_topics").select("*").in("id", pending);
+    if (error) break;
+    const rows = (data ?? []) as SyllabusTopic[];
+    rows.forEach((t) => (topics[t.id] = t));
+    pending = Array.from(
+      new Set(
+        rows
+          .map((t) => t.parent_topic_id)
+          .filter((p): p is string => !!p && !topics[p]),
+      ),
+    );
+  }
+
+  const versions = await fetchSyllabusVersions();
+  const versionCode: Record<string, string> = {};
+  versions.forEach((v) => (versionCode[v.id] = v.syllabus_code));
+  return { topics, versionCode };
+};
+
 export const fetchTopicPracticeMap = async (): Promise<
   { topic: string; level: string; syllabus_topic_id: string }[]
 > => {
