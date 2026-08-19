@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { CircleCheck, CircleX, Lightbulb } from "lucide-react";
 import MathText from "@/components/MathText";
