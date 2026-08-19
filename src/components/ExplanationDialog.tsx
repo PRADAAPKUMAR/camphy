@@ -118,7 +118,7 @@ const ExplanationDialog = ({ open, onOpenChange, question, userAnswer, isLoading
               </section>
             </div>
           )}
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
