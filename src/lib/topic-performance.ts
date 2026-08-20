@@ -76,6 +76,8 @@ export const totalMappedQuestions = (rows: TopicAccuracyRow[]) =>
 export interface TopicQuestionResult {
   paperId: string;
   paperCode: string;
+  year: number | null;
+  session: string | null;
   questionNumber: number;
   correct: boolean;
   completedAt: string;
@@ -175,6 +177,8 @@ export const computeTopicTreePerformance = (
       sub.questions.push({
         paperId: r.paperId,
         paperCode: r.paperCode,
+        year: r.year ?? null,
+        session: r.session ?? null,
         questionNumber: qNum,
         correct: !!isCorrect,
         completedAt: r.completedAt,
