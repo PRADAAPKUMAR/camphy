@@ -200,6 +200,9 @@ export type Database = {
           paper_code: string
           pdf_url: string
           session: string
+          source_pdf_url: string | null
+          storage_bucket: string | null
+          storage_path: string | null
           subject: string
           year: number
         }
@@ -210,6 +213,9 @@ export type Database = {
           paper_code: string
           pdf_url: string
           session: string
+          source_pdf_url?: string | null
+          storage_bucket?: string | null
+          storage_path?: string | null
           subject: string
           year: number
         }
@@ -220,6 +226,9 @@ export type Database = {
           paper_code?: string
           pdf_url?: string
           session?: string
+          source_pdf_url?: string | null
+          storage_bucket?: string | null
+          storage_path?: string | null
           subject?: string
           year?: number
         }
