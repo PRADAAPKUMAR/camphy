@@ -239,3 +239,51 @@ export const computeTopicTreePerformance = (
 
 export const totalTreeQuestions = (groups: SyllabusGroup[]) =>
   groups.reduce((s, g) => s + g.attempted, 0);
+
+/* ------------------------------------------------------------------ *
+ * Weakest subtopics
+ * ------------------------------------------------------------------ */
+
+export interface WeakSubtopic {
+  key: string;
+  syllabus: string;
+  syllabusLabel: string;
+  topicName: string;
+  code: string;
+  name: string;
+  attempted: number;
+  correct: number;
+  accuracy: number;
+}
+
+/**
+ * Lowest-accuracy subtopics across both syllabuses. Subtopics with very few
+ * attempts are skipped so a single wrong answer never dominates the list.
+ */
+export const weakestSubtopics = (
+  groups: SyllabusGroup[],
+  { minAttempted = 3, limit = 6 }: { minAttempted?: number; limit?: number } = {},
+): WeakSubtopic[] => {
+  const rows: WeakSubtopic[] = [];
+  groups.forEach((g) =>
+    g.topics.forEach((t) =>
+      t.subtopics.forEach((s) => {
+        if (s.attempted < minAttempted || s.accuracy >= 100) return;
+        rows.push({
+          key: s.key,
+          syllabus: g.code,
+          syllabusLabel: g.label,
+          topicName: t.name,
+          code: s.code,
+          name: s.name,
+          attempted: s.attempted,
+          correct: s.correct,
+          accuracy: s.accuracy,
+        });
+      }),
+    ),
+  );
+  return rows
+    .sort((a, b) => a.accuracy - b.accuracy || b.attempted - a.attempted)
+    .slice(0, limit);
+};

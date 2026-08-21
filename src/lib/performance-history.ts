@@ -23,10 +23,81 @@ export interface PerformanceRecord {
    * verified question_topic_mapping rows. Keyed by question number.
    */
   questionResults?: Record<number, boolean>;
+  /** Seconds spent on each question (Question mode only). */
+  questionTimes?: Record<number, number>;
+  /** "sheet" = PDF + answer sheet, "question" = one-question-at-a-time mode. */
+  attemptMode?: "sheet" | "question";
 }
 
 export const practiceTypeOf = (r: PerformanceRecord): "paper" | "topic" =>
   r.practiceType === "topic" ? "topic" : "paper";
+
+export interface WrongQuestionSet {
+  paperId: string;
+  paperCode: string;
+  level: string;
+  year: number | null;
+  session: string | null;
+  questions: number[];
+  lastAttempt: string;
+}
+
+/**
+ * Past-paper questions the student got wrong, grouped by paper. A question that
+ * was later answered correctly drops out of the set.
+ */
+export const collectWrongQuestions = (records: PerformanceRecord[]): WrongQuestionSet[] => {
+  const byPaper = new Map<string, WrongQuestionSet & { outcomes: Map<number, { ok: boolean; at: string }> }>();
+
+  [...records]
+    .filter((r) => practiceTypeOf(r) === "paper" && r.questionResults)
+    .sort((a, b) => +new Date(a.completedAt) - +new Date(b.completedAt))
+    .forEach((r) => {
+      const entry =
+        byPaper.get(r.paperId) ??
+        {
+          paperId: r.paperId,
+          paperCode: r.paperCode,
+          level: r.level,
+          year: r.year ?? null,
+          session: r.session ?? null,
+          questions: [],
+          lastAttempt: r.completedAt,
+          outcomes: new Map<number, { ok: boolean; at: string }>(),
+        };
+      entry.lastAttempt = r.completedAt;
+      Object.entries(r.questionResults ?? {}).forEach(([q, ok]) => {
+        entry.outcomes.set(Number(q), { ok: !!ok, at: r.completedAt });
+      });
+      byPaper.set(r.paperId, entry);
+    });
+
+  return Array.from(byPaper.values())
+    .map(({ outcomes, ...rest }) => ({
+      ...rest,
+      questions: Array.from(outcomes.entries())
+        .filter(([, v]) => !v.ok)
+        .map(([q]) => q)
+        .sort((a, b) => a - b),
+    }))
+    .filter((s) => s.questions.length > 0)
+    .sort((a, b) => +new Date(b.lastAttempt) - +new Date(a.lastAttempt));
+};
+
+/** Average seconds per question across Question-mode attempts (0 when unknown). */
+export const averageSecondsPerQuestion = (records: PerformanceRecord[]) => {
+  let total = 0;
+  let count = 0;
+  records.forEach((r) => {
+    Object.values(r.questionTimes ?? {}).forEach((s) => {
+      if (typeof s === "number" && s > 0 && s < 3600) {
+        total += s;
+        count++;
+      }
+    });
+  });
+  return count ? Math.round(total / count) : 0;
+};
 
 export const normalizeLevel = (level: string) => {
   const l = (level ?? "").trim().toUpperCase();
