@@ -318,6 +318,15 @@ const PerformancePage = () => {
               <TopicPerformance records={history} />
             </Suspense>
 
+            <Suspense fallback={null}>
+              <WeakestSubtopics records={history} />
+            </Suspense>
+
+            <Suspense fallback={null}>
+              <RetryMistakes records={history} />
+            </Suspense>
+
+
             <section>
               <SectionTitle>Recent Attempts</SectionTitle>
               <div className="space-y-2.5">
