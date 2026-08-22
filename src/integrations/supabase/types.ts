@@ -294,6 +294,44 @@ export type Database = {
           },
         ]
       }
+      question_images: {
+        Row: {
+          created_at: string
+          height: number | null
+          id: string
+          paper_id: string
+          question_number: number
+          storage_path: string
+          width: number | null
+        }
+        Insert: {
+          created_at?: string
+          height?: number | null
+          id?: string
+          paper_id: string
+          question_number: number
+          storage_path: string
+          width?: number | null
+        }
+        Update: {
+          created_at?: string
+          height?: number | null
+          id?: string
+          paper_id?: string
+          question_number?: number
+          storage_path?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_images_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       question_topic_mapping: {
         Row: {
           created_at: string
