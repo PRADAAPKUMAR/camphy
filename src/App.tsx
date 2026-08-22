@@ -24,6 +24,8 @@ const TopicTheoryPage = lazy(() => import("./pages/TopicTheoryPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const StudyToolsPage = lazy(() => import("./pages/StudyToolsPage"));
 const PerformancePage = lazy(() => import("./pages/PerformancePage"));
+const QuestionModePage = lazy(() => import("./pages/QuestionModePage"));
+const AdminUploadPage = lazy(() => import("./pages/AdminUploadPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -93,6 +95,8 @@ const RouterContent = () => {
         <Route path="/papers" element={<Index />} />
         <Route path="/papers/:level" element={<SubjectPage />} />
         <Route path="/exam/:paperId" element={<ExamPage />} />
+        <Route path="/question-mode/:paperId" element={<QuestionModePage />} />
+        <Route path="/admin/upload" element={<AdminUploadPage />} />
         <Route path="/materials" element={<MaterialsPage />} />
         <Route path="/materials/:level" element={<MaterialsLevelPage />} />
         <Route path="/view-drive" element={<DriveViewerPage />} />

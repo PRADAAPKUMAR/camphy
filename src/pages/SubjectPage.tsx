@@ -171,12 +171,23 @@ const SubjectPage = () => {
                               <h3 className="text-base font-semibold font-mono">{paper.paper_code}</h3>
                             </div>
                           </div>
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <Badge variant="secondary" className="font-medium text-xs bg-secondary/60">
                               {paper.session}
                             </Badge>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/question-mode/${paper.id}`);
+                              }}
+                              className="ml-auto rounded-lg border border-primary/30 bg-primary/10 px-2 py-1 text-[11px] font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                            >
+                              Question mode
+                            </button>
                           </div>
                         </div>
+
                       ))}
                     </div>
                   </div>

@@ -25,6 +25,8 @@ import {
 const PhysicsBackground = lazy(() => import("@/components/PhysicsBackground"));
 const ScoreTrendChart = lazy(() => import("@/components/performance/ScoreTrendChart"));
 const TopicPerformance = lazy(() => import("@/components/performance/TopicPerformance"));
+const WeakestSubtopics = lazy(() => import("@/components/performance/WeakestSubtopics"));
+const RetryMistakes = lazy(() => import("@/components/performance/RetryMistakes"));
 
 const StatCard = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
   <div className="glass-card rounded-2xl p-4 sm:p-5">
@@ -315,6 +317,15 @@ const PerformancePage = () => {
             <Suspense fallback={null}>
               <TopicPerformance records={history} />
             </Suspense>
+
+            <Suspense fallback={null}>
+              <WeakestSubtopics records={history} />
+            </Suspense>
+
+            <Suspense fallback={null}>
+              <RetryMistakes records={history} />
+            </Suspense>
+
 
             <section>
               <SectionTitle>Recent Attempts</SectionTitle>
