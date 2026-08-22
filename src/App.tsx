@@ -24,6 +24,8 @@ const TopicTheoryPage = lazy(() => import("./pages/TopicTheoryPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const StudyToolsPage = lazy(() => import("./pages/StudyToolsPage"));
 const PerformancePage = lazy(() => import("./pages/PerformancePage"));
+const QuestionModePage = lazy(() => import("./pages/QuestionModePage"));
+const AdminUploadPage = lazy(() => import("./pages/AdminUploadPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
