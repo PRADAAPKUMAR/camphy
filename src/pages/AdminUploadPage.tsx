@@ -20,6 +20,7 @@ import {
   questionNumberFromFilename,
   readFileAsBase64,
 } from "@/lib/question-images";
+import { compareSessions } from "@/lib/exam-sessions";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
