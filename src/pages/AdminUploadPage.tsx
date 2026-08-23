@@ -69,7 +69,15 @@ const AdminUploadPage = () => {
     [papers],
   );
   const levelPapers = useMemo(
-    () => (papers ?? []).filter((p) => !level || p.level === level),
+    () =>
+      (papers ?? [])
+        .filter((p) => !level || p.level === level)
+        .sort(
+          (a, b) =>
+            (b.year ?? 0) - (a.year ?? 0) ||
+            compareSessions(a.session, b.session) ||
+            (a.paper_code ?? "").localeCompare(b.paper_code ?? ""),
+        ),
     [papers, level],
   );
 
