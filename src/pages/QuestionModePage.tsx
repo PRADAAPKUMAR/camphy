@@ -269,8 +269,8 @@ const QuestionModePage = () => {
             </div>
           </div>
         ) : (
-          <div className="mx-auto grid max-w-6xl gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
-            <div className="space-y-4">
+          <div className="grid w-full gap-4 lg:grid-cols-[minmax(0,1fr)_240px]">
+            <div className="space-y-3">
               <div className="flex items-center justify-between gap-2">
                 <Button
                   variant="outline"
