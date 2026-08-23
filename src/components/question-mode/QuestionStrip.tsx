@@ -14,12 +14,12 @@ const QuestionStrip = ({
   correctAnswers,
   onJump,
 }: QuestionStripProps) => (
-  <div className="flex flex-wrap gap-1.5">
+  <div className="grid grid-cols-5 gap-1.5">
     {questions.map((q) => {
       const answer = answers[q];
       const correct = correctAnswers[q];
       let cls =
-        "h-8 w-8 rounded-lg border text-xs font-semibold tabular-nums transition-colors ";
+        "h-8 w-full rounded-lg border text-xs font-semibold tabular-nums transition-colors ";
       if (answer && correct !== undefined) {
         cls +=
           answer === correct

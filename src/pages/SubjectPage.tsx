@@ -15,6 +15,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { compareSessions } from "@/lib/exam-sessions";
 
 const SubjectPage = () => {
   const { level } = useParams<{ level: string }>();
@@ -153,11 +154,19 @@ const SubjectPage = () => {
 
             {years.map((y) => (
               <TabsContent key={y} value={String(y)} className="space-y-8">
-                {Object.entries(papersByYearGrouped[y] || {}).sort(([a], [b]) => a.localeCompare(b)).map(([group, groupPapers]) => (
+                {Object.entries(papersByYearGrouped[y] || {})
+                  .sort(([a], [b]) => (isIGCSE ? a.localeCompare(b) : compareSessions(a, b)))
+                  .map(([group, groupPapers]) => (
                   <div key={group}>
                     <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">{group}</h3>
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                      {[...groupPapers].sort((a, b) => a.paper_code.localeCompare(b.paper_code)).map((paper) => (
+                      {[...groupPapers]
+                        .sort(
+                          (a, b) =>
+                            compareSessions(a.session, b.session) ||
+                            a.paper_code.localeCompare(b.paper_code),
+                        )
+                        .map((paper) => (
                         <div
                           key={paper.id}
                           className="glass-card-hover group cursor-pointer rounded-xl p-5"

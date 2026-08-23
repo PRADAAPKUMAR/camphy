@@ -204,7 +204,7 @@ const QuestionModePage = () => {
   return (
     <div className="min-h-screen bg-background bg-grid">
       <header className="border-b border-border/40">
-        <div className="container flex flex-wrap items-center justify-between gap-3 py-4">
+        <div className="flex w-full flex-wrap items-center justify-between gap-3 px-2 py-3 sm:px-4">
           <div className="min-w-0">
             <Breadcrumb className="mb-1">
               <BreadcrumbList>
@@ -245,7 +245,7 @@ const QuestionModePage = () => {
         </div>
       </header>
 
-      <main className="container py-5">
+      <main className="w-full px-2 py-3 sm:px-4">
         {finished ? (
           <div className="mx-auto max-w-3xl">
             <div className="glass-card overflow-hidden rounded-2xl">
@@ -269,8 +269,8 @@ const QuestionModePage = () => {
             </div>
           </div>
         ) : (
-          <div className="mx-auto grid max-w-6xl gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
-            <div className="space-y-4">
+          <div className="grid w-full gap-4 lg:grid-cols-[minmax(0,1fr)_240px]">
+            <div className="space-y-3">
               <div className="flex items-center justify-between gap-2">
                 <Button
                   variant="outline"
