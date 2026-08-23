@@ -245,7 +245,7 @@ const QuestionModePage = () => {
         </div>
       </header>
 
-      <main className="container py-5">
+      <main className="w-full px-2 py-3 sm:px-4">
         {finished ? (
           <div className="mx-auto max-w-3xl">
             <div className="glass-card overflow-hidden rounded-2xl">
