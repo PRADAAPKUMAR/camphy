@@ -20,6 +20,8 @@ const DriveViewerPage = lazy(() => import("./pages/DriveViewerPage"));
 const TopicPracticePage = lazy(() => import("./pages/TopicPracticePage"));
 const TopicLevelPage = lazy(() => import("./pages/TopicLevelPage"));
 const TopicExamPage = lazy(() => import("./pages/TopicExamPage"));
+const TopicalMcqPage = lazy(() => import("./pages/TopicalMcqPage"));
+const TopicalMcqQuestionModePage = lazy(() => import("./pages/TopicalMcqQuestionModePage"));
 const TopicTheoryPage = lazy(() => import("./pages/TopicTheoryPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const StudyToolsPage = lazy(() => import("./pages/StudyToolsPage"));
@@ -103,6 +105,8 @@ const RouterContent = () => {
         <Route path="/topic-practice" element={<TopicPracticePage />} />
         <Route path="/topic-practice/:level" element={<TopicLevelPage />} />
         <Route path="/topic-exam/:paperId" element={<TopicExamPage />} />
+        <Route path="/topical-mcq" element={<TopicalMcqPage />} />
+        <Route path="/topical-mcq/:paperId" element={<TopicalMcqQuestionModePage />} />
         <Route path="/topic-theory/:questionId" element={<TopicTheoryPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/study-tools" element={<StudyToolsPage />} />
