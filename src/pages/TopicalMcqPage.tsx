@@ -1,7 +1,6 @@
-import { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, LayoutGrid, Target } from "lucide-react";
+import { ArrowLeft, GraduationCap, Atom, Target } from "lucide-react";
 import PhysicsBackground from "@/components/PhysicsBackground";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,38 +13,41 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { fetchBankTopics } from "@/lib/topical-bank";
 
-const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
+const TILES = [
+  { level: "IGCSE", label: "IGCSE", icon: Atom, blurb: "0625 multiple-choice past-paper questions" },
+  {
+    level: "AS LEVEL",
+    label: "AS Level",
+    icon: GraduationCap,
+    blurb: "9702 multiple-choice past-paper questions",
+  },
+] as const;
 
-const LEVEL_ORDER = ["IGCSE", "AS Level", "A2 Level"];
-
-/** Topical MCQ: every topic-wise MCQ set, played one question at a time. */
+/** Topical MCQ: past-paper MCQs grouped by mapped syllabus topic, per level. */
 const TopicalMcqPage = () => {
   const navigate = useNavigate();
 
-  const { data: papers, isLoading } = useQuery({
-    queryKey: ["topical-mcq-all"],
+  const stats = useQuery({
+    queryKey: ["topical-bank-stats"],
     queryFn: async () => {
-      const supabase = await getSupabase();
-      const { data, error } = await supabase
-        .from("topicwise_mcq_papers")
-        .select("id, topic, level, total_questions, timer_minutes")
-        .order("topic");
-      if (error) throw error;
-      return data;
+      const entries = await Promise.all(
+        TILES.map(async (t) => {
+          const topics = await fetchBankTopics(t.level);
+          return [
+            t.level,
+            {
+              topics: topics.length,
+              questions: topics.reduce((n, x) => n + x.questions.length, 0),
+            },
+          ] as const;
+        }),
+      );
+      return Object.fromEntries(entries) as Record<string, { topics: number; questions: number }>;
     },
-    staleTime: 10 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
   });
-
-  const byLevel = useMemo(() => {
-    const groups: Record<string, NonNullable<typeof papers>> = {};
-    (papers ?? []).forEach((p) => {
-      (groups[p.level] ??= []).push(p);
-    });
-    return Object.entries(groups).sort(
-      ([a], [b]) => LEVEL_ORDER.indexOf(a) - LEVEL_ORDER.indexOf(b),
-    );
-  }, [papers]);
 
   return (
     <div className="relative min-h-screen bg-background bg-grid">
@@ -79,7 +81,7 @@ const TopicalMcqPage = () => {
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">Topical MCQ</h1>
               <p className="text-sm text-muted-foreground">
-                One question at a time with instant marking, per-topic
+                Past-paper MCQs sorted by syllabus topic, one question at a time
               </p>
             </div>
           </div>
@@ -87,56 +89,46 @@ const TopicalMcqPage = () => {
       </header>
 
       <main className="container relative py-8">
-        {isLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="glass-card rounded-xl p-5">
-                <Skeleton className="mb-3 h-9 w-9 rounded-lg" />
-                <Skeleton className="mb-2 h-5 w-32" />
-                <Skeleton className="h-4 w-20" />
-              </div>
-            ))}
-          </div>
-        ) : byLevel.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <Target className="mb-4 h-12 w-12 text-muted-foreground/40" />
-            <p className="font-medium text-muted-foreground">No topical MCQ sets available yet.</p>
-          </div>
-        ) : (
-          <div className="space-y-10">
-            {byLevel.map(([level, list]) => (
-              <section key={level}>
-                <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                  {level}
-                </h2>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {list.map((paper) => (
-                    <div
-                      key={paper.id}
-                      className="glass-card-hover group cursor-pointer rounded-xl p-5"
-                      onClick={() => navigate(`/topical-mcq/${paper.id}`)}
-                    >
-                      <div className="mb-3 flex items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
-                          <LayoutGrid className="h-4 w-4" />
-                        </div>
-                        <h3 className="text-base font-semibold">{paper.topic}</h3>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <Badge variant="secondary" className="bg-secondary/60 text-xs font-medium">
-                          {paper.total_questions} Qs
-                        </Badge>
-                        <Badge variant="secondary" className="bg-secondary/60 text-xs font-medium">
-                          Question mode
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
+        <div className="grid gap-5 sm:grid-cols-2">
+          {TILES.map(({ level, label, icon: Icon, blurb }) => {
+            const stat = stats.data?.[level];
+            return (
+              <button
+                key={level}
+                type="button"
+                onClick={() => navigate(`/topical-mcq/${encodeURIComponent(level)}`)}
+                className="glass-card-hover group rounded-2xl p-6 text-left"
+              >
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
+                  <Icon className="h-6 w-6" />
                 </div>
-              </section>
-            ))}
-          </div>
-        )}
+                <h2 className="text-xl font-bold">{label}</h2>
+                <p className="mt-1 text-sm text-muted-foreground">{blurb}</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {stats.isLoading ? (
+                    <>
+                      <Skeleton className="h-5 w-20" />
+                      <Skeleton className="h-5 w-24" />
+                    </>
+                  ) : stat ? (
+                    <>
+                      <Badge variant="secondary" className="bg-secondary/60 text-xs font-medium">
+                        {stat.topics} topics
+                      </Badge>
+                      <Badge variant="secondary" className="bg-secondary/60 text-xs font-medium">
+                        {stat.questions} questions
+                      </Badge>
+                    </>
+                  ) : (
+                    <Badge variant="outline" className="text-xs">
+                      <Target className="mr-1 h-3 w-3" /> Coming soon
+                    </Badge>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </main>
     </div>
   );
