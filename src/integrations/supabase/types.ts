@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -376,6 +376,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      question_topic_mapping_audit: {
+        Row: {
+          audited_at: string | null
+          audited_topic_code: string | null
+          audited_topic_id: string | null
+          audited_topic_name: string | null
+          confidence: string | null
+          evidence: string | null
+          existing_topic_code: string | null
+          existing_topic_name: string | null
+          id: string
+          mapping_id: string
+          paper_id: string
+          question_number: number
+          status: string
+          syllabus_topic_id: string
+        }
+        Insert: {
+          audited_at?: string | null
+          audited_topic_code?: string | null
+          audited_topic_id?: string | null
+          audited_topic_name?: string | null
+          confidence?: string | null
+          evidence?: string | null
+          existing_topic_code?: string | null
+          existing_topic_name?: string | null
+          id?: string
+          mapping_id: string
+          paper_id: string
+          question_number: number
+          status?: string
+          syllabus_topic_id: string
+        }
+        Update: {
+          audited_at?: string | null
+          audited_topic_code?: string | null
+          audited_topic_id?: string | null
+          audited_topic_name?: string | null
+          confidence?: string | null
+          evidence?: string | null
+          existing_topic_code?: string | null
+          existing_topic_name?: string | null
+          id?: string
+          mapping_id?: string
+          paper_id?: string
+          question_number?: number
+          status?: string
+          syllabus_topic_id?: string
+        }
+        Relationships: []
       }
       study_materials: {
         Row: {
