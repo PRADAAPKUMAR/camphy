@@ -1,17 +1,13 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Zap,
   BookOpen,
   ClipboardList,
   ArrowRight,
   Target,
   BarChart3,
   Lightbulb,
-  Menu,
-  X,
-  MoreHorizontal,
   CalendarClock,
   User,
 } from "lucide-react";
@@ -22,24 +18,8 @@ const PhysicsBackground = lazy(() => import("@/components/PhysicsBackground"));
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
-/** Primary nav items shown directly on desktop. */
-const PRIMARY_NAV = [
-  { label: "Papers", to: "/papers" },
-  { label: "Topic Practice", to: "/topic-practice" },
-  { label: "Study Materials", to: "/materials" },
-  { label: "Performance", to: "/performance" },
-];
-
-/** Less frequently used items tucked into a "More" menu. */
-const SECONDARY_NAV = [
-  { label: "Study Tools", to: "/study-tools" },
-  { label: "About", to: "/about" },
-];
-
 const HomePage = () => {
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
 
   const { data } = useQuery({
     queryKey: ["home_counts"],
@@ -119,91 +99,6 @@ const HomePage = () => {
       <Suspense fallback={null}>
         <PhysicsBackground />
       </Suspense>
-
-      {/* Navigation */}
-      <nav className="relative border-b border-border/40">
-        <div className="container flex items-center justify-between py-4">
-          <Link to="/" className="flex items-center gap-2 font-extrabold tracking-tight">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-primary/20 bg-primary/10">
-              <Zap className="h-4 w-4 text-primary" />
-            </span>
-            Physics<span className="gradient-text">HQ</span>
-          </Link>
-
-          {/* Desktop: primary items + compact "More" dropdown */}
-          <div className="hidden items-center gap-1 md:flex">
-            {PRIMARY_NAV.map((n) => (
-              <Link
-                key={n.to}
-                to={n.to}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground"
-              >
-                {n.label}
-              </Link>
-            ))}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setMoreOpen((v) => !v)}
-                onBlur={() => setTimeout(() => setMoreOpen(false), 120)}
-                className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground"
-                aria-label="More"
-                aria-expanded={moreOpen}
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </button>
-              {moreOpen && (
-                <div className="absolute right-0 top-full z-20 mt-1 w-44 overflow-hidden rounded-xl border border-border/40 bg-card/95 p-1 shadow-lg backdrop-blur">
-                  {SECONDARY_NAV.map((n) => (
-                    <Link
-                      key={n.to}
-                      to={n.to}
-                      className="block rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground"
-                    >
-                      {n.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Mobile: compact hamburger menu */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            onClick={() => setMenuOpen((v) => !v)}
-          >
-            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
-        </div>
-        {menuOpen && (
-          <div className="container flex flex-col gap-1 pb-4 md:hidden">
-            {PRIMARY_NAV.map((n) => (
-              <Link
-                key={n.to}
-                to={n.to}
-                onClick={() => setMenuOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground"
-              >
-                {n.label}
-              </Link>
-            ))}
-            {SECONDARY_NAV.map((n) => (
-              <Link
-                key={n.to}
-                to={n.to}
-                onClick={() => setMenuOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground"
-              >
-                {n.label}
-              </Link>
-            ))}
-          </div>
-        )}
-      </nav>
 
       {/* Hero */}
       <header className="relative border-b border-border/40 pt-24 pb-20">

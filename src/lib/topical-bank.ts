@@ -15,6 +15,7 @@ export interface MappedQuestion {
   session: string | null;
   questionNumber: number;
   topicId: string;
+  subtopicName?: string;
 }
 
 const PAGE = 1000;
@@ -96,6 +97,7 @@ export const fetchBankTopics = async (level: string): Promise<BankTopic[]> => {
     group.questions.push(q);
 
     const leaf = topics[q.topicId];
+    q.subtopicName = leaf && leaf.id !== root.id ? leaf.topic_name : root.topic_name;
     if (leaf && leaf.id !== root.id) {
       const subs = subCounts.get(key) ?? new Map();
       subCounts.set(key, subs);
@@ -145,17 +147,12 @@ export interface BankSessionQuestion extends MappedQuestion {
 export const buildTopicalSet = async (
   level: string,
   topicSlug: string,
-  max = 30,
 ): Promise<{ topic: BankTopic | null; questions: BankSessionQuestion[] }> => {
   const topics = await fetchBankTopics(level);
   const topic = topics.find((t) => slugifyTopic(t.name) === topicSlug) ?? null;
   if (!topic) return { topic: null, questions: [] };
 
-  const coverage = await fetchImageCoverage(
-    Array.from(new Set(topic.questions.map((q) => q.paperId))),
-  );
-  const withImages = topic.questions.filter((q) => coverage.has(`${q.paperId}:${q.questionNumber}`));
-  const pool = (withImages.length ? withImages : topic.questions).slice();
+  const pool = topic.questions.slice();
 
   pool.sort(
     (a, b) =>
@@ -166,7 +163,7 @@ export const buildTopicalSet = async (
 
   return {
     topic,
-    questions: pool.slice(0, max).map((q, i) => ({ ...q, index: i + 1 })),
+    questions: pool.map((q, i) => ({ ...q, index: i + 1 })),
   };
 };
 
