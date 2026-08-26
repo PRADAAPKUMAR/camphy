@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { usePageTransition } from "@/hooks/use-page-transition";
 import RunningTimerBar from "@/components/study/RunningTimerBar";
+import SiteNav from "@/components/SiteNav";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react";
 
@@ -63,9 +64,16 @@ const DeferredShell = () => {
 /** Router wrapper to enable page transitions */
 const RouterContent = () => {
   usePageTransition();
+  const { pathname } = useLocation();
+  const navExcluded =
+    /^\/(exam|question-mode|topic-exam)\//.test(pathname) ||
+    /^\/topical-mcq\/[^/]+\/[^/]+\/?$/.test(pathname) ||
+    pathname === "/view-drive" ||
+    pathname.startsWith("/topic-theory/");
 
   return (
     <>
+    {!navExcluded && <SiteNav />}
     <Suspense fallback={
       <div className="min-h-screen bg-background">
         <div className="border-b border-border/40">

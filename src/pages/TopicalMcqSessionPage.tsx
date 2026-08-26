@@ -313,6 +313,9 @@ const TopicalMcqSessionPage = () => {
                     {currentItem.paperCode} · {currentItem.session} {currentItem.year} · Q
                     {currentItem.questionNumber}
                   </p>
+                  <p className="truncate text-xs font-medium text-primary">
+                    {currentItem.subtopicName ?? topicName}
+                  </p>
                 </div>
                 <Button
                   variant="outline"
