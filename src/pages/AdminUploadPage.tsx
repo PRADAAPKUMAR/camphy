@@ -43,15 +43,37 @@ const callAdmin = async (passcode: string, body: Record<string, unknown>) => {
   return data;
 };
 
+const callTables = async (passcode: string, body: Record<string, unknown>) => {
+  const supabase = await getSupabase();
+  const { data, error } = await supabase.functions.invoke("admin-table-editor", {
+    body: { passcode, ...body },
+  });
+  if (error) throw new Error(data?.error ?? error.message);
+  if (data?.error) throw new Error(data.error);
+  return data;
+};
+
 const AdminUploadPage = () => {
   const [passcode, setPasscode] = useState("");
   const [unlocked, setUnlocked] = useState(false);
+  const [view, setView] = useState<string | null>(null);
   const [level, setLevel] = useState<string>("");
   const [paperId, setPaperId] = useState<string>("");
   const [pending, setPending] = useState<Pending[]>([]);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [uploaded, setUploaded] = useState<number[]>([]);
+
+  const { data: tables, isLoading: tablesLoading } = useQuery({
+    queryKey: ["admin-tables"],
+    queryFn: async () => {
+      const data = await callTables(passcode, { action: "tables" });
+      return (data?.tables ?? []) as { name: string; columns: ColumnMeta[] }[];
+    },
+    enabled: unlocked,
+    staleTime: 60_000,
+  });
+
 
   const { data: papers } = useQuery({
     queryKey: ["admin-papers"],
