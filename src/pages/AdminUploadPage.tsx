@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle2, Loader2, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Images, Loader2, Table2, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,8 +21,10 @@ import {
   readFileAsBase64,
 } from "@/lib/question-images";
 import { compareSessions } from "@/lib/exam-sessions";
+import TableGridEditor, { type ColumnMeta } from "@/components/admin/TableGridEditor";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
+
 
 interface Pending {
   file: File;
