@@ -203,7 +203,7 @@ const AdminUploadPage = () => {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background bg-grid p-6">
         <div className="glass-card w-full max-w-sm space-y-4 rounded-2xl p-6">
-          <h1 className="text-lg font-bold">Admin — Question images</h1>
+          <h1 className="text-lg font-bold">Admin console</h1>
           <div className="space-y-2">
             <Label htmlFor="passcode">Passcode</Label>
             <Input
