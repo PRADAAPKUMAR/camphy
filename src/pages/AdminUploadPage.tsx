@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle2, Loader2, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Images, Loader2, Table2, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,8 +21,10 @@ import {
   readFileAsBase64,
 } from "@/lib/question-images";
 import { compareSessions } from "@/lib/exam-sessions";
+import TableGridEditor, { type ColumnMeta } from "@/components/admin/TableGridEditor";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
+
 
 interface Pending {
   file: File;
@@ -41,15 +43,37 @@ const callAdmin = async (passcode: string, body: Record<string, unknown>) => {
   return data;
 };
 
+const callTables = async (passcode: string, body: Record<string, unknown>) => {
+  const supabase = await getSupabase();
+  const { data, error } = await supabase.functions.invoke("admin-table-editor", {
+    body: { passcode, ...body },
+  });
+  if (error) throw new Error(data?.error ?? error.message);
+  if (data?.error) throw new Error(data.error);
+  return data;
+};
+
 const AdminUploadPage = () => {
   const [passcode, setPasscode] = useState("");
   const [unlocked, setUnlocked] = useState(false);
+  const [view, setView] = useState<string | null>(null);
   const [level, setLevel] = useState<string>("");
   const [paperId, setPaperId] = useState<string>("");
   const [pending, setPending] = useState<Pending[]>([]);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [uploaded, setUploaded] = useState<number[]>([]);
+
+  const { data: tables, isLoading: tablesLoading } = useQuery({
+    queryKey: ["admin-tables"],
+    queryFn: async () => {
+      const data = await callTables(passcode, { action: "tables" });
+      return (data?.tables ?? []) as { name: string; columns: ColumnMeta[] }[];
+    },
+    enabled: unlocked,
+    staleTime: 60_000,
+  });
+
 
   const { data: papers } = useQuery({
     queryKey: ["admin-papers"],
@@ -179,7 +203,7 @@ const AdminUploadPage = () => {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background bg-grid p-6">
         <div className="glass-card w-full max-w-sm space-y-4 rounded-2xl p-6">
-          <h1 className="text-lg font-bold">Admin — Question images</h1>
+          <h1 className="text-lg font-bold">Admin console</h1>
           <div className="space-y-2">
             <Label htmlFor="passcode">Passcode</Label>
             <Input
@@ -204,9 +228,94 @@ const AdminUploadPage = () => {
     );
   }
 
+  if (view === null) {
+    return (
+      <div className="min-h-screen bg-background bg-grid">
+        <div className="container max-w-6xl space-y-6 py-8">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h1 className="text-2xl font-bold">Admin console</h1>
+              <p className="text-sm text-muted-foreground">
+                Pick a tile to edit data like a spreadsheet, or manage question images.
+              </p>
+            </div>
+            <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground" asChild>
+              <Link to="/">
+                <ArrowLeft className="h-4 w-4" /> Home
+              </Link>
+            </Button>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <button
+              type="button"
+              onClick={() => setView("__images")}
+              className="glass-card flex flex-col items-start gap-2 rounded-2xl p-5 text-left transition hover:border-primary/50"
+            >
+              <Images className="h-8 w-8 text-primary" />
+              <span className="font-semibold">Question images</span>
+              <span className="text-xs text-muted-foreground">
+                Upload one JPG per MCQ question and manage what is already uploaded.
+              </span>
+            </button>
+
+            {tablesLoading && (
+              <div className="glass-card flex items-center gap-2 rounded-2xl p-5 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Loading tables…
+              </div>
+            )}
+
+            {(tables ?? []).map((t) => (
+              <button
+                key={t.name}
+                type="button"
+                onClick={() => setView(t.name)}
+                className="glass-card flex flex-col items-start gap-2 rounded-2xl p-5 text-left transition hover:border-primary/50"
+              >
+                <Table2 className="h-8 w-8 text-primary" />
+                <span className="font-mono text-sm font-semibold">{t.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  {t.columns.length} columns · edit, add, delete or download rows
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (view !== "__images") {
+    const meta = (tables ?? []).find((t) => t.name === view);
+    return (
+      <div className="min-h-screen bg-background bg-grid">
+        <div className="container max-w-[100rem] space-y-5 py-8">
+          <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground" onClick={() => setView(null)}>
+            <ArrowLeft className="h-4 w-4" /> All tiles
+          </Button>
+          <div className="glass-card rounded-2xl p-5">
+            {meta ? (
+              <TableGridEditor
+                table={meta.name}
+                columns={meta.columns}
+                call={(body) => callTables(passcode, body)}
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground">Table not found.</p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background bg-grid">
       <div className="container max-w-4xl space-y-6 py-8">
+        <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground" onClick={() => setView(null)}>
+          <ArrowLeft className="h-4 w-4" /> All tiles
+        </Button>
+
         <div>
           <h1 className="text-2xl font-bold">Question image uploads</h1>
           <p className="text-sm text-muted-foreground">
