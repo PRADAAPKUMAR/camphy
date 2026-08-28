@@ -24,16 +24,16 @@ const SiteNav = () => {
   const [moreOpen, setMoreOpen] = useState(false);
 
   const linkClass = (to: string) =>
-    `rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-muted/30 hover:text-foreground ${
+    `rounded-lg px-2.5 py-1.5 text-[13px] font-medium transition-colors hover:bg-muted/30 hover:text-foreground ${
       isActive(pathname, to) ? "bg-muted/30 text-foreground" : "text-muted-foreground"
     }`;
 
   return (
     <nav className="relative z-40 border-b border-border/40 bg-background/85 backdrop-blur-xl">
-      <div className="container flex items-center justify-between py-4">
-        <Link to="/" className="flex items-center gap-2 font-extrabold tracking-tight">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-primary/20 bg-primary/10">
-            <Zap className="h-4 w-4 text-primary" />
+      <div className="container flex items-center justify-between py-2">
+        <Link to="/" className="flex items-center gap-2 text-sm font-extrabold tracking-tight">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-primary/20 bg-primary/10">
+            <Zap className="h-3.5 w-3.5 text-primary" />
           </span>
           Physics<span className="gradient-text">HQ</span>
         </Link>
