@@ -101,7 +101,7 @@ const HomePage = () => {
       </Suspense>
 
       {/* Hero */}
-      <header className="relative border-b border-border/40 pt-24 pb-20">
+      <header className="relative flex min-h-[calc(100vh-56px)] flex-col justify-center border-b border-border/40 pb-24 pt-36">
         <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <div className="absolute -left-[120px] -top-[120px] h-[240px] w-[240px] rounded-full border border-primary/10 animate-[spin_12s_linear_infinite]">
