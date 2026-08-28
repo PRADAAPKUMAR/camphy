@@ -20,21 +20,22 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
+    target: "es2020",
+    cssCodeSplit: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'router': ['react-router-dom'],
-          'query': ['@tanstack/react-query'],
-          'supabase': ['@supabase/supabase-js'],
-          'ui-radix': [
-            '@radix-ui/react-tooltip',
-            '@radix-ui/react-toast',
-            '@radix-ui/react-scroll-area',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-popover',
-            '@radix-ui/react-dialog',
-          ],
+        manualChunks(id: string) {
+          if (!id.includes("node_modules")) return;
+          if (id.includes("react-dom") || /node_modules\/(react|scheduler)\//.test(id)) return "react-vendor";
+          if (id.includes("react-router")) return "router";
+          if (id.includes("@tanstack/react-query")) return "query";
+          if (id.includes("@supabase")) return "supabase";
+          if (id.includes("katex")) return "katex";
+          if (id.includes("jspdf") || id.includes("html2canvas")) return "pdf";
+          if (id.includes("recharts") || id.includes("d3-")) return "charts";
+          const radix = id.match(/@radix-ui\/([^/]+)/);
+          if (radix) return `radix-${radix[1]}`;
+          return "vendor";
         },
       },
     },
