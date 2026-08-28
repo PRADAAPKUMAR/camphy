@@ -123,15 +123,22 @@ const HomePage = () => {
             Cambridge IGCSE & AS Level Physics learning, revision and examination practice.
           </p>
 
-          {/* Quiet stats row */}
-          <div className="mt-8 flex flex-wrap justify-center gap-x-8 gap-y-3 text-xs text-muted-foreground">
-            <span>{data ? `${data.papers}+ past papers` : "Past papers"}</span>
-            <span className="text-border/60">·</span>
-            <span>{data ? `${data.topics}+ topic sets` : "Topic sets"}</span>
-            <span className="text-border/60">·</span>
-            <span>{data ? `${data.materials}+ resources` : "Resources"}</span>
-            <span className="text-border/60">·</span>
-            <span>{levelsCount || 3} levels</span>
+          {/* Stats row — pill badges */}
+          <div className="mt-8 flex flex-wrap justify-center gap-2">
+            {[
+              { label: "Past papers", value: data?.papers },
+              { label: "Topic sets", value: data?.topics },
+              { label: "Resources", value: data?.materials },
+              { label: "Levels", value: levelsCount || 3 },
+            ].map((s) => (
+              <span
+                key={s.label}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-card/40 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur-sm"
+              >
+                <span className="font-bold text-primary">{s.value ?? "—"}</span>
+                <span>{s.label}</span>
+              </span>
+            ))}
           </div>
         </div>
       </header>
