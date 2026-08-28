@@ -27,9 +27,9 @@ function spawnParticle(w: number, h: number): Particle {
     x, y,
     vx: Math.cos(angle) * speed,
     vy: Math.sin(angle) * speed,
-    opacity: 0.45 + Math.random() * 0.45,
+    opacity: 0.25 + Math.random() * 0.35,
     hue: Math.random() > 0.5 ? 0 : 1,
-    size: 2 + Math.random() * 2.5,
+    size: 1.5 + Math.random() * 2,
   };
 }
 
@@ -118,9 +118,9 @@ const PhysicsBackground = memo(() => {
         ctx.fill();
 
         // Simplified glow - single gradient
-        const r = p.size * 4.5;
+        const r = p.size * 3;
         const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
-        grad.addColorStop(0, `${color}${p.opacity * 0.6})`);
+        grad.addColorStop(0, `${color}${p.opacity * 0.3})`);
         grad.addColorStop(1, `${color}0)`);
         ctx.beginPath();
         ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
