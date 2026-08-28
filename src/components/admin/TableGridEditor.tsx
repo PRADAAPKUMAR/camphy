@@ -78,6 +78,8 @@ const TableGridEditor = ({ table, columns, call }: Props) => {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const pk = useMemo(() => columns.find((c) => c.primaryKey)?.name ?? null, [columns]);
 
@@ -177,6 +179,44 @@ const TableGridEditor = ({ table, columns, call }: Props) => {
       URL.revokeObjectURL(url);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not export");
+    }
+  };
+
+  const importCsv = async (file: File) => {
+    setImporting(true);
+    try {
+      const grid = parseCsv(await file.text());
+      if (grid.length < 2) throw new Error("CSV needs a header row and at least one data row");
+      const known = new Set(columns.map((c) => c.name));
+      const header = grid[0].map((h) => h.trim().replace(/^"|"$/g, ""));
+      const unknown = header.filter((h) => h && !known.has(h));
+      if (unknown.length) throw new Error(`Unknown column(s): ${unknown.join(", ")}`);
+      const payload = grid.slice(1).map((line) => {
+        const row: Row = {};
+        header.forEach((h, i) => {
+          if (!h) return;
+          const v = (line[i] ?? "").trim();
+          if (v !== "") row[h] = v;
+        });
+        return row;
+      });
+      if (!payload.length) throw new Error("No data rows found");
+
+      let inserted = 0;
+      let updated = 0;
+      const CHUNK = 200;
+      for (let i = 0; i < payload.length; i += CHUNK) {
+        const res = await call({ action: "save", table, rows: payload.slice(i, i + CHUNK) });
+        inserted += Number(res?.inserted ?? 0);
+        updated += Number(res?.updated ?? 0);
+      }
+      toast.success(`Imported — ${inserted} added, ${updated} updated`);
+      await load(page);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not import CSV");
+    } finally {
+      setImporting(false);
+      if (fileRef.current) fileRef.current.value = "";
     }
   };
 
