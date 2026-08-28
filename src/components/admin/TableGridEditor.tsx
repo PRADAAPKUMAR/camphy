@@ -237,6 +237,26 @@ const TableGridEditor = ({ table, columns, call }: Props) => {
           <Button size="sm" variant="outline" className="gap-1.5" onClick={download}>
             <Download className="h-3.5 w-3.5" /> CSV
           </Button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".csv,text/csv"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) importCsv(f);
+            }}
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5"
+            onClick={() => fileRef.current?.click()}
+            disabled={importing}
+          >
+            {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+            Import CSV
+          </Button>
           <Button size="sm" variant="outline" className="gap-1.5" onClick={addRow}>
             <Plus className="h-3.5 w-3.5" /> Add row
           </Button>
