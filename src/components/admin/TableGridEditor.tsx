@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Download, Loader2, Plus, RefreshCw, Save, Trash2 } from "lucide-react";
+import { Download, Loader2, Plus, RefreshCw, Save, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -35,6 +35,41 @@ const csvEscape = (v: unknown) => {
 
 const PAGE_SIZE = 200;
 
+/** Minimal RFC4180 CSV parser (handles quotes, escaped quotes, CRLF). */
+const parseCsv = (text: string): string[][] => {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = "";
+  let quoted = false;
+  const src = text.replace(/^\uFEFF/, "");
+  for (let i = 0; i < src.length; i++) {
+    const ch = src[i];
+    if (quoted) {
+      if (ch === '"') {
+        if (src[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else quoted = false;
+      } else field += ch;
+      continue;
+    }
+    if (ch === '"') quoted = true;
+    else if (ch === ",") {
+      row.push(field);
+      field = "";
+    } else if (ch === "\n" || ch === "\r") {
+      if (ch === "\r" && src[i + 1] === "\n") i++;
+      row.push(field);
+      field = "";
+      if (row.some((c) => c.trim() !== "")) rows.push(row);
+      row = [];
+    } else field += ch;
+  }
+  row.push(field);
+  if (row.some((c) => c.trim() !== "")) rows.push(row);
+  return rows;
+};
+
 const TableGridEditor = ({ table, columns, call }: Props) => {
   const [rows, setRows] = useState<Row[]>([]);
   const [dirty, setDirty] = useState<Set<number>>(new Set());
@@ -43,6 +78,8 @@ const TableGridEditor = ({ table, columns, call }: Props) => {
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const pk = useMemo(() => columns.find((c) => c.primaryKey)?.name ?? null, [columns]);
 
@@ -145,6 +182,44 @@ const TableGridEditor = ({ table, columns, call }: Props) => {
     }
   };
 
+  const importCsv = async (file: File) => {
+    setImporting(true);
+    try {
+      const grid = parseCsv(await file.text());
+      if (grid.length < 2) throw new Error("CSV needs a header row and at least one data row");
+      const known = new Set(columns.map((c) => c.name));
+      const header = grid[0].map((h) => h.trim().replace(/^"|"$/g, ""));
+      const unknown = header.filter((h) => h && !known.has(h));
+      if (unknown.length) throw new Error(`Unknown column(s): ${unknown.join(", ")}`);
+      const payload = grid.slice(1).map((line) => {
+        const row: Row = {};
+        header.forEach((h, i) => {
+          if (!h) return;
+          const v = (line[i] ?? "").trim();
+          if (v !== "") row[h] = v;
+        });
+        return row;
+      });
+      if (!payload.length) throw new Error("No data rows found");
+
+      let inserted = 0;
+      let updated = 0;
+      const CHUNK = 200;
+      for (let i = 0; i < payload.length; i += CHUNK) {
+        const res = await call({ action: "save", table, rows: payload.slice(i, i + CHUNK) });
+        inserted += Number(res?.inserted ?? 0);
+        updated += Number(res?.updated ?? 0);
+      }
+      toast.success(`Imported — ${inserted} added, ${updated} updated`);
+      await load(page);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not import CSV");
+    } finally {
+      setImporting(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
   const pages = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
   return (
@@ -161,6 +236,26 @@ const TableGridEditor = ({ table, columns, call }: Props) => {
           </Button>
           <Button size="sm" variant="outline" className="gap-1.5" onClick={download}>
             <Download className="h-3.5 w-3.5" /> CSV
+          </Button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".csv,text/csv"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) importCsv(f);
+            }}
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5"
+            onClick={() => fileRef.current?.click()}
+            disabled={importing}
+          >
+            {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+            Import CSV
           </Button>
           <Button size="sm" variant="outline" className="gap-1.5" onClick={addRow}>
             <Plus className="h-3.5 w-3.5" /> Add row
