@@ -1,54 +1,51 @@
+# Theory Past Papers
 
+Add a Theory Past Papers section alongside the existing MCQ past papers, with its own levels, PDF viewer, official answer key button, per-part explanations, and an admin uploader that auto-pairs question papers with mark schemes by filename.
 
-# MCQ Exam Practice App
+## Home page
 
-## Overview
-A split-screen exam practice app where users browse past papers, view the PDF on the left, answer MCQs on the right, and get scored against an answer key — all with a 45-minute countdown timer.
+Split the current "Past Papers" tile into two tiles:
 
-## Pages & Flow
+- **MCQ Past Papers** -> `/papers` (existing flow, IGCSE / AS / A2 unchanged)
+- **Theory Past Papers** -> `/theory-papers` (new)
 
-### 1. Home Page — Paper Browser
-- A landing page with **cards** displaying available papers
-- Each card shows: **subject, level, year, session, paper code**
-- Cards are visually grouped or filterable by subject/level
-- Clicking a card navigates to the Exam page for that paper
+## Theory browsing flow
 
-### 2. Exam Page — Split Screen
-- **Left side (70%)**: PDF viewer showing the selected paper using `react-pdf`
-- **Right side (30%)**: MCQ answer panel
-  - **Timer** at the top counting down from 45 minutes
-  - **40 questions** listed vertically, each with A/B/C/D buttons in a single row
-  - Selected answers are highlighted
-  - A **Submit** button at the bottom
-  - Auto-submits when timer reaches 0
+```text
+/theory-papers            -> level tiles: IGCSE, AS Level, A2 Level
+/theory-papers/:level     -> paper cards (paper code, session, year)
+/theory-paper/:paperId    -> question paper PDF viewer
+```
 
-### 3. Results View
-- After submission, the MCQ panel transforms to show results:
-  - **Score summary** at the top (e.g., "32/40")
-  - Each question shows the user's answer highlighted **green** (correct) or **red** (incorrect), with the correct answer indicated
-  - Option to go back to home and try another paper
+On the paper viewer:
+- Question paper PDF rendered full-height from Cloud storage (same Android/desktop handling as the current PDF viewer).
+- **Official Answer Key** button opens the mark-scheme PDF in a new tab.
+- A list of question numbers; each has an **Explanation** button that opens the same style of floating dialog used in MCQ mode. Inside the dialog, each question *part* (e.g. 1(a), 1(b)(ii)) is a card with formula-rendered text (KaTeX, as today) plus an optional image.
 
-## Database (Supabase — Lovable Cloud)
+## Admin page
 
-### Tables
-1. **papers** — `id, level, subject, year, session, paper_code, pdf_url`
-2. **answer_keys** — `id, paper_id, question_number, correct_option`
-3. **attempts** — `id, paper_id, score, total_questions, answers (JSON), created_at`
+Extend the existing admin console (passcode-protected) with a **Theory papers** tile:
 
-### Seed Data
-- Mock data inserted for a few sample papers and their answer keys so the app is functional immediately
+- Multi-file PDF upload. Filenames are parsed with the Cambridge convention:
+  - `9702_s23_qp_22.pdf` -> question paper
+  - `9702_s23_ms_22.pdf` -> mark scheme
+  - Parsed fields: syllabus code, session letter (`s` = May/June, `w` = Oct/Nov, `m` = Feb/March), 2-digit year, component number.
+  - Level is derived from the syllabus + component (0625/0972 -> IGCSE; 9702 components 1-3 -> AS; 4-5 -> A2), and is shown for override before saving.
+- QP and MS with the same code/session/year/component are auto-paired into one theory paper row; uploading a MS for an existing QP fills in the missing side, and vice versa.
+- Files with unrecognised names are listed as skipped with the reason, never guessed.
+- An explanations editor: pick level -> paper -> question, then add/edit/delete parts (part label, explanation text supporting LaTeX, optional uploaded image).
+- Existing theory papers list with delete.
 
-## Components
-- **PaperSelector** — Card grid for browsing/selecting papers
-- **PDFViewer** — Renders the PDF using `react-pdf`
-- **MCQPanel** — Scrollable list of 40 questions with A/B/C/D buttons
-- **Timer** — Countdown from 45:00, triggers auto-submit at 0
-- **ResultSummary** — Score display with correct/incorrect highlighting
+## Technical notes
 
-## Key Behaviors
-- Timer starts when the exam page loads
-- User can navigate PDF pages while answering
-- Answers stored in React state during the exam
-- On submit: compare with answer_keys, calculate score, save attempt to database, show results
-- No authentication required — attempts are saved anonymously
+Database (new tables, RLS + GRANTs following project rules):
+- `theory_papers`: level, syllabus_code, paper_code, component, session, year, `question_storage_path`, `answer_storage_path`, `total_questions`. Publicly readable.
+- `theory_explanations`: `theory_paper_id`, `question_number`, `part_label`, `order_index`, `explanation`, `image_path`. Publicly readable (theory answers are already public via the official mark scheme, so no oracle concern as in MCQ).
 
+Storage: new public bucket `theory-papers` holding `qp/` and `ms/` PDFs, plus `explanations/` images.
+
+Edge function: extend the existing admin function pattern with a `admin-theory` function (passcode-verified, service role) for upload, pair, list, delete and explanation CRUD. Reads on the client go straight through the public anon client — no new read function needed.
+
+Frontend: new pages `TheoryPapersPage`, `TheoryLevelPage`, `TheoryPaperPage`, plus `TheoryExplanationDialog` reusing `MathText`; routes registered lazily in `App.tsx` and the theory viewer added to the nav-excluded route list. Filename parsing lives in `src/lib/theory-filenames.ts` and is unit-testable.
+
+Nothing in the existing MCQ, topic practice, performance or study-tools flows changes.
