@@ -4,10 +4,10 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { usePageTransition } from "@/hooks/use-page-transition";
 import RunningTimerBar from "@/components/study/RunningTimerBar";
 import SiteNav from "@/components/SiteNav";
-import { SpeedInsights } from "@vercel/speed-insights/react";
-import { Analytics } from "@vercel/analytics/react";
 
 const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
+const SpeedInsights = lazy(() => import("@vercel/speed-insights/react").then(m => ({ default: m.SpeedInsights })));
+const Analytics = lazy(() => import("@vercel/analytics/react").then(m => ({ default: m.Analytics })));
 const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
 const Sonner = lazy(() => import("@/components/ui/sonner").then(m => ({ default: m.Toaster })));
 
@@ -57,6 +57,8 @@ const DeferredShell = () => {
     <Suspense fallback={null}>
       <Toaster />
       <Sonner />
+      <SpeedInsights />
+      <Analytics />
     </Suspense>
   );
 };
@@ -137,8 +139,6 @@ const App = () => (
         <BrowserRouter>
           <RouterContent />
         </BrowserRouter>
-        <SpeedInsights />
-        <Analytics />
       </TooltipProvider>
     </Suspense>
   </QueryClientProvider>
