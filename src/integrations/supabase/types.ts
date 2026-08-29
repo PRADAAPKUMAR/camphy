@@ -548,6 +548,95 @@ export type Database = {
         }
         Relationships: []
       }
+      theory_explanations: {
+        Row: {
+          created_at: string
+          explanation: string | null
+          id: string
+          image_path: string | null
+          order_index: number
+          part_label: string
+          question_number: number
+          theory_paper_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          image_path?: string | null
+          order_index?: number
+          part_label?: string
+          question_number: number
+          theory_paper_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          image_path?: string | null
+          order_index?: number
+          part_label?: string
+          question_number?: number
+          theory_paper_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "theory_explanations_theory_paper_id_fkey"
+            columns: ["theory_paper_id"]
+            isOneToOne: false
+            referencedRelation: "theory_papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      theory_papers: {
+        Row: {
+          answer_storage_path: string | null
+          component: string
+          created_at: string
+          id: string
+          level: string
+          paper_code: string
+          question_storage_path: string | null
+          session: string
+          syllabus_code: string
+          total_questions: number
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          answer_storage_path?: string | null
+          component: string
+          created_at?: string
+          id?: string
+          level: string
+          paper_code: string
+          question_storage_path?: string | null
+          session: string
+          syllabus_code: string
+          total_questions?: number
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          answer_storage_path?: string | null
+          component?: string
+          created_at?: string
+          id?: string
+          level?: string
+          paper_code?: string
+          question_storage_path?: string | null
+          session?: string
+          syllabus_code?: string
+          total_questions?: number
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
       topic_practice_syllabus_map: {
         Row: {
           created_at: string
