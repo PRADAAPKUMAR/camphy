@@ -311,6 +311,19 @@ const AdminUploadPage = () => {
     );
   }
 
+  if (view === "__theory") {
+    return (
+      <div className="min-h-screen bg-background bg-grid">
+        <div className="container max-w-5xl space-y-5 py-8">
+          <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground" onClick={() => setView(null)}>
+            <ArrowLeft className="h-4 w-4" /> All tiles
+          </Button>
+          <TheoryAdminPanel call={(body) => callTheory(passcode, body)} />
+        </div>
+      </div>
+    );
+  }
+
   if (view !== "__images") {
     const meta = (tables ?? []).find((t) => t.name === view);
     return (
