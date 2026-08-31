@@ -9,6 +9,7 @@ import {
   BarChart3,
   Lightbulb,
   CalendarClock,
+  FileText,
   User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
