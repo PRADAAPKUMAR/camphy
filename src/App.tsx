@@ -123,6 +123,9 @@ const RouterContent = () => {
         <Route path="/topical-mcq/:level" element={<TopicalMcqLevelPage />} />
         <Route path="/topical-mcq/:level/:topicSlug" element={<TopicalMcqSessionPage />} />
         <Route path="/topic-theory/:questionId" element={<TopicTheoryPage />} />
+        <Route path="/theory-papers" element={<TheoryPapersPage />} />
+        <Route path="/theory-papers/:level" element={<TheoryLevelPage />} />
+        <Route path="/theory-paper/:paperId" element={<TheoryPaperPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/study-tools" element={<StudyToolsPage />} />
         <Route path="/performance" element={<PerformancePage />} />
