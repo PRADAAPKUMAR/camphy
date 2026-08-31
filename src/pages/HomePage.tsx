@@ -26,16 +26,20 @@ const HomePage = () => {
     queryKey: ["home_counts"],
     queryFn: async () => {
       const supabase = await getSupabase();
-      const [papers, materials, mcq, theory] = await Promise.all([
+      const [papers, materials, mcq, theory, theoryPapers, mcqExpl, theoryExpl] = await Promise.all([
         supabase.from("papers").select("level", { count: "exact" }),
         supabase.from("study_materials").select("*", { count: "exact", head: true }),
         supabase.from("topicwise_mcq_papers").select("*", { count: "exact", head: true }),
         supabase.from("topicwise_theory_questions").select("*", { count: "exact", head: true }),
+        supabase.from("theory_papers").select("*", { count: "exact", head: true }),
+        supabase.from("question_explanations").select("*", { count: "exact", head: true }),
+        supabase.from("theory_explanations").select("*", { count: "exact", head: true }),
       ]);
       return {
-        papers: papers.count ?? 0,
+        papers: (papers.count ?? 0) + (theoryPapers.count ?? 0),
         materials: materials.count ?? 0,
         topics: (mcq.count ?? 0) + (theory.count ?? 0),
+        explanations: (mcqExpl.count ?? 0) + (theoryExpl.count ?? 0),
         levels: (papers.data ?? []).map((r: { level: string }) => r.level),
       };
     },
