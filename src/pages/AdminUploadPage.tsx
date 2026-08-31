@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle2, Images, Loader2, Table2, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, CheckCircle2, FileText, Images, Loader2, Table2, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +33,16 @@ interface Pending {
   status: "pending" | "uploading" | "done" | "error";
   message?: string;
 }
+
+const callTheory = async (passcode: string, body: Record<string, unknown>) => {
+  const supabase = await getSupabase();
+  const { data, error } = await supabase.functions.invoke("admin-theory", {
+    body: { passcode, ...body },
+  });
+  if (error) throw new Error(data?.error ?? error.message);
+  if (data?.error) throw new Error(data.error);
+  return data;
+};
 
 const callAdmin = async (passcode: string, body: Record<string, unknown>) => {
   const supabase = await getSupabase();
