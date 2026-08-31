@@ -49,11 +49,18 @@ const HomePage = () => {
 
   const primaryActions = [
     {
-      title: "Past Papers",
-      desc: "Practice complete Cambridge examination papers.",
+      title: "MCQ Past Papers",
+      desc: "Practice complete Cambridge multiple-choice papers.",
       to: "/papers",
       icon: <ClipboardList className="h-6 w-6" />,
       tone: "primary",
+    },
+    {
+      title: "Theory Past Papers",
+      desc: "Structured papers with answer keys and explanations.",
+      to: "/theory-papers",
+      icon: <FileText className="h-6 w-6" />,
+      tone: "accent",
     },
     {
       title: "Topic Practice",
