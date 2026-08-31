@@ -136,22 +136,37 @@ const HomePage = () => {
           </p>
 
           {/* Stats row — pill badges */}
-          <div className="mt-8 flex flex-wrap justify-center gap-2">
+          <div className="mt-10 flex flex-wrap justify-center gap-3">
             {[
               { label: "Past papers", value: data?.papers },
               { label: "Topic sets", value: data?.topics },
               { label: "Resources", value: data?.materials },
+              {
+                label: "Worked explanations",
+                value: data?.explanations,
+                highlight: true,
+              },
               { label: "Levels", value: levelsCount || 3 },
             ].map((s) => (
               <span
                 key={s.label}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-card/40 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur-sm"
+                className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium backdrop-blur-sm transition-transform hover:scale-105 ${
+                  s.highlight
+                    ? "border-primary/50 bg-primary/15 text-primary shadow-[0_0_16px_hsl(217_91%_60%/0.25)]"
+                    : "border-border/50 bg-card/40 text-muted-foreground"
+                }`}
               >
-                <span className="font-bold text-primary">{s.value ?? "—"}</span>
+                {s.highlight && <Lightbulb className="h-4 w-4" />}
+                <span className={`text-base font-bold ${s.highlight ? "text-primary" : "text-primary"}`}>
+                  {s.value ?? "—"}
+                </span>
                 <span>{s.label}</span>
               </span>
             ))}
           </div>
+          <p className="mx-auto mt-4 max-w-md text-sm text-muted-foreground">
+            Every explanation breaks down the correct answer <span className="font-semibold text-foreground">and</span> why the wrong options fail — with formulas and calculations.
+          </p>
         </div>
       </header>
 
