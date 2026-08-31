@@ -270,6 +270,21 @@ const AdminUploadPage = () => {
               </span>
             </button>
 
+            <button
+              type="button"
+              onClick={() => setView("__theory")}
+              className="glass-card flex flex-col items-start gap-2 rounded-2xl p-5 text-left transition hover:border-primary/50"
+            >
+              <FileText className="h-8 w-8 text-primary" />
+              <span className="font-semibold">Theory past papers</span>
+              <span className="text-xs text-muted-foreground">
+                Upload question paper &amp; mark scheme PDFs (auto-paired by filename) and write
+                explanations.
+              </span>
+            </button>
+
+
+
             {tablesLoading && (
               <div className="glass-card flex items-center gap-2 rounded-2xl p-5 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" /> Loading tables…
