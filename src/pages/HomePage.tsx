@@ -26,20 +26,20 @@ const HomePage = () => {
     queryKey: ["home_counts"],
     queryFn: async () => {
       const supabase = await getSupabase();
-      const [papers, materials, mcq, theory, theoryPapers, mcqExpl, theoryExpl] = await Promise.all([
+      const [papers, materials, mcq, theory, theoryPapers, explCounts] = await Promise.all([
         supabase.from("papers").select("level", { count: "exact" }),
         supabase.from("study_materials").select("*", { count: "exact", head: true }),
         supabase.from("topicwise_mcq_papers").select("*", { count: "exact", head: true }),
         supabase.from("topicwise_theory_questions").select("*", { count: "exact", head: true }),
         supabase.from("theory_papers").select("*", { count: "exact", head: true }),
-        supabase.from("question_explanations").select("*", { count: "exact", head: true }),
-        supabase.from("theory_explanations").select("*", { count: "exact", head: true }),
+        supabase.rpc("get_explanation_counts"),
       ]);
+      const counts = (explCounts.data ?? {}) as { mcq?: number; theory?: number };
       return {
         papers: (papers.count ?? 0) + (theoryPapers.count ?? 0),
         materials: materials.count ?? 0,
         topics: (mcq.count ?? 0) + (theory.count ?? 0),
-        explanations: (mcqExpl.count ?? 0) + (theoryExpl.count ?? 0),
+        explanations: (counts.mcq ?? 0) + (counts.theory ?? 0),
         levels: (papers.data ?? []).map((r: { level: string }) => r.level),
       };
     },
@@ -141,25 +141,14 @@ const HomePage = () => {
               { label: "Past papers", value: data?.papers },
               { label: "Topic sets", value: data?.topics },
               { label: "Resources", value: data?.materials },
-              {
-                label: "Worked explanations",
-                value: data?.explanations,
-                highlight: true,
-              },
+              { label: "Worked explanations", value: data?.explanations },
               { label: "Levels", value: levelsCount || 3 },
             ].map((s) => (
               <span
                 key={s.label}
-                className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium backdrop-blur-sm transition-transform hover:scale-105 ${
-                  s.highlight
-                    ? "border-primary/50 bg-primary/15 text-primary shadow-[0_0_16px_hsl(217_91%_60%/0.25)]"
-                    : "border-border/50 bg-card/40 text-muted-foreground"
-                }`}
+                className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/40 px-4 py-2 text-sm font-medium text-muted-foreground backdrop-blur-sm"
               >
-                {s.highlight && <Lightbulb className="h-4 w-4" />}
-                <span className={`text-base font-bold ${s.highlight ? "text-primary" : "text-primary"}`}>
-                  {s.value ?? "—"}
-                </span>
+                <span className="text-base font-bold text-primary">{s.value ?? "—"}</span>
                 <span>{s.label}</span>
               </span>
             ))}
