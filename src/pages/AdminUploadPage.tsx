@@ -22,6 +22,7 @@ import {
 } from "@/lib/question-images";
 import { compareSessions } from "@/lib/exam-sessions";
 import TableGridEditor, { type ColumnMeta } from "@/components/admin/TableGridEditor";
+import TheoryAdminPanel from "@/components/admin/TheoryAdminPanel";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
