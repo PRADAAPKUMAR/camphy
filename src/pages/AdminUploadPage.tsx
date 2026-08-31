@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle2, Images, Loader2, Table2, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, CheckCircle2, FileText, Images, Loader2, Table2, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +22,7 @@ import {
 } from "@/lib/question-images";
 import { compareSessions } from "@/lib/exam-sessions";
 import TableGridEditor, { type ColumnMeta } from "@/components/admin/TableGridEditor";
+import TheoryAdminPanel from "@/components/admin/TheoryAdminPanel";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
@@ -32,6 +33,16 @@ interface Pending {
   status: "pending" | "uploading" | "done" | "error";
   message?: string;
 }
+
+const callTheory = async (passcode: string, body: Record<string, unknown>) => {
+  const supabase = await getSupabase();
+  const { data, error } = await supabase.functions.invoke("admin-theory", {
+    body: { passcode, ...body },
+  });
+  if (error) throw new Error(data?.error ?? error.message);
+  if (data?.error) throw new Error(data.error);
+  return data;
+};
 
 const callAdmin = async (passcode: string, body: Record<string, unknown>) => {
   const supabase = await getSupabase();
@@ -259,6 +270,21 @@ const AdminUploadPage = () => {
               </span>
             </button>
 
+            <button
+              type="button"
+              onClick={() => setView("__theory")}
+              className="glass-card flex flex-col items-start gap-2 rounded-2xl p-5 text-left transition hover:border-primary/50"
+            >
+              <FileText className="h-8 w-8 text-primary" />
+              <span className="font-semibold">Theory past papers</span>
+              <span className="text-xs text-muted-foreground">
+                Upload question paper &amp; mark scheme PDFs (auto-paired by filename) and write
+                explanations.
+              </span>
+            </button>
+
+
+
             {tablesLoading && (
               <div className="glass-card flex items-center gap-2 rounded-2xl p-5 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" /> Loading tables…
@@ -280,6 +306,19 @@ const AdminUploadPage = () => {
               </button>
             ))}
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (view === "__theory") {
+    return (
+      <div className="min-h-screen bg-background bg-grid">
+        <div className="container max-w-5xl space-y-5 py-8">
+          <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground" onClick={() => setView(null)}>
+            <ArrowLeft className="h-4 w-4" /> All tiles
+          </Button>
+          <TheoryAdminPanel call={(body) => callTheory(passcode, body)} />
         </div>
       </div>
     );

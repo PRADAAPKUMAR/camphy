@@ -25,6 +25,9 @@ const TopicalMcqPage = lazy(() => import("./pages/TopicalMcqPage"));
 const TopicalMcqLevelPage = lazy(() => import("./pages/TopicalMcqLevelPage"));
 const TopicalMcqSessionPage = lazy(() => import("./pages/TopicalMcqSessionPage"));
 const TopicTheoryPage = lazy(() => import("./pages/TopicTheoryPage"));
+const TheoryPapersPage = lazy(() => import("./pages/TheoryPapersPage"));
+const TheoryLevelPage = lazy(() => import("./pages/TheoryLevelPage"));
+const TheoryPaperPage = lazy(() => import("./pages/TheoryPaperPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const StudyToolsPage = lazy(() => import("./pages/StudyToolsPage"));
 const PerformancePage = lazy(() => import("./pages/PerformancePage"));
@@ -120,6 +123,9 @@ const RouterContent = () => {
         <Route path="/topical-mcq/:level" element={<TopicalMcqLevelPage />} />
         <Route path="/topical-mcq/:level/:topicSlug" element={<TopicalMcqSessionPage />} />
         <Route path="/topic-theory/:questionId" element={<TopicTheoryPage />} />
+        <Route path="/theory-papers" element={<TheoryPapersPage />} />
+        <Route path="/theory-papers/:level" element={<TheoryLevelPage />} />
+        <Route path="/theory-paper/:paperId" element={<TheoryPaperPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/study-tools" element={<StudyToolsPage />} />
         <Route path="/performance" element={<PerformancePage />} />
