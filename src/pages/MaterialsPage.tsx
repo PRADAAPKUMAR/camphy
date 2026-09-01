@@ -30,7 +30,7 @@ const levelDescriptions: Record<string, string> = {
 
 const MaterialsPage = () => {
   const navigate = useNavigate();
-  const { tileProps, linkTileProps } = useTileTransition();
+  const { tileProps } = useTileTransition();
 
   const { data: materials, isLoading } = useQuery({
     queryKey: ["study_materials"],

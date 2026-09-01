@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTileTransition } from "@/hooks/use-tile-transition";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Atom, FileText, FlaskConical, Microscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,7 @@ const levelDescriptions: Record<string, string> = {
 
 const TheoryPapersPage = () => {
   const navigate = useNavigate();
-  const { tileProps, linkTileProps } = useTileTransition();
+  const { linkTileProps } = useTileTransition();
 
   const { data: papers, isLoading } = useQuery({
     queryKey: ["theory_papers"],

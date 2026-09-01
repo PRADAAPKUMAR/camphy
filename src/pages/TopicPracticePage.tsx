@@ -26,7 +26,7 @@ const levelIcons: Record<string, React.ReactNode> = {
 
 const TopicPracticePage = () => {
   const navigate = useNavigate();
-  const { tileProps, linkTileProps } = useTileTransition();
+  const { tileProps } = useTileTransition();
 
   const { data: mcqLevels, isLoading: mcqLoading } = useQuery({
     queryKey: ["topicwise_mcq_levels"],
