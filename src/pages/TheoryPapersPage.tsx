@@ -23,6 +23,7 @@ const levelDescriptions: Record<string, string> = {
 
 const TheoryPapersPage = () => {
   const navigate = useNavigate();
+  const { tileProps, linkTileProps } = useTileTransition();
 
   const { data: papers, isLoading } = useQuery({
     queryKey: ["theory_papers"],
@@ -90,6 +91,7 @@ const TheoryPapersPage = () => {
                   <Link
                     key={level}
                     to={`/theory-papers/${encodeURIComponent(level)}`}
+                    {...linkTileProps(`/theory-papers/${encodeURIComponent(level)}`)}
                     className="glass-card-hover group flex flex-col gap-4 rounded-2xl p-7"
                   >
                     <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
