@@ -123,15 +123,24 @@
   @keyframes fadeInUp {
     from {
       opacity: 0;
-      transform: translateY(8px);
+      transform: translate3d(0, 6px, 0) scale(0.985);
     }
     to {
       opacity: 1;
-      transform: translateY(0);
+      transform: translate3d(0, 0, 0) scale(1);
     }
   }
 
+  /* Purely visual reveal — the route is already rendering while this plays. */
   .page-transition {
-    animation: fadeInUp 0.5s ease-out;
+    animation: fadeInUp 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform, opacity;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page-transition {
+      animation: none;
+      will-change: auto;
+    }
   }
 }
