@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { normalizeLevel } from "@/lib/performance-history";
+import { useTileTransition } from "@/hooks/use-tile-transition";
 
 const PhysicsBackground = lazy(() => import("@/components/PhysicsBackground"));
 
@@ -21,6 +22,7 @@ const getSupabase = () => import("@/integrations/supabase/client").then((m) => m
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const { tileProps } = useTileTransition();
 
   const { data } = useQuery({
     queryKey: ["home_counts"],
@@ -170,7 +172,7 @@ const HomePage = () => {
               <button
                 key={a.to}
                 type="button"
-                onClick={() => navigate(a.to)}
+                {...tileProps(a.to)}
                 className="glass-card-hover group rounded-xl p-6 text-left"
               >
                 <div
@@ -212,7 +214,7 @@ const HomePage = () => {
         <section className="mt-12">
           <div
             className="glass-card-hover group flex flex-col gap-3 rounded-xl p-5 sm:flex-row sm:items-center sm:justify-between"
-            onClick={() => navigate("/study-tools")}
+            {...tileProps("/study-tools")}
             role="link"
             tabIndex={0}
             onKeyDown={(e) => e.key === "Enter" && navigate("/study-tools")}

@@ -12,7 +12,7 @@ export const usePageTransition = () => {
       main.classList.remove("page-transition");
     };
 
-    const timer = setTimeout(removeTransition, 500);
+    const timer = setTimeout(removeTransition, 320);
 
     return () => clearTimeout(timer);
   }, [location.pathname]);

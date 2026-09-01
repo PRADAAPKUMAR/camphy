@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useTileTransition } from "@/hooks/use-tile-transition";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, GraduationCap, Atom, Target } from "lucide-react";
 import PhysicsBackground from "@/components/PhysicsBackground";
@@ -28,6 +29,7 @@ const TILES = [
 /** Topical MCQ: past-paper MCQs grouped by mapped syllabus topic, per level. */
 const TopicalMcqPage = () => {
   const navigate = useNavigate();
+  const { tileProps } = useTileTransition();
 
   const stats = useQuery({
     queryKey: ["topical-bank-stats"],
@@ -96,7 +98,7 @@ const TopicalMcqPage = () => {
               <button
                 key={level}
                 type="button"
-                onClick={() => navigate(`/topical-mcq/${encodeURIComponent(level)}`)}
+                {...tileProps(`/topical-mcq/${encodeURIComponent(level)}`)}
                 className="glass-card-hover group rounded-2xl p-6 text-left"
               >
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
