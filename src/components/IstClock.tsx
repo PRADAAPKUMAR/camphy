@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 const IST = "Asia/Kolkata";
 
-const dateFmt = new Intl.DateTimeFormat("en-GB", {
+const dateFmt = new Intl.DateTimeFormat("en-US", {
   timeZone: IST,
   day: "2-digit",
   month: "short",
@@ -16,10 +16,18 @@ const timeFmt = new Intl.DateTimeFormat("en-US", {
   hour12: true,
 });
 
+/** "01 Sep 2026" regardless of locale ordering. */
+const formatDate = (d: Date) => {
+  const parts = dateFmt.formatToParts(d);
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  return `${get("day")} ${get("month")} ${get("year")}`;
+};
+
 const read = () => ({
-  date: dateFmt.format(new Date()),
+  date: formatDate(new Date()),
   time: timeFmt.format(new Date()),
 });
+
 
 /** Live Asia/Kolkata date + time. Never uses the device timezone. */
 const IstClock = ({ compact = false }: { compact?: boolean }) => {
