@@ -131,16 +131,35 @@
     }
   }
 
+  /* Reverse of the tile zoom: destination shrinks back into place. */
+  @keyframes zoomOutIn {
+    from {
+      opacity: 0.7;
+      transform: translate3d(0, 0, 0) scale(1.03);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+  }
+
   /* Purely visual reveal — the route is already rendering while this plays. */
   .page-transition {
     animation: fadeInUp 0.3s cubic-bezier(0.22, 1, 0.36, 1);
     will-change: transform, opacity;
   }
 
+  .page-transition-back {
+    animation: zoomOutIn 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform, opacity;
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .page-transition {
+    .page-transition,
+    .page-transition-back {
       animation: none;
       will-change: auto;
     }
   }
+
 }
