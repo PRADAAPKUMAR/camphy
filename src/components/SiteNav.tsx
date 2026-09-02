@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, MoreHorizontal, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import IstClock from "@/components/IstClock";
+
 
 const PRIMARY_NAV = [
   { label: "Papers", to: "/papers" },
@@ -66,18 +68,24 @@ const SiteNav = () => {
               </div>
             )}
           </div>
+          <span className="ml-2 border-l border-border/40 pl-3">
+            <IstClock />
+          </span>
         </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          aria-label={menuOpen ? "Close menu" : "Open menu"}
-          onClick={() => setMenuOpen((open) => !open)}
-        >
-          {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
+        <div className="flex items-center gap-2 md:hidden">
+          <IstClock compact />
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        </div>
       </div>
+
       {menuOpen && (
         <div className="container flex flex-col gap-1 pb-4 md:hidden">
           {[...PRIMARY_NAV, ...SECONDARY_NAV].map((item) => (
