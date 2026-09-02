@@ -20,7 +20,7 @@ interface Props {
 
 const TheoryExplanationDialog = ({ open, onOpenChange, question, parts }: Props) => (
   <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="flex max-h-[85vh] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] flex-col gap-0 overflow-hidden border-border/60 bg-card/95 p-0 backdrop-blur-xl sm:w-[92vw] sm:max-w-[92vw] lg:w-[90vw] lg:max-w-[1060px]">
+    <DialogContent className="flex max-h-[85vh] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] flex-col gap-0 overflow-hidden border-border/60 bg-card p-0 [contain:paint] [isolation:isolate] sm:w-[92vw] sm:max-w-[92vw] lg:w-[90vw] lg:max-w-[1060px]">
       <DialogHeader className="shrink-0 border-b border-border/50 px-4 py-4 sm:px-6">
         <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
           <Lightbulb className="h-4 w-4 shrink-0 text-primary" />

@@ -141,7 +141,11 @@ const TheoryPaperPage = () => {
       </header>
 
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        <div className="min-h-0 flex-1 lg:w-[78%]">
+        <div
+          className={`min-h-0 flex-1 [contain:paint] [isolation:isolate] lg:w-[78%] ${
+            openQuestion !== null ? "invisible" : ""
+          }`}
+        >
           {question_url ? (
             <Suspense
               fallback={

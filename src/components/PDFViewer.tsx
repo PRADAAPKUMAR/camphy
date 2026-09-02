@@ -15,10 +15,10 @@ const PDFViewer = memo(({ url }: PDFViewerProps) => {
   }, [url]);
 
   return (
-    <div className="flex h-full flex-col bg-muted/30">
+    <div className="flex h-full flex-col bg-muted/30 [contain:paint] [isolation:isolate] [transform:translateZ(0)]">
       <iframe
         src={viewerUrl}
-        className="h-full w-full border-0"
+        className="h-full w-full border-0 [transform:translateZ(0)]"
         title="PDF Viewer"
         loading="lazy"
       />
