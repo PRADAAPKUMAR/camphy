@@ -33,6 +33,7 @@ const StudyToolsPage = lazy(() => import("./pages/StudyToolsPage"));
 const PerformancePage = lazy(() => import("./pages/PerformancePage"));
 const QuestionModePage = lazy(() => import("./pages/QuestionModePage"));
 const AdminUploadPage = lazy(() => import("./pages/AdminUploadPage"));
+const WorksheetGeneratorPage = lazy(() => import("./pages/WorksheetGeneratorPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
