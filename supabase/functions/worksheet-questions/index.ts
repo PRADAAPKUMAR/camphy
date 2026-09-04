@@ -30,6 +30,20 @@ const shuffled = <T>(arr: T[]): T[] => {
   return a;
 };
 
+/** PostgREST caps rows at 1000 — page through everything. */
+const fetchAll = async (build: (from: number, to: number) => any): Promise<any[]> => {
+  const PAGE = 1000;
+  const out: any[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await build(from, from + PAGE - 1);
+    if (error) throw new Error(error.message);
+    const rows = data ?? [];
+    out.push(...rows);
+    if (rows.length < PAGE) break;
+  }
+  return out;
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -70,25 +84,27 @@ Deno.serve(async (req) => {
     const paperIds = papers.map((p) => p.id as string);
 
     // --- images (authoritative availability) -----------------------------
-    const { data: images, error: imagesError } = await supabase
-      .from("question_images")
-      .select("paper_id, question_number, storage_path")
-      .in("paper_id", paperIds);
-    if (imagesError) return json({ error: imagesError.message }, 500);
+    const images = await fetchAll((from, to) =>
+      supabase
+        .from("question_images")
+        .select("paper_id, question_number, storage_path")
+        .in("paper_id", paperIds)
+        .order("paper_id")
+        .order("question_number")
+        .range(from, to),
+    );
 
     const pathOf = new Map<string, string>();
-    for (const row of images ?? []) {
+    for (const row of images) {
       pathOf.set(`${row.paper_id}:${row.question_number}`, row.storage_path as string);
     }
 
     // --- answer keys ------------------------------------------------------
-    const { data: keys, error: keysError } = await supabase
-      .from("answer_keys")
-      .select("*")
-      .in("paper_id", paperIds);
-    if (keysError) return json({ error: keysError.message }, 500);
+    const keys = await fetchAll((from, to) =>
+      supabase.from("answer_keys").select("*").in("paper_id", paperIds).order("paper_id").range(from, to),
+    );
     const answerOf = new Map<string, string>();
-    for (const row of keys ?? []) {
+    for (const row of keys) {
       for (let q = 1; q <= 40; q++) {
         const v = (row as Record<string, unknown>)[`q${q}`];
         if (typeof v === "string" && v.trim()) {
@@ -116,12 +132,17 @@ Deno.serve(async (req) => {
     }
 
     if (allowedTopicIds || source === "topic") {
-      const { data: mappings } = await supabase
-        .from("question_topic_mapping")
-        .select("paper_id, question_number, syllabus_topic_id, mapping_type")
-        .in("paper_id", paperIds)
-        .eq("verified", true);
-      for (const m of mappings ?? []) {
+      const mappings = await fetchAll((from, to) =>
+        supabase
+          .from("question_topic_mapping")
+          .select("paper_id, question_number, syllabus_topic_id, mapping_type")
+          .in("paper_id", paperIds)
+          .eq("verified", true)
+          .order("paper_id")
+          .order("question_number")
+          .range(from, to),
+      );
+      for (const m of mappings) {
         const k = `${m.paper_id}:${m.question_number}`;
         if (m.mapping_type === "primary" || !topicOf.has(k)) {
           if (!allowedTopicIds || allowedTopicIds.has(m.syllabus_topic_id as string)) {
@@ -160,7 +181,7 @@ Deno.serve(async (req) => {
       }
     } else {
       candidates = [];
-      for (const row of images ?? []) {
+      for (const row of images) {
         const ref = { paper_id: row.paper_id as string, question_number: row.question_number as number };
         const k = `${ref.paper_id}:${ref.question_number}`;
         if (!answerOf.has(k)) {
