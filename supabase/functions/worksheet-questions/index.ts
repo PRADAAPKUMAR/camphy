@@ -131,7 +131,9 @@ Deno.serve(async (req) => {
       allowedTopicIds = expanded;
     }
 
-    if (allowedTopicIds || source === "topic") {
+    {
+      // Mappings are loaded for every source so the preview can show a topic
+      // breakdown; only `topic` mode filters the pool by them.
       const mappings = await fetchAll((from, to) =>
         supabase
           .from("question_topic_mapping")
