@@ -114,6 +114,7 @@ const RouterContent = () => {
         <Route path="/exam/:paperId" element={<ExamPage />} />
         <Route path="/question-mode/:paperId" element={<QuestionModePage />} />
         <Route path="/admin/upload" element={<AdminUploadPage />} />
+        <Route path="/worksheet-generator" element={<WorksheetGeneratorPage />} />
         <Route path="/materials" element={<MaterialsPage />} />
         <Route path="/materials/:level" element={<MaterialsLevelPage />} />
         <Route path="/view-drive" element={<DriveViewerPage />} />
