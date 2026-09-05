@@ -91,6 +91,13 @@ const HomePage = () => {
       icon: <BarChart3 className="h-6 w-6" />,
       tone: "primary",
     },
+    {
+      title: "Worksheet Generator",
+      desc: "Build printable MCQ practice worksheets with answer keys.",
+      to: "/worksheet-generator",
+      icon: <FilePlus2 className="h-6 w-6" />,
+      tone: "accent",
+    },
   ] as const;
 
   const toneClasses: Record<string, string> = {
