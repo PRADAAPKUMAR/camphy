@@ -13,6 +13,7 @@ const PRIMARY_NAV = [
 ];
 
 const SECONDARY_NAV = [
+  { label: "Worksheet Generator", to: "/worksheet-generator" },
   { label: "Study Tools", to: "/study-tools" },
   { label: "About", to: "/about" },
 ];
