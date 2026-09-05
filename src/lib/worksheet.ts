@@ -140,6 +140,24 @@ const drawBrandHeader = (doc: any, meta: WorksheetMeta, subtitle: string) => {
   return y + 6;
 };
 
+/** Opens the finished PDF in a new browser tab instead of downloading it. */
+const openPdfInNewTab = (doc: any, fileName: string) => {
+  const blob: Blob = doc.output("blob");
+  const url = URL.createObjectURL(
+    new Blob([blob], { type: "application/pdf" }),
+  );
+  const tab = window.open(url, "_blank");
+  if (!tab) {
+    // Popup blocked — fall back to a normal download so the work isn't lost.
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.click();
+  }
+  // Revoke late so the new tab has time to load the document.
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+};
+
 export const generateWorksheetPdf = async (loaded: LoadedImage[], meta: WorksheetMeta) => {
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
