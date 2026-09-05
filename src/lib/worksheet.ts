@@ -195,7 +195,7 @@ export const generateWorksheetPdf = async (loaded: LoadedImage[], meta: Workshee
     doc.setTextColor(0);
   }
 
-  doc.save(`${meta.fileBase}_Worksheet.pdf`);
+  openPdfInNewTab(doc, `${meta.fileBase}_Worksheet.pdf`);
 };
 
 export const generateAnswerKeyPdf = async (
