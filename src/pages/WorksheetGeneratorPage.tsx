@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { AlertTriangle, Download, FileText, Loader2, Shuffle, Sparkles } from "lucide-react";
+import { AlertTriangle, ExternalLink, FileText, Loader2, Shuffle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -512,7 +512,7 @@ const WorksheetGeneratorPage = () => {
               {!!loaded?.length && (
                 <div className="grid gap-2 sm:grid-cols-2">
                   <Button onClick={() => download("worksheet")} disabled={busy} className="gap-2">
-                    <Download className="h-4 w-4" /> Worksheet PDF
+                    <ExternalLink className="h-4 w-4" /> Open worksheet PDF
                   </Button>
                   <Button
                     onClick={() => download("key")}
@@ -520,7 +520,7 @@ const WorksheetGeneratorPage = () => {
                     variant="outline"
                     className="gap-2"
                   >
-                    <Download className="h-4 w-4" /> Answer key PDF
+                    <ExternalLink className="h-4 w-4" /> Open answer key PDF
                   </Button>
                 </div>
               )}
