@@ -10,6 +10,7 @@ import {
   Lightbulb,
   CalendarClock,
   FileText,
+  FilePlus2,
   User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
