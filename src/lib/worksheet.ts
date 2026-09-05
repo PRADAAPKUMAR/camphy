@@ -237,7 +237,7 @@ export const generateAnswerKeyPdf = async (
     y += lineHeight;
   });
 
-  doc.save(`${meta.fileBase}_Answer_Key.pdf`);
+  openPdfInNewTab(doc, `${meta.fileBase}_Answer_Key.pdf`);
 };
 
 export const sanitizeFilePart = (value: string) =>
