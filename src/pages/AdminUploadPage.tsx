@@ -30,9 +30,13 @@ const getSupabase = () => import("@/integrations/supabase/client").then((m) => m
 interface Pending {
   file: File;
   question: number | null;
+  /** Paper resolved from the filename; null when it could not be matched. */
+  targetPaperId: string | null;
+  targetLabel: string | null;
   status: "pending" | "uploading" | "done" | "error";
   message?: string;
 }
+
 
 const callTheory = async (passcode: string, body: Record<string, unknown>) => {
   const supabase = await getSupabase();
