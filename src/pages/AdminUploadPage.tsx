@@ -393,10 +393,14 @@ const AdminUploadPage = () => {
         <div>
           <h1 className="text-2xl font-bold">Question image uploads</h1>
           <p className="text-sm text-muted-foreground">
-            One JPG per MCQ question. Question numbers are detected from filenames
-            (e.g. <span className="font-mono">q07.jpg</span>, <span className="font-mono">9702_s23_12_q7.jpg</span>).
+            Drop all your images at once — the paper and question number are read from each
+            filename (e.g. <span className="font-mono">9702_s23_12_q07.jpg</span>,{" "}
+            <span className="font-mono">0625_w22_22_q7.png</span>) and each image is filed under
+            the right paper automatically. The pickers below are only needed for files whose name
+            can&apos;t be matched.
           </p>
         </div>
+
 
         <div className="glass-card grid gap-4 rounded-2xl p-5 sm:grid-cols-2">
           <div className="space-y-2">
