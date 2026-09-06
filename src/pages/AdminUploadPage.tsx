@@ -147,21 +147,44 @@ const AdminUploadPage = () => {
 
   const onFiles = (files: FileList | null) => {
     if (!files) return;
+    const rows = papers ?? [];
     const next: Pending[] = Array.from(files)
       .filter((f) => f.type.startsWith("image/"))
-      .map((file) => ({
-        file,
-        question: questionNumberFromFilename(file.name),
-        status: "pending" as const,
-      }))
-      .sort((a, b) => (a.question ?? 999) - (b.question ?? 999));
+      .map((file) => {
+        const parsed = parseMcqImageName(file.name);
+        const match = parsed ? matchPaper(rows, parsed) : null;
+        return {
+          file,
+          question: parsed?.question ?? questionNumberFromFilename(file.name),
+          targetPaperId: match?.id ?? null,
+          targetLabel: match ? paperLabel(match) : null,
+          status: "pending" as const,
+        };
+      })
+      .sort(
+        (a, b) =>
+          (a.targetLabel ?? "zz").localeCompare(b.targetLabel ?? "zz") ||
+          (a.question ?? 999) - (b.question ?? 999),
+      );
     setPending(next);
+
+    const matched = next.filter((p) => p.targetPaperId).length;
+    const papersHit = new Set(next.map((p) => p.targetPaperId).filter(Boolean)).size;
+    if (matched) {
+      toast.success(`${matched} image${matched > 1 ? "s" : ""} matched to ${papersHit} paper${papersHit > 1 ? "s" : ""}`);
+    }
+    if (matched < next.length) {
+      toast.info(`${next.length - matched} file(s) need the paper picked manually below`);
+    }
   };
 
   const uploadAll = async () => {
-    if (!paperId) return toast.error("Pick a paper first");
-    const ready = pending.filter((p) => p.question);
-    if (!ready.length) return toast.error("No files with a detected question number");
+    const ready = pending.filter((p) => p.question && (p.targetPaperId ?? paperId));
+    if (!ready.length) {
+      return toast.error(
+        "No uploadable files — each image needs a question number and a paper (from its filename or the picker above)",
+      );
+    }
 
     setUploading(true);
     setProgress(0);
@@ -169,7 +192,8 @@ const AdminUploadPage = () => {
 
     for (let i = 0; i < pending.length; i++) {
       const item = pending[i];
-      if (!item.question) continue;
+      const target = item.targetPaperId ?? paperId;
+      if (!item.question || !target) continue;
       setPending((prev) =>
         prev.map((p, idx) => (idx === i ? { ...p, status: "uploading" } : p)),
       );
@@ -180,7 +204,7 @@ const AdminUploadPage = () => {
         ]);
         await callAdmin(passcode, {
           action: "upload",
-          paper_id: paperId,
+          paper_id: target,
           question_number: item.question,
           content_type: item.file.type,
           data_base64,
@@ -188,7 +212,11 @@ const AdminUploadPage = () => {
           height: dims?.height,
         });
         setPending((prev) => prev.map((p, idx) => (idx === i ? { ...p, status: "done" } : p)));
-        setUploaded((prev) => Array.from(new Set([...prev, item.question!])).sort((a, b) => a - b));
+        if (target === paperId) {
+          setUploaded((prev) =>
+            Array.from(new Set([...prev, item.question!])).sort((a, b) => a - b),
+          );
+        }
       } catch (e) {
         setPending((prev) =>
           prev.map((p, idx) =>
@@ -205,6 +233,7 @@ const AdminUploadPage = () => {
     setUploading(false);
     toast.success("Upload finished");
   };
+
 
   const removeQuestion = async (q: number) => {
     try {
