@@ -20,7 +20,9 @@ import {
   questionNumberFromFilename,
   readFileAsBase64,
 } from "@/lib/question-images";
+import { matchPaper, paperLabel, parseMcqImageName } from "@/lib/mcq-filenames";
 import { compareSessions } from "@/lib/exam-sessions";
+
 import TableGridEditor, { type ColumnMeta } from "@/components/admin/TableGridEditor";
 import TheoryAdminPanel from "@/components/admin/TheoryAdminPanel";
 
@@ -30,9 +32,13 @@ const getSupabase = () => import("@/integrations/supabase/client").then((m) => m
 interface Pending {
   file: File;
   question: number | null;
+  /** Paper resolved from the filename; null when it could not be matched. */
+  targetPaperId: string | null;
+  targetLabel: string | null;
   status: "pending" | "uploading" | "done" | "error";
   message?: string;
 }
+
 
 const callTheory = async (passcode: string, body: Record<string, unknown>) => {
   const supabase = await getSupabase();
@@ -141,21 +147,44 @@ const AdminUploadPage = () => {
 
   const onFiles = (files: FileList | null) => {
     if (!files) return;
+    const rows = papers ?? [];
     const next: Pending[] = Array.from(files)
       .filter((f) => f.type.startsWith("image/"))
-      .map((file) => ({
-        file,
-        question: questionNumberFromFilename(file.name),
-        status: "pending" as const,
-      }))
-      .sort((a, b) => (a.question ?? 999) - (b.question ?? 999));
+      .map((file) => {
+        const parsed = parseMcqImageName(file.name);
+        const match = parsed ? matchPaper(rows, parsed) : null;
+        return {
+          file,
+          question: parsed?.question ?? questionNumberFromFilename(file.name),
+          targetPaperId: match?.id ?? null,
+          targetLabel: match ? paperLabel(match) : null,
+          status: "pending" as const,
+        };
+      })
+      .sort(
+        (a, b) =>
+          (a.targetLabel ?? "zz").localeCompare(b.targetLabel ?? "zz") ||
+          (a.question ?? 999) - (b.question ?? 999),
+      );
     setPending(next);
+
+    const matched = next.filter((p) => p.targetPaperId).length;
+    const papersHit = new Set(next.map((p) => p.targetPaperId).filter(Boolean)).size;
+    if (matched) {
+      toast.success(`${matched} image${matched > 1 ? "s" : ""} matched to ${papersHit} paper${papersHit > 1 ? "s" : ""}`);
+    }
+    if (matched < next.length) {
+      toast.info(`${next.length - matched} file(s) need the paper picked manually below`);
+    }
   };
 
   const uploadAll = async () => {
-    if (!paperId) return toast.error("Pick a paper first");
-    const ready = pending.filter((p) => p.question);
-    if (!ready.length) return toast.error("No files with a detected question number");
+    const ready = pending.filter((p) => p.question && (p.targetPaperId ?? paperId));
+    if (!ready.length) {
+      return toast.error(
+        "No uploadable files — each image needs a question number and a paper (from its filename or the picker above)",
+      );
+    }
 
     setUploading(true);
     setProgress(0);
@@ -163,7 +192,8 @@ const AdminUploadPage = () => {
 
     for (let i = 0; i < pending.length; i++) {
       const item = pending[i];
-      if (!item.question) continue;
+      const target = item.targetPaperId ?? paperId;
+      if (!item.question || !target) continue;
       setPending((prev) =>
         prev.map((p, idx) => (idx === i ? { ...p, status: "uploading" } : p)),
       );
@@ -174,7 +204,7 @@ const AdminUploadPage = () => {
         ]);
         await callAdmin(passcode, {
           action: "upload",
-          paper_id: paperId,
+          paper_id: target,
           question_number: item.question,
           content_type: item.file.type,
           data_base64,
@@ -182,7 +212,11 @@ const AdminUploadPage = () => {
           height: dims?.height,
         });
         setPending((prev) => prev.map((p, idx) => (idx === i ? { ...p, status: "done" } : p)));
-        setUploaded((prev) => Array.from(new Set([...prev, item.question!])).sort((a, b) => a - b));
+        if (target === paperId) {
+          setUploaded((prev) =>
+            Array.from(new Set([...prev, item.question!])).sort((a, b) => a - b),
+          );
+        }
       } catch (e) {
         setPending((prev) =>
           prev.map((p, idx) =>
@@ -199,6 +233,7 @@ const AdminUploadPage = () => {
     setUploading(false);
     toast.success("Upload finished");
   };
+
 
   const removeQuestion = async (q: number) => {
     try {
@@ -358,10 +393,14 @@ const AdminUploadPage = () => {
         <div>
           <h1 className="text-2xl font-bold">Question image uploads</h1>
           <p className="text-sm text-muted-foreground">
-            One JPG per MCQ question. Question numbers are detected from filenames
-            (e.g. <span className="font-mono">q07.jpg</span>, <span className="font-mono">9702_s23_12_q7.jpg</span>).
+            Drop all your images at once — the paper and question number are read from each
+            filename (e.g. <span className="font-mono">9702_s23_12_q07.jpg</span>,{" "}
+            <span className="font-mono">0625_w22_22_q7.png</span>) and each image is filed under
+            the right paper automatically. The pickers below are only needed for files whose name
+            can&apos;t be matched.
           </p>
         </div>
+
 
         <div className="glass-card grid gap-4 rounded-2xl p-5 sm:grid-cols-2">
           <div className="space-y-2">
