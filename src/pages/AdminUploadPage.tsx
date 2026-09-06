@@ -20,7 +20,9 @@ import {
   questionNumberFromFilename,
   readFileAsBase64,
 } from "@/lib/question-images";
+import { matchPaper, paperLabel, parseMcqImageName } from "@/lib/mcq-filenames";
 import { compareSessions } from "@/lib/exam-sessions";
+
 import TableGridEditor, { type ColumnMeta } from "@/components/admin/TableGridEditor";
 import TheoryAdminPanel from "@/components/admin/TheoryAdminPanel";
 
