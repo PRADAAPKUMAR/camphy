@@ -44,6 +44,132 @@ const fetchAll = async (build: (from: number, to: number) => any): Promise<any[]
   return out;
 };
 
+/** Topics that actually have worksheet-ready questions, merged across syllabus versions. */
+const availableTopics = async (supabase: any, level: string | null) => {
+  let papersQuery = supabase.from("papers").select("id, level");
+  if (level) papersQuery = papersQuery.eq("level", level);
+  const { data: papers } = await papersQuery;
+  const paperIds = (papers ?? []).map((p: any) => p.id as string);
+  if (!paperIds.length) return [];
+
+  const images = await fetchAll((from, to) =>
+    supabase
+      .from("question_images")
+      .select("paper_id, question_number")
+      .in("paper_id", paperIds)
+      .order("paper_id")
+      .order("question_number")
+      .range(from, to),
+  );
+  const hasImage = new Set(images.map((r: any) => `${r.paper_id}:${r.question_number}`));
+
+  const keys = await fetchAll((from, to) =>
+    supabase.from("answer_keys").select("*").in("paper_id", paperIds).order("paper_id").range(from, to),
+  );
+  const hasKey = new Set<string>();
+  for (const row of keys) {
+    for (let q = 1; q <= 40; q++) {
+      const v = (row as Record<string, unknown>)[`q${q}`];
+      if (typeof v === "string" && v.trim()) hasKey.add(`${row.paper_id}:${q}`);
+    }
+  }
+
+  const mappings = await fetchAll((from, to) =>
+    supabase
+      .from("question_topic_mapping")
+      .select("paper_id, question_number, syllabus_topic_id, mapping_type")
+      .in("paper_id", paperIds)
+      .eq("verified", true)
+      .order("paper_id")
+      .order("question_number")
+      .range(from, to),
+  );
+
+  // keep one topic per question (primary wins)
+  const topicOf = new Map<string, string>();
+  for (const m of mappings) {
+    const k = `${m.paper_id}:${m.question_number}`;
+    if (!hasImage.has(k) || !hasKey.has(k)) continue;
+    if (m.mapping_type === "primary" || !topicOf.has(k)) topicOf.set(k, m.syllabus_topic_id as string);
+  }
+  if (!topicOf.size) return [];
+
+  // resolve topics + ancestors
+  const topics = new Map<string, any>();
+  let pending = Array.from(new Set(topicOf.values()));
+  for (let depth = 0; depth < 4 && pending.length; depth++) {
+    const { data } = await supabase
+      .from("syllabus_topics")
+      .select("id, parent_topic_id, topic_code, topic_name")
+      .in("id", pending);
+    const rows = data ?? [];
+    rows.forEach((t: any) => topics.set(t.id, t));
+    pending = Array.from(
+      new Set(
+        rows
+          .map((t: any) => t.parent_topic_id as string | null)
+          .filter((p: string | null): p is string => !!p && !topics.has(p)),
+      ),
+    );
+  }
+
+  const rootOf = (id: string) => {
+    let node = topics.get(id);
+    let guard = 0;
+    while (node?.parent_topic_id && topics.has(node.parent_topic_id) && guard++ < 6) {
+      node = topics.get(node.parent_topic_id);
+    }
+    return node ?? null;
+  };
+
+  interface Group {
+    key: string;
+    name: string;
+    code: string;
+    ids: Set<string>;
+    count: number;
+    subs: Map<string, { key: string; name: string; code: string; ids: Set<string>; count: number }>;
+  }
+  const groups = new Map<string, Group>();
+
+  for (const topicId of topicOf.values()) {
+    const leaf = topics.get(topicId);
+    const root = rootOf(topicId);
+    if (!root) continue;
+    const key = String(root.topic_name).trim().toLowerCase();
+    let g = groups.get(key);
+    if (!g) {
+      g = { key, name: root.topic_name, code: root.topic_code, ids: new Set(), count: 0, subs: new Map() };
+      groups.set(key, g);
+    }
+    g.ids.add(root.id);
+    g.count++;
+    if (leaf && leaf.id !== root.id) {
+      const subKey = String(leaf.topic_name).trim().toLowerCase();
+      let s = g.subs.get(subKey);
+      if (!s) {
+        s = { key: subKey, name: leaf.topic_name, code: leaf.topic_code, ids: new Set(), count: 0 };
+        g.subs.set(subKey, s);
+      }
+      s.ids.add(leaf.id);
+      s.count++;
+    }
+  }
+
+  return Array.from(groups.values())
+    .map((g) => ({
+      key: g.key,
+      name: g.name,
+      code: g.code,
+      ids: Array.from(g.ids),
+      count: g.count,
+      subtopics: Array.from(g.subs.values())
+        .map((s) => ({ key: s.key, name: s.name, code: s.code, ids: Array.from(s.ids), count: s.count }))
+        .sort((a, b) => String(a.code).localeCompare(String(b.code), undefined, { numeric: true })),
+    }))
+    .sort((a, b) => String(a.code).localeCompare(String(b.code), undefined, { numeric: true }));
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -52,6 +178,7 @@ Deno.serve(async (req) => {
     const level = typeof body.level === "string" ? body.level : null;
     const source = typeof body.source === "string" ? body.source : "random";
     const paperId = typeof body.paper_id === "string" ? body.paper_id : null;
+
     const topicIds: string[] = Array.isArray(body.topic_ids)
       ? body.topic_ids.filter((t: unknown) => typeof t === "string")
       : [];
@@ -71,6 +198,11 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
+
+    if (body.mode === "topics") {
+      return json({ topics: await availableTopics(supabase, level) });
+    }
+
 
     // --- papers in scope -------------------------------------------------
     let papersQuery = supabase.from("papers").select("id, level, paper_code, year, session");
