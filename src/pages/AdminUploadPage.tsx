@@ -455,7 +455,7 @@ const AdminUploadPage = () => {
           </div>
 
           {pending.length > 0 && (
-            <div className="max-h-64 space-y-1.5 overflow-y-auto rounded-lg border border-border/40 p-2">
+            <div className="max-h-72 space-y-1.5 overflow-y-auto rounded-lg border border-border/40 p-2">
               {pending.map((p, idx) => (
                 <div key={`${p.file.name}-${idx}`} className="flex items-center gap-2 text-xs">
                   <Input
@@ -472,9 +472,18 @@ const AdminUploadPage = () => {
                     }
                     className="h-8 w-16"
                   />
-                  <span className="min-w-0 flex-1 truncate font-mono text-muted-foreground">
-                    {p.file.name}
-                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-mono text-muted-foreground">{p.file.name}</div>
+                    <div
+                      className={
+                        p.targetLabel
+                          ? "truncate text-[11px] text-emerald-300"
+                          : "truncate text-[11px] text-amber-300"
+                      }
+                    >
+                      {p.targetLabel ?? "Paper not recognised — uses the paper picked above"}
+                    </div>
+                  </div>
                   {p.status === "uploading" && <Loader2 className="h-4 w-4 animate-spin" />}
                   {p.status === "done" && <CheckCircle2 className="h-4 w-4 text-success" />}
                   {p.status === "error" && (
@@ -487,10 +496,18 @@ const AdminUploadPage = () => {
 
           {uploading && <Progress value={progress} />}
 
-          <Button className="gap-2" onClick={uploadAll} disabled={uploading || !paperId}>
+          <Button
+            className="gap-2"
+            onClick={uploadAll}
+            disabled={
+              uploading ||
+              !pending.some((p) => p.question && (p.targetPaperId ?? paperId))
+            }
+          >
             {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-            Upload {pending.filter((p) => p.question).length || ""} images
+            Upload {pending.filter((p) => p.question && (p.targetPaperId ?? paperId)).length || ""} images
           </Button>
+
         </div>
 
         {paperId && (
