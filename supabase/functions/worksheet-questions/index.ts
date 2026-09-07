@@ -199,6 +199,11 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
+    if (body.mode === "topics") {
+      return json({ topics: await availableTopics(supabase, level) });
+    }
+
+
     // --- papers in scope -------------------------------------------------
     let papersQuery = supabase.from("papers").select("id, level, paper_code, year, session");
     if (paperId) papersQuery = papersQuery.eq("id", paperId);
