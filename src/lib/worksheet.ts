@@ -40,7 +40,30 @@ export interface WorksheetRequest {
   shuffle: boolean;
 }
 
+export interface WorksheetTopicOption {
+  key: string;
+  name: string;
+  code: string;
+  ids: string[];
+  count: number;
+}
+
+export interface WorksheetTopicGroup extends WorksheetTopicOption {
+  subtopics: WorksheetTopicOption[];
+}
+
+/** Only topics that have worksheet-ready (image + answer key) mapped questions. */
+export const fetchWorksheetTopics = async (level: string): Promise<WorksheetTopicGroup[]> => {
+  const supabase = await getSupabase();
+  const { data, error } = await supabase.functions.invoke("worksheet-questions", {
+    body: { mode: "topics", level },
+  });
+  if (error) return [];
+  return (data?.topics ?? []) as WorksheetTopicGroup[];
+};
+
 /** Server-side selection: images + answer keys never leave the edge function unfiltered. */
+
 export const fetchWorksheetSelection = async (req: WorksheetRequest): Promise<WorksheetSelection> => {
   const supabase = await getSupabase();
   const { data, error } = await supabase.functions.invoke("worksheet-questions", { body: req });
