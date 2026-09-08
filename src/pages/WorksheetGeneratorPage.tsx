@@ -171,7 +171,9 @@ const WorksheetGeneratorPage = () => {
         level,
         source,
         paper_id: source === "paper" ? paperId : null,
-        topic_ids: source === "topic" ? [subtopicId || topicId] : [],
+        topic_ids:
+          source === "topic" ? (selectedSub?.ids ?? selectedTopic?.ids ?? []) : [],
+
         refs: source === "mistakes" ? mistakeRefs : [],
         count: effectiveCount,
         shuffle,
