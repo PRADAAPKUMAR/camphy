@@ -105,7 +105,8 @@ const WorksheetGeneratorPage = () => {
     [wrongSets],
   );
 
-  const selectedTopic = tree.find((t) => t.id === topicId);
+  const selectedTopic = tree.find((t) => t.key === topicId);
+  const selectedSub = selectedTopic?.subtopics.find((c) => c.key === subtopicId);
   const effectiveCount = Math.min(40, Math.max(1, Number(customCount) || count));
 
   const reset = () => {
@@ -120,20 +121,18 @@ const WorksheetGeneratorPage = () => {
       return p ? `Past paper: ${p.paper_code} — ${p.session} ${p.year}` : "Past paper";
     }
     if (source === "topic") {
-      const sub = selectedTopic?.children.find((c) => c.id === subtopicId);
-      if (sub) return `Topic: ${selectedTopic?.topic_name} — ${sub.topic_name}`;
-      if (selectedTopic) return `Topic: ${selectedTopic.topic_name}`;
+      if (selectedSub) return `Topic: ${selectedTopic?.name} — ${selectedSub.name}`;
+      if (selectedTopic) return `Topic: ${selectedTopic.name}`;
       return "Topic practice";
     }
     if (source === "mistakes") return "Source: my previous mistakes";
     return "Source: random mixed questions";
-  }, [source, papers, paperId, selectedTopic, subtopicId]);
+  }, [source, papers, paperId, selectedTopic, selectedSub]);
 
   const fileBase = useMemo(() => {
     const lvl = level === "IGCSE" ? "IGCSE" : "AS";
     if (source === "topic" && selectedTopic) {
-      const sub = selectedTopic.children.find((c) => c.id === subtopicId);
-      return `PhysicsHQ_${lvl}_${sanitizeFilePart(sub?.topic_name ?? selectedTopic.topic_name)}_MCQ`;
+      return `PhysicsHQ_${lvl}_${sanitizeFilePart(selectedSub?.name ?? selectedTopic.name)}_MCQ`;
     }
     if (source === "paper") {
       const p = papers?.find((x) => x.id === paperId);
@@ -141,7 +140,8 @@ const WorksheetGeneratorPage = () => {
     }
     if (source === "mistakes") return `PhysicsHQ_${lvl}_My_Mistakes_MCQ`;
     return `PhysicsHQ_${lvl}_Mixed_MCQ`;
-  }, [level, source, selectedTopic, subtopicId, papers, paperId]);
+  }, [level, source, selectedTopic, selectedSub, papers, paperId]);
+
 
   const meta = {
     levelLabel: LEVELS.find((l) => l.value === level)?.label ?? displayLevel(level),
