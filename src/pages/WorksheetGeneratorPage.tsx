@@ -71,7 +71,14 @@ const WorksheetGeneratorPage = () => {
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<string | null>(null);
 
-  const { tree } = useSyllabusTopicTree(level, source === "topic");
+  const { data: topicGroups, isLoading: topicsLoading } = useQuery({
+    queryKey: ["worksheet-topics", level],
+    queryFn: () => fetchWorksheetTopics(level),
+    enabled: source === "topic",
+    staleTime: 30 * 60 * 1000,
+  });
+  const tree = topicGroups ?? [];
+
 
   const { data: papers } = useQuery({
     queryKey: ["worksheet-papers", level],
