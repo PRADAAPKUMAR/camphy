@@ -23,11 +23,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useSyllabusTopicTree } from "@/hooks/use-syllabus";
 import { displayLevel } from "@/lib/syllabus";
 import { collectWrongQuestions, readPerformanceHistory } from "@/lib/performance-history";
 import {
   fetchWorksheetSelection,
+  fetchWorksheetTopics,
   generateAnswerKeyPdf,
   generateWorksheetPdf,
   loadWorksheetImages,
@@ -36,6 +36,7 @@ import {
   type WorksheetSelection,
   type WorksheetSource,
 } from "@/lib/worksheet";
+
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
