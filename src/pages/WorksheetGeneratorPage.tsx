@@ -331,16 +331,23 @@ const WorksheetGeneratorPage = () => {
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose a topic" />
+                    <SelectValue
+                      placeholder={topicsLoading ? "Loading topics…" : "Choose a topic"}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {tree.map((t) => (
-                      <SelectItem key={t.id} value={t.id}>
-                        {t.topic_code} {t.topic_name}
+                      <SelectItem key={t.key} value={t.key}>
+                        {t.code} {t.name} ({t.count})
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {!topicsLoading && !tree.length && (
+                  <p className="text-xs text-muted-foreground">
+                    No topic-mapped questions with images for this level yet.
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label>Subtopic (optional)</Label>
@@ -350,21 +357,22 @@ const WorksheetGeneratorPage = () => {
                     setSubtopicId(v === "__all" ? "" : v);
                     reset();
                   }}
-                  disabled={!selectedTopic?.children.length}
+                  disabled={!selectedTopic?.subtopics.length}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="All subtopics" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__all">All subtopics</SelectItem>
-                    {(selectedTopic?.children ?? []).map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.topic_code} {c.topic_name}
+                    {(selectedTopic?.subtopics ?? []).map((c) => (
+                      <SelectItem key={c.key} value={c.key}>
+                        {c.code} {c.name} ({c.count})
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+
             </div>
           )}
 
