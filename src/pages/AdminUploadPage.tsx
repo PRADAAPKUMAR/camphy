@@ -31,13 +31,46 @@ const getSupabase = () => import("@/integrations/supabase/client").then((m) => m
 
 interface Pending {
   file: File;
+  name: string;
   question: number | null;
   /** Paper resolved from the filename; null when it could not be matched. */
   targetPaperId: string | null;
   targetLabel: string | null;
+  /** The filename was recognised by the parser. */
+  recognised: boolean;
+  /** Recognised but no matching paper row exists. */
+  unmatched: boolean;
   status: "pending" | "uploading" | "done" | "error";
   message?: string;
 }
+
+const IMAGE_EXT = /\.(jpe?g|png|webp|gif|bmp)$/i;
+const CONCURRENCY = 4;
+
+const extractFiles = async (input: File[]): Promise<File[]> => {
+  const out: File[] = [];
+  for (const f of input) {
+    if (IMAGE_EXT.test(f.name) || f.type.startsWith("image/")) {
+      out.push(f);
+      continue;
+    }
+    if (!/\.zip$/i.test(f.name)) continue;
+    const JSZip = (await import("jszip")).default;
+    const zip = await JSZip.loadAsync(f);
+    const entries = Object.values(zip.files).filter(
+      (e) => !e.dir && IMAGE_EXT.test(e.name) && !e.name.split("/").pop()!.startsWith("."),
+    );
+    for (const entry of entries) {
+      const blob = await entry.async("blob");
+      const base = entry.name.split("/").pop()!;
+      const ext = base.split(".").pop()!.toLowerCase();
+      const type = ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg";
+      out.push(new File([blob], base, { type }));
+    }
+  }
+  return out;
+};
+
 
 
 const callTheory = async (passcode: string, body: Record<string, unknown>) => {
