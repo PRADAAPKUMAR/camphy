@@ -23,11 +23,11 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useSyllabusTopicTree } from "@/hooks/use-syllabus";
 import { displayLevel } from "@/lib/syllabus";
 import { collectWrongQuestions, readPerformanceHistory } from "@/lib/performance-history";
 import {
   fetchWorksheetSelection,
+  fetchWorksheetTopics,
   generateAnswerKeyPdf,
   generateWorksheetPdf,
   loadWorksheetImages,
@@ -36,6 +36,7 @@ import {
   type WorksheetSelection,
   type WorksheetSource,
 } from "@/lib/worksheet";
+
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
@@ -70,7 +71,14 @@ const WorksheetGeneratorPage = () => {
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<string | null>(null);
 
-  const { tree } = useSyllabusTopicTree(level, source === "topic");
+  const { data: topicGroups, isLoading: topicsLoading } = useQuery({
+    queryKey: ["worksheet-topics", level],
+    queryFn: () => fetchWorksheetTopics(level),
+    enabled: source === "topic",
+    staleTime: 30 * 60 * 1000,
+  });
+  const tree = topicGroups ?? [];
+
 
   const { data: papers } = useQuery({
     queryKey: ["worksheet-papers", level],
@@ -97,7 +105,8 @@ const WorksheetGeneratorPage = () => {
     [wrongSets],
   );
 
-  const selectedTopic = tree.find((t) => t.id === topicId);
+  const selectedTopic = tree.find((t) => t.key === topicId);
+  const selectedSub = selectedTopic?.subtopics.find((c) => c.key === subtopicId);
   const effectiveCount = Math.min(40, Math.max(1, Number(customCount) || count));
 
   const reset = () => {
@@ -112,20 +121,18 @@ const WorksheetGeneratorPage = () => {
       return p ? `Past paper: ${p.paper_code} — ${p.session} ${p.year}` : "Past paper";
     }
     if (source === "topic") {
-      const sub = selectedTopic?.children.find((c) => c.id === subtopicId);
-      if (sub) return `Topic: ${selectedTopic?.topic_name} — ${sub.topic_name}`;
-      if (selectedTopic) return `Topic: ${selectedTopic.topic_name}`;
+      if (selectedSub) return `Topic: ${selectedTopic?.name} — ${selectedSub.name}`;
+      if (selectedTopic) return `Topic: ${selectedTopic.name}`;
       return "Topic practice";
     }
     if (source === "mistakes") return "Source: my previous mistakes";
     return "Source: random mixed questions";
-  }, [source, papers, paperId, selectedTopic, subtopicId]);
+  }, [source, papers, paperId, selectedTopic, selectedSub]);
 
   const fileBase = useMemo(() => {
     const lvl = level === "IGCSE" ? "IGCSE" : "AS";
     if (source === "topic" && selectedTopic) {
-      const sub = selectedTopic.children.find((c) => c.id === subtopicId);
-      return `PhysicsHQ_${lvl}_${sanitizeFilePart(sub?.topic_name ?? selectedTopic.topic_name)}_MCQ`;
+      return `PhysicsHQ_${lvl}_${sanitizeFilePart(selectedSub?.name ?? selectedTopic.name)}_MCQ`;
     }
     if (source === "paper") {
       const p = papers?.find((x) => x.id === paperId);
@@ -133,7 +140,8 @@ const WorksheetGeneratorPage = () => {
     }
     if (source === "mistakes") return `PhysicsHQ_${lvl}_My_Mistakes_MCQ`;
     return `PhysicsHQ_${lvl}_Mixed_MCQ`;
-  }, [level, source, selectedTopic, subtopicId, papers, paperId]);
+  }, [level, source, selectedTopic, selectedSub, papers, paperId]);
+
 
   const meta = {
     levelLabel: LEVELS.find((l) => l.value === level)?.label ?? displayLevel(level),
@@ -163,7 +171,9 @@ const WorksheetGeneratorPage = () => {
         level,
         source,
         paper_id: source === "paper" ? paperId : null,
-        topic_ids: source === "topic" ? [subtopicId || topicId] : [],
+        topic_ids:
+          source === "topic" ? (selectedSub?.ids ?? selectedTopic?.ids ?? []) : [],
+
         refs: source === "mistakes" ? mistakeRefs : [],
         count: effectiveCount,
         shuffle,
@@ -323,16 +333,23 @@ const WorksheetGeneratorPage = () => {
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose a topic" />
+                    <SelectValue
+                      placeholder={topicsLoading ? "Loading topics…" : "Choose a topic"}
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {tree.map((t) => (
-                      <SelectItem key={t.id} value={t.id}>
-                        {t.topic_code} {t.topic_name}
+                      <SelectItem key={t.key} value={t.key}>
+                        {t.code} {t.name} ({t.count})
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {!topicsLoading && !tree.length && (
+                  <p className="text-xs text-muted-foreground">
+                    No topic-mapped questions with images for this level yet.
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label>Subtopic (optional)</Label>
@@ -342,21 +359,22 @@ const WorksheetGeneratorPage = () => {
                     setSubtopicId(v === "__all" ? "" : v);
                     reset();
                   }}
-                  disabled={!selectedTopic?.children.length}
+                  disabled={!selectedTopic?.subtopics.length}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="All subtopics" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__all">All subtopics</SelectItem>
-                    {(selectedTopic?.children ?? []).map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.topic_code} {c.topic_name}
+                    {(selectedTopic?.subtopics ?? []).map((c) => (
+                      <SelectItem key={c.key} value={c.key}>
+                        {c.code} {c.name} ({c.count})
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+
             </div>
           )}
 
