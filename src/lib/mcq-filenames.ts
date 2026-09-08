@@ -2,18 +2,26 @@
  * Cambridge MCQ question-image filename parsing.
  *
  * Recognised shape (separators can be `_`, `-`, space or `.`):
- *   9702_s23_12_q07.jpg  -> AS LEVEL, V2, May/June 2023, question 7
- *   0625_w22_22_q7.png   -> IGCSE, EXTENDED MCQ-V2, Oct/Nov 2022, question 7
+ *   9702_m20_12_q01.jpg  -> AS LEVEL, Feb/March 2020, component 12, V2, Q1
+ *   9702_s23_12_q07.jpg  -> AS LEVEL, May/June 2023, component 12, V2, Q7
+ *   0625_w22_22_q07.png  -> IGCSE, Oct/Nov 2022, component 22, EXTENDED MCQ-V2, Q7
  *
- * The parsed paper description is matched against the existing `papers` rows,
- * so images can be dropped in bulk and routed to the right paper folder.
+ * Matching against the existing `papers` rows is done on canonical values
+ * (canonical level + canonical session + year + paper_code), never on exact
+ * human-readable strings, because the table mixes labels such as
+ * "May / June" (AS) and "June" (IGCSE).
  */
 
 export interface ParsedMcqImageName {
   syllabus_code: string;
+  /** Canonical session code: "s" | "m" | "w" */
+  session_code: string;
+  /** Human-readable session label for display. */
   session: string;
   year: number;
   component: string;
+  /** Canonical level: "igcse" | "aslevel" */
+  level_code: string;
   level: string;
   paper_code: string;
   question: number | null;
@@ -21,13 +29,52 @@ export interface ParsedMcqImageName {
 
 const IGCSE_CODES = new Set(["0625", "0972", "0654", "0653"]);
 
-const SESSIONS: Record<string, string> = {
+const SESSION_LABELS: Record<string, string> = {
   s: "May / June",
   m: "Feb/March",
   w: "October / November",
 };
 
-export const sessionFromLetter = (letter: string) => SESSIONS[letter.toLowerCase()] ?? null;
+const squash = (v?: string | null) =>
+  (v ?? "").toLowerCase().replace(/[\s._\-/]+/g, "");
+
+/** Canonical level code for any spelling of the level. */
+export const canonicalLevel = (value?: string | null): string | null => {
+  const v = squash(value);
+  if (!v) return null;
+  if (v.startsWith("igcse") || v.startsWith("0625") || v.startsWith("0972")) return "igcse";
+  if (v.startsWith("as") || v.startsWith("alevel") || v.startsWith("a2") || v.startsWith("9702"))
+    return "aslevel";
+  return v;
+};
+
+/** Canonical Cambridge session code ("s", "m", "w") for any spelling. */
+export const canonicalSession = (value?: string | null): string | null => {
+  const v = squash(value);
+  if (!v) return null;
+  if (v === "s" || v === "m" || v === "w") return v;
+  if (v.startsWith("mayjune") || v.startsWith("june") || v.startsWith("may") || v === "summer")
+    return "s";
+  if (
+    v.startsWith("febmarch") ||
+    v.startsWith("februarymarch") ||
+    v.startsWith("feb") ||
+    v.startsWith("march")
+  )
+    return "m";
+  if (
+    v.startsWith("octnov") ||
+    v.startsWith("octobernovember") ||
+    v.startsWith("oct") ||
+    v.startsWith("nov") ||
+    v === "winter"
+  )
+    return "w";
+  return null;
+};
+
+export const sessionFromLetter = (letter: string) =>
+  SESSION_LABELS[letter.toLowerCase()] ?? null;
 
 /** Question number from a filename (`q07`, `question-7`, trailing `-07`). */
 export const questionFromName = (base: string): number | null => {
@@ -68,16 +115,21 @@ export const parseMcqImageName = (filename: string): ParsedMcqImageName | null =
   if (!m) return null;
 
   const [, syllabus_code, letter, yy, component] = m;
+  const session_code = canonicalSession(letter);
   const session = sessionFromLetter(letter);
   const paper_code = paperCodeFor(syllabus_code, component);
-  if (!session || !paper_code) return null;
+  if (!session_code || !session || !paper_code) return null;
+
+  const isIgcse = IGCSE_CODES.has(syllabus_code);
 
   return {
     syllabus_code,
+    session_code,
     session,
     year: 2000 + Number(yy),
     component,
-    level: IGCSE_CODES.has(syllabus_code) ? "IGCSE" : "AS LEVEL",
+    level_code: isIgcse ? "igcse" : "aslevel",
+    level: isIgcse ? "IGCSE" : "AS LEVEL",
     paper_code,
     question: questionFromName(base.slice(m.index! + m[0].length) || base),
   };
@@ -91,15 +143,13 @@ export interface PaperRow {
   year: number | null;
 }
 
-const norm = (v?: string | null) => (v ?? "").toLowerCase().replace(/\s+/g, "");
-
 /** Finds the existing paper row a parsed filename belongs to. */
 export const matchPaper = (papers: PaperRow[], parsed: ParsedMcqImageName): PaperRow | null =>
   papers.find(
     (p) =>
-      norm(p.level) === norm(parsed.level) &&
-      norm(p.paper_code) === norm(parsed.paper_code) &&
-      norm(p.session) === norm(parsed.session) &&
+      canonicalLevel(p.level) === parsed.level_code &&
+      squash(p.paper_code) === squash(parsed.paper_code) &&
+      canonicalSession(p.session) === parsed.session_code &&
       Number(p.year) === parsed.year,
   ) ?? null;
 

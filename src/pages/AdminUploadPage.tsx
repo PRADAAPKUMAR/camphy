@@ -31,13 +31,46 @@ const getSupabase = () => import("@/integrations/supabase/client").then((m) => m
 
 interface Pending {
   file: File;
+  name: string;
   question: number | null;
   /** Paper resolved from the filename; null when it could not be matched. */
   targetPaperId: string | null;
   targetLabel: string | null;
+  /** The filename was recognised by the parser. */
+  recognised: boolean;
+  /** Recognised but no matching paper row exists. */
+  unmatched: boolean;
   status: "pending" | "uploading" | "done" | "error";
   message?: string;
 }
+
+const IMAGE_EXT = /\.(jpe?g|png|webp|gif|bmp)$/i;
+const CONCURRENCY = 4;
+
+const extractFiles = async (input: File[]): Promise<File[]> => {
+  const out: File[] = [];
+  for (const f of input) {
+    if (IMAGE_EXT.test(f.name) || f.type.startsWith("image/")) {
+      out.push(f);
+      continue;
+    }
+    if (!/\.zip$/i.test(f.name)) continue;
+    const JSZip = (await import("jszip")).default;
+    const zip = await JSZip.loadAsync(f);
+    const entries = Object.values(zip.files).filter(
+      (e) => !e.dir && IMAGE_EXT.test(e.name) && !e.name.split("/").pop()!.startsWith("."),
+    );
+    for (const entry of entries) {
+      const blob = await entry.async("blob");
+      const base = entry.name.split("/").pop()!;
+      const ext = base.split(".").pop()!.toLowerCase();
+      const type = ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg";
+      out.push(new File([blob], base, { type }));
+    }
+  }
+  return out;
+};
+
 
 
 const callTheory = async (passcode: string, body: Record<string, unknown>) => {
@@ -145,42 +178,86 @@ const AdminUploadPage = () => {
     }
   };
 
-  const onFiles = (files: FileList | null) => {
+  const onFiles = async (files: FileList | null) => {
     if (!files) return;
     const rows = papers ?? [];
-    const next: Pending[] = Array.from(files)
-      .filter((f) => f.type.startsWith("image/"))
-      .map((file) => {
-        const parsed = parseMcqImageName(file.name);
-        const match = parsed ? matchPaper(rows, parsed) : null;
-        return {
-          file,
-          question: parsed?.question ?? questionNumberFromFilename(file.name),
-          targetPaperId: match?.id ?? null,
-          targetLabel: match ? paperLabel(match) : null,
-          status: "pending" as const,
-        };
-      })
-      .sort(
-        (a, b) =>
-          (a.targetLabel ?? "zz").localeCompare(b.targetLabel ?? "zz") ||
-          (a.question ?? 999) - (b.question ?? 999),
-      );
-    setPending(next);
-
-    const matched = next.filter((p) => p.targetPaperId).length;
-    const papersHit = new Set(next.map((p) => p.targetPaperId).filter(Boolean)).size;
-    if (matched) {
-      toast.success(`${matched} image${matched > 1 ? "s" : ""} matched to ${papersHit} paper${papersHit > 1 ? "s" : ""}`);
-    }
-    if (matched < next.length) {
-      toast.info(`${next.length - matched} file(s) need the paper picked manually below`);
+    setReading(true);
+    try {
+      const expanded = await extractFiles(Array.from(files));
+      const next: Pending[] = expanded
+        .map((file) => {
+          const parsed = parseMcqImageName(file.name);
+          const match = parsed ? matchPaper(rows, parsed) : null;
+          return {
+            file,
+            name: file.name,
+            question: parsed?.question ?? questionNumberFromFilename(file.name),
+            targetPaperId: match?.id ?? null,
+            targetLabel: match
+              ? paperLabel(match)
+              : parsed
+                ? `No paper found for ${parsed.level} · ${parsed.paper_code} · ${parsed.session} ${parsed.year}`
+                : null,
+            recognised: Boolean(parsed),
+            unmatched: Boolean(parsed) && !match,
+            status: "pending" as const,
+          };
+        })
+        .sort(
+          (a, b) =>
+            (a.targetLabel ?? "zz").localeCompare(b.targetLabel ?? "zz") ||
+            (a.question ?? 999) - (b.question ?? 999),
+        );
+      setPending(next);
+      setOverrideUnmatched(false);
+      if (!next.length) toast.error("No image files found in that selection");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not read those files");
+    } finally {
+      setReading(false);
     }
   };
 
+  const targetFor = (p: Pending) =>
+    p.targetPaperId ?? (p.recognised && !overrideUnmatched ? null : paperId || null);
+
+  const summary = useMemo(() => {
+    const matched = pending.filter((p) => p.targetPaperId).length;
+    const unmatched = pending.filter((p) => p.unmatched).length;
+    const unparsed = pending.filter((p) => !p.recognised).length;
+    const invalidQ = pending.filter(
+      (p) => !p.question || p.question < 1 || p.question > 100,
+    ).length;
+    const seen = new Map<string, number>();
+    let duplicates = 0;
+    for (const p of pending) {
+      const t = p.targetPaperId ?? (p.recognised ? "?" : paperId);
+      if (!t || !p.question) continue;
+      const key = `${t}#${p.question}`;
+      const n = (seen.get(key) ?? 0) + 1;
+      seen.set(key, n);
+      if (n > 1) duplicates++;
+    }
+    const papersHit = new Set(pending.map((p) => p.targetPaperId).filter(Boolean)).size;
+    return { total: pending.length, matched, unmatched, unparsed, invalidQ, duplicates, papersHit };
+  }, [pending, paperId, overrideUnmatched]);
+
+  const ready = useMemo(
+    () => pending.filter((p) => p.question && targetFor(p)),
+    [pending, paperId, overrideUnmatched],
+  );
+  const blocked = summary.unmatched > 0 && !overrideUnmatched;
+
   const uploadAll = async () => {
-    const ready = pending.filter((p) => p.question && (p.targetPaperId ?? paperId));
-    if (!ready.length) {
+    if (blocked) {
+      return toast.error(
+        `${summary.unmatched} recognised file(s) have no matching paper — resolve them before uploading`,
+      );
+    }
+    const queue = pending
+      .map((p, index) => ({ p, index, target: targetFor(p) }))
+      .filter((x) => x.p.question && x.target);
+    if (!queue.length) {
       return toast.error(
         "No uploadable files — each image needs a question number and a paper (from its filename or the picker above)",
       );
@@ -189,50 +266,62 @@ const AdminUploadPage = () => {
     setUploading(true);
     setProgress(0);
     let done = 0;
+    let failed = 0;
 
-    for (let i = 0; i < pending.length; i++) {
-      const item = pending[i];
-      const target = item.targetPaperId ?? paperId;
-      if (!item.question || !target) continue;
+    const runOne = async ({ p, index, target }: (typeof queue)[number]) => {
       setPending((prev) =>
-        prev.map((p, idx) => (idx === i ? { ...p, status: "uploading" } : p)),
+        prev.map((x, idx) => (idx === index ? { ...x, status: "uploading" } : x)),
       );
       try {
         const [data_base64, dims] = await Promise.all([
-          readFileAsBase64(item.file),
-          imageDimensions(item.file),
+          readFileAsBase64(p.file),
+          imageDimensions(p.file),
         ]);
         await callAdmin(passcode, {
           action: "upload",
           paper_id: target,
-          question_number: item.question,
-          content_type: item.file.type,
+          question_number: p.question,
+          content_type: p.file.type,
           data_base64,
           width: dims?.width,
           height: dims?.height,
         });
-        setPending((prev) => prev.map((p, idx) => (idx === i ? { ...p, status: "done" } : p)));
+        setPending((prev) =>
+          prev.map((x, idx) => (idx === index ? { ...x, status: "done" } : x)),
+        );
         if (target === paperId) {
           setUploaded((prev) =>
-            Array.from(new Set([...prev, item.question!])).sort((a, b) => a - b),
+            Array.from(new Set([...prev, p.question!])).sort((a, b) => a - b),
           );
         }
       } catch (e) {
+        failed++;
         setPending((prev) =>
-          prev.map((p, idx) =>
-            idx === i
-              ? { ...p, status: "error", message: e instanceof Error ? e.message : "Failed" }
-              : p,
+          prev.map((x, idx) =>
+            idx === index
+              ? { ...x, status: "error", message: e instanceof Error ? e.message : "Failed" }
+              : x,
           ),
         );
       }
       done++;
-      setProgress(Math.round((done / ready.length) * 100));
-    }
+      setProgress(Math.round((done / queue.length) * 100));
+    };
+
+    let cursor = 0;
+    const workers = Array.from({ length: Math.min(CONCURRENCY, queue.length) }, async () => {
+      while (cursor < queue.length) {
+        const job = queue[cursor++];
+        await runOne(job);
+      }
+    });
+    await Promise.all(workers);
 
     setUploading(false);
-    toast.success("Upload finished");
+    if (failed) toast.error(`${queue.length - failed} uploaded, ${failed} failed`);
+    else toast.success(`${queue.length} image(s) uploaded`);
   };
+
 
 
   const removeQuestion = async (q: number) => {
