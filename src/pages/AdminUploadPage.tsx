@@ -113,6 +113,8 @@ const AdminUploadPage = () => {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [uploaded, setUploaded] = useState<number[]>([]);
+  const [reading, setReading] = useState(false);
+  const [overrideUnmatched, setOverrideUnmatched] = useState(false);
 
   const { data: tables, isLoading: tablesLoading } = useQuery({
     queryKey: ["admin-tables"],
