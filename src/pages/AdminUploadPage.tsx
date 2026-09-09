@@ -113,6 +113,8 @@ const AdminUploadPage = () => {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [uploaded, setUploaded] = useState<number[]>([]);
+  const [reading, setReading] = useState(false);
+  const [overrideUnmatched, setOverrideUnmatched] = useState(false);
 
   const { data: tables, isLoading: tablesLoading } = useQuery({
     queryKey: ["admin-tables"],
@@ -533,20 +535,67 @@ const AdminUploadPage = () => {
 
         <div className="glass-card space-y-4 rounded-2xl p-5">
           <div className="space-y-2">
-            <Label htmlFor="files">Question images</Label>
+            <Label htmlFor="files">Question images or ZIP files</Label>
             <Input
               id="files"
               type="file"
-              accept="image/*"
+              accept="image/*,.zip,application/zip"
               multiple
               onChange={(e) => onFiles(e.target.files)}
             />
+            <p className="text-[11px] text-muted-foreground">
+              You can drop thousands of images at once, or a .zip containing them — every file
+              inside is read the same way.
+            </p>
           </div>
+
+          {reading && (
+            <p className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> Reading files…
+            </p>
+          )}
+
+          {pending.length > 0 && (
+            <div className="grid gap-2 rounded-xl border border-border/40 p-3 text-xs sm:grid-cols-3">
+              <div>Total files: <span className="font-semibold">{summary.total}</span></div>
+              <div className="text-emerald-300">
+                Matched: <span className="font-semibold">{summary.matched}</span>
+                {summary.papersHit ? ` (${summary.papersHit} paper${summary.papersHit > 1 ? "s" : ""})` : ""}
+              </div>
+              <div className={summary.unmatched ? "text-destructive" : "text-muted-foreground"}>
+                Unmatched: <span className="font-semibold">{summary.unmatched}</span>
+              </div>
+              <div className={summary.unparsed ? "text-amber-300" : "text-muted-foreground"}>
+                Name not readable: <span className="font-semibold">{summary.unparsed}</span>
+              </div>
+              <div className={summary.invalidQ ? "text-amber-300" : "text-muted-foreground"}>
+                Invalid question no.: <span className="font-semibold">{summary.invalidQ}</span>
+              </div>
+              <div className={summary.duplicates ? "text-amber-300" : "text-muted-foreground"}>
+                Duplicates: <span className="font-semibold">{summary.duplicates}</span>
+              </div>
+            </div>
+          )}
+
+          {summary.unmatched > 0 && (
+            <label className="flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-xs">
+              <input
+                type="checkbox"
+                className="mt-0.5"
+                checked={overrideUnmatched}
+                onChange={(e) => setOverrideUnmatched(e.target.checked)}
+              />
+              <span>
+                {summary.unmatched} file(s) were read correctly but no such paper exists. Upload is
+                blocked until you tick this box to send them to the paper picked above instead.
+              </span>
+            </label>
+          )}
 
           {pending.length > 0 && (
             <div className="max-h-72 space-y-1.5 overflow-y-auto rounded-lg border border-border/40 p-2">
               {pending.map((p, idx) => (
-                <div key={`${p.file.name}-${idx}`} className="flex items-center gap-2 text-xs">
+                <div key={`${p.name}-${idx}`} className="flex items-center gap-2 text-xs">
                   <Input
                     type="number"
                     min={1}
@@ -562,15 +611,17 @@ const AdminUploadPage = () => {
                     className="h-8 w-16"
                   />
                   <div className="min-w-0 flex-1">
-                    <div className="truncate font-mono text-muted-foreground">{p.file.name}</div>
+                    <div className="truncate font-mono text-muted-foreground">{p.name}</div>
                     <div
                       className={
-                        p.targetLabel
+                        p.targetPaperId
                           ? "truncate text-[11px] text-emerald-300"
-                          : "truncate text-[11px] text-amber-300"
+                          : p.unmatched
+                            ? "truncate text-[11px] text-destructive"
+                            : "truncate text-[11px] text-amber-300"
                       }
                     >
-                      {p.targetLabel ?? "Paper not recognised — uses the paper picked above"}
+                      {p.targetLabel ?? "Name not readable — uses the paper picked above"}
                     </div>
                   </div>
                   {p.status === "uploading" && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -588,16 +639,14 @@ const AdminUploadPage = () => {
           <Button
             className="gap-2"
             onClick={uploadAll}
-            disabled={
-              uploading ||
-              !pending.some((p) => p.question && (p.targetPaperId ?? paperId))
-            }
+            disabled={uploading || reading || blocked || !ready.length}
           >
             {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-            Upload {pending.filter((p) => p.question && (p.targetPaperId ?? paperId)).length || ""} images
+            Upload {ready.length || ""} images
           </Button>
 
         </div>
+
 
         {paperId && (
           <div className="glass-card space-y-3 rounded-2xl p-5">
