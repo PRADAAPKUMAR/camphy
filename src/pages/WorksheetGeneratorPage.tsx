@@ -2,12 +2,23 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { AlertTriangle, ExternalLink, FileText, Loader2, Shuffle, Sparkles } from "lucide-react";
+import {
+  AlertTriangle,
+  ChevronDown,
+  ChevronRight,
+  ExternalLink,
+  FileText,
+  Loader2,
+  Shuffle,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -37,9 +48,6 @@ import {
   type WorksheetSource,
 } from "@/lib/worksheet";
 
-
-const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
-
 const LEVELS = [
   { value: "IGCSE", label: "IGCSE Physics 0625" },
   { value: "AS LEVEL", label: "AS Level Physics 9702" },
@@ -47,19 +55,25 @@ const LEVELS = [
 
 const SOURCES: { value: WorksheetSource; label: string }[] = [
   { value: "random", label: "Random questions" },
-  { value: "topic", label: "Topic / subtopic" },
-  { value: "paper", label: "Past paper" },
+  { value: "topic", label: "Topical questions" },
   { value: "mistakes", label: "My mistakes" },
 ];
 
 const COUNTS = [10, 15, 20, 25, 30, 40];
 
+/** One selected topic or subtopic. */
+interface Picked {
+  key: string;
+  label: string;
+  ids: string[];
+  count: number;
+}
+
 const WorksheetGeneratorPage = () => {
   const [level, setLevel] = useState("IGCSE");
   const [source, setSource] = useState<WorksheetSource>("random");
-  const [topicId, setTopicId] = useState<string>("");
-  const [subtopicId, setSubtopicId] = useState<string>("");
-  const [paperId, setPaperId] = useState<string>("");
+  const [picked, setPicked] = useState<Picked[]>([]);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [count, setCount] = useState(20);
   const [customCount, setCustomCount] = useState("");
   const [shuffle, setShuffle] = useState(false);
@@ -79,23 +93,6 @@ const WorksheetGeneratorPage = () => {
   });
   const tree = topicGroups ?? [];
 
-
-  const { data: papers } = useQuery({
-    queryKey: ["worksheet-papers", level],
-    queryFn: async () => {
-      const supabase = await getSupabase();
-      const { data, error } = await supabase
-        .from("papers")
-        .select("id, paper_code, year, session")
-        .eq("level", level)
-        .order("year", { ascending: false })
-        .order("paper_code");
-      if (error) throw error;
-      return data ?? [];
-    },
-    enabled: source === "paper",
-  });
-
   const wrongSets = useMemo(() => collectWrongQuestions(readPerformanceHistory()), []);
   const mistakeRefs = useMemo(
     () =>
@@ -105,8 +102,6 @@ const WorksheetGeneratorPage = () => {
     [wrongSets],
   );
 
-  const selectedTopic = tree.find((t) => t.key === topicId);
-  const selectedSub = selectedTopic?.subtopics.find((c) => c.key === subtopicId);
   const effectiveCount = Math.min(40, Math.max(1, Number(customCount) || count));
 
   const reset = () => {
@@ -115,33 +110,40 @@ const WorksheetGeneratorPage = () => {
     setFailed([]);
   };
 
+  const isPicked = (key: string) => picked.some((p) => p.key === key);
+
+  const togglePick = (entry: Picked, on: boolean) => {
+    setPicked((prev) => (on ? [...prev.filter((p) => p.key !== entry.key), entry] : prev.filter((p) => p.key !== entry.key)));
+    reset();
+  };
+
+  // Unique topic ids across every selection — this is what the query filters on.
+  const selectedTopicIds = useMemo(
+    () => Array.from(new Set(picked.flatMap((p) => p.ids))),
+    [picked],
+  );
+  const selectedPoolCount = picked.reduce((sum, p) => sum + p.count, 0);
+
   const sourceLabel = useMemo(() => {
-    if (source === "paper") {
-      const p = papers?.find((x) => x.id === paperId);
-      return p ? `Past paper: ${p.paper_code} — ${p.session} ${p.year}` : "Past paper";
-    }
     if (source === "topic") {
-      if (selectedSub) return `Topic: ${selectedTopic?.name} — ${selectedSub.name}`;
-      if (selectedTopic) return `Topic: ${selectedTopic.name}`;
-      return "Topic practice";
+      if (!picked.length) return "Topical practice";
+      if (picked.length <= 3) return `Topics: ${picked.map((p) => p.label).join(", ")}`;
+      return `Topics: ${picked.length} selected`;
     }
     if (source === "mistakes") return "Source: my previous mistakes";
     return "Source: random mixed questions";
-  }, [source, papers, paperId, selectedTopic, selectedSub]);
+  }, [source, picked]);
 
   const fileBase = useMemo(() => {
     const lvl = level === "IGCSE" ? "IGCSE" : "AS";
-    if (source === "topic" && selectedTopic) {
-      return `PhysicsHQ_${lvl}_${sanitizeFilePart(selectedSub?.name ?? selectedTopic.name)}_MCQ`;
-    }
-    if (source === "paper") {
-      const p = papers?.find((x) => x.id === paperId);
-      return `PhysicsHQ_${lvl}_${sanitizeFilePart(`${p?.paper_code ?? "Paper"}_${p?.session ?? ""}_${p?.year ?? ""}`)}_MCQ`;
+    if (source === "topic" && picked.length) {
+      const part =
+        picked.length === 1 ? sanitizeFilePart(picked[0].label) : `${picked.length}_Topics`;
+      return `PhysicsHQ_${lvl}_${part}_MCQ`;
     }
     if (source === "mistakes") return `PhysicsHQ_${lvl}_My_Mistakes_MCQ`;
     return `PhysicsHQ_${lvl}_Mixed_MCQ`;
-  }, [level, source, selectedTopic, selectedSub, papers, paperId]);
-
+  }, [level, source, picked]);
 
   const meta = {
     levelLabel: LEVELS.find((l) => l.value === level)?.label ?? displayLevel(level),
@@ -151,12 +153,8 @@ const WorksheetGeneratorPage = () => {
   };
 
   const buildSelection = async () => {
-    if (source === "paper" && !paperId) {
-      toast.error("Pick a past paper first");
-      return;
-    }
-    if (source === "topic" && !topicId) {
-      toast.error("Pick a topic first");
+    if (source === "topic" && !selectedTopicIds.length) {
+      toast.error("Select at least one topic or subtopic");
       return;
     }
     if (source === "mistakes" && !mistakeRefs.length) {
@@ -170,10 +168,7 @@ const WorksheetGeneratorPage = () => {
       const result = await fetchWorksheetSelection({
         level,
         source,
-        paper_id: source === "paper" ? paperId : null,
-        topic_ids:
-          source === "topic" ? (selectedSub?.ids ?? selectedTopic?.ids ?? []) : [],
-
+        topic_ids: source === "topic" ? selectedTopicIds : [],
         refs: source === "mistakes" ? mistakeRefs : [],
         count: effectiveCount,
         shuffle,
@@ -278,9 +273,8 @@ const WorksheetGeneratorPage = () => {
                 value={level}
                 onValueChange={(v) => {
                   setLevel(v);
-                  setTopicId("");
-                  setSubtopicId("");
-                  setPaperId("");
+                  setPicked([]);
+                  setExpanded({});
                   reset();
                 }}
               >
@@ -321,84 +315,131 @@ const WorksheetGeneratorPage = () => {
           </div>
 
           {source === "topic" && (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Topic</Label>
-                <Select
-                  value={topicId}
-                  onValueChange={(v) => {
-                    setTopicId(v);
-                    setSubtopicId("");
-                    reset();
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue
-                      placeholder={topicsLoading ? "Loading topics…" : "Choose a topic"}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {tree.map((t) => (
-                      <SelectItem key={t.key} value={t.key}>
-                        {t.code} {t.name} ({t.count})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Topics — select one or more</Label>
+                {!!picked.length && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => {
+                      setPicked([]);
+                      reset();
+                    }}
+                  >
+                    Clear all
+                  </Button>
+                )}
+              </div>
+
+              {!!picked.length && (
+                <div className="flex flex-wrap gap-1.5">
+                  {picked.map((p) => (
+                    <Badge key={p.key} variant="secondary" className="gap-1 pr-1">
+                      {p.label}
+                      <button
+                        type="button"
+                        aria-label={`Remove ${p.label}`}
+                        className="rounded-full p-0.5 hover:bg-background/40"
+                        onClick={() => togglePick(p, false)}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                  <Badge variant="outline">
+                    {picked.length} selected · {selectedPoolCount} questions
+                  </Badge>
+                </div>
+              )}
+
+              <div className="max-h-80 space-y-1 overflow-y-auto rounded-xl border border-border/40 p-2">
+                {topicsLoading && (
+                  <p className="p-2 text-sm text-muted-foreground">Loading topics…</p>
+                )}
                 {!topicsLoading && !tree.length && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="p-2 text-xs text-muted-foreground">
                     No topic-mapped questions with images for this level yet.
                   </p>
                 )}
-              </div>
-              <div className="space-y-2">
-                <Label>Subtopic (optional)</Label>
-                <Select
-                  value={subtopicId}
-                  onValueChange={(v) => {
-                    setSubtopicId(v === "__all" ? "" : v);
-                    reset();
-                  }}
-                  disabled={!selectedTopic?.subtopics.length}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="All subtopics" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__all">All subtopics</SelectItem>
-                    {(selectedTopic?.subtopics ?? []).map((c) => (
-                      <SelectItem key={c.key} value={c.key}>
-                        {c.code} {c.name} ({c.count})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                {tree.map((t) => {
+                  const topicKey = `topic:${t.key}`;
+                  const parentOn = isPicked(topicKey);
+                  const open = !!expanded[t.key];
+                  return (
+                    <div key={t.key} className="rounded-lg">
+                      <div className="flex items-center gap-2 px-1 py-1.5">
+                        <Checkbox
+                          id={topicKey}
+                          checked={parentOn}
+                          onCheckedChange={(v) => {
+                            const on = v === true;
+                            // Selecting the whole topic supersedes its subtopics.
+                            if (on) {
+                              setPicked((prev) => [
+                                ...prev.filter((p) => !p.key.startsWith(`sub:${t.key}:`)),
+                                { key: topicKey, label: t.name, ids: t.ids, count: t.count },
+                              ]);
+                              reset();
+                            } else {
+                              togglePick({ key: topicKey, label: t.name, ids: t.ids, count: t.count }, false);
+                            }
+                          }}
+                        />
+                        <Label htmlFor={topicKey} className="flex-1 cursor-pointer text-sm font-normal">
+                          <span className="text-muted-foreground">{t.code}</span> {t.name}{" "}
+                          <span className="text-muted-foreground">({t.count})</span>
+                        </Label>
+                        {!!t.subtopics.length && (
+                          <button
+                            type="button"
+                            aria-label={open ? "Hide subtopics" : "Show subtopics"}
+                            className="rounded-md p-1 text-muted-foreground hover:bg-muted/40"
+                            onClick={() => setExpanded((p) => ({ ...p, [t.key]: !open }))}
+                          >
+                            {open ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </button>
+                        )}
+                      </div>
 
-            </div>
-          )}
-
-          {source === "paper" && (
-            <div className="space-y-2">
-              <Label>Past paper</Label>
-              <Select
-                value={paperId}
-                onValueChange={(v) => {
-                  setPaperId(v);
-                  reset();
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a paper" />
-                </SelectTrigger>
-                <SelectContent className="max-h-72">
-                  {(papers ?? []).map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.paper_code} · {p.session} {p.year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                      {open && !!t.subtopics.length && (
+                        <div className="ml-6 space-y-1 border-l border-border/40 pl-3">
+                          {t.subtopics.map((s) => {
+                            const subKey = `sub:${t.key}:${s.key}`;
+                            return (
+                              <div key={s.key} className="flex items-center gap-2 py-1">
+                                <Checkbox
+                                  id={subKey}
+                                  disabled={parentOn}
+                                  checked={parentOn || isPicked(subKey)}
+                                  onCheckedChange={(v) =>
+                                    togglePick(
+                                      { key: subKey, label: s.name, ids: s.ids, count: s.count },
+                                      v === true,
+                                    )
+                                  }
+                                />
+                                <Label
+                                  htmlFor={subKey}
+                                  className="flex-1 cursor-pointer text-xs font-normal text-muted-foreground"
+                                >
+                                  {s.code} {s.name} ({s.count})
+                                </Label>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 

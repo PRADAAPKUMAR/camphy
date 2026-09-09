@@ -28,17 +28,18 @@ export interface WorksheetSelection {
   error?: string;
 }
 
-export type WorksheetSource = "random" | "topic" | "paper" | "mistakes";
+export type WorksheetSource = "random" | "topic" | "mistakes";
 
 export interface WorksheetRequest {
   level?: string | null;
   source: WorksheetSource;
-  paper_id?: string | null;
+  /** Topic + subtopic ids across every selected topic (multi-select). */
   topic_ids?: string[];
   refs?: { paper_id: string; question_number: number }[];
   count: number;
   shuffle: boolean;
 }
+
 
 export interface WorksheetTopicOption {
   key: string;
