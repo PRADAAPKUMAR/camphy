@@ -177,7 +177,6 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const level = typeof body.level === "string" ? body.level : null;
     const source = typeof body.source === "string" ? body.source : "random";
-    const paperId = typeof body.paper_id === "string" ? body.paper_id : null;
 
     const topicIds: string[] = Array.isArray(body.topic_ids)
       ? body.topic_ids.filter((t: unknown) => typeof t === "string")
@@ -192,7 +191,6 @@ Deno.serve(async (req) => {
       : [];
     const requested = Math.min(MAX_COUNT, Math.max(1, Number(body.count) || 20));
     const shuffle = body.shuffle === true;
-    const keepOrder = source === "paper" && !shuffle;
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -206,8 +204,7 @@ Deno.serve(async (req) => {
 
     // --- papers in scope -------------------------------------------------
     let papersQuery = supabase.from("papers").select("id, level, paper_code, year, session");
-    if (paperId) papersQuery = papersQuery.eq("id", paperId);
-    else if (level) papersQuery = papersQuery.eq("level", level);
+    if (level) papersQuery = papersQuery.eq("level", level);
     const { data: papers, error: papersError } = await papersQuery;
     if (papersError) return json({ error: papersError.message }, 500);
     if (!papers?.length) return json({ pool_size: 0, items: [], excluded: [] });
@@ -318,16 +315,7 @@ Deno.serve(async (req) => {
       for (const row of images) {
         const ref = { paper_id: row.paper_id as string, question_number: row.question_number as number };
         const k = `${ref.paper_id}:${ref.question_number}`;
-        if (!answerOf.has(k)) {
-          if (source === "paper") {
-            excluded.push({
-              paper_code: String(paperById.get(ref.paper_id)?.paper_code ?? ""),
-              question_number: ref.question_number,
-              reason: "no answer key entry",
-            });
-          }
-          continue;
-        }
+        if (!answerOf.has(k)) continue;
         if (allowedTopicIds && !topicOf.has(k)) continue;
         candidates.push(ref);
       }
@@ -343,18 +331,11 @@ Deno.serve(async (req) => {
     });
 
     const poolSize = candidates.length;
-    let picked: Ref[];
-    if (keepOrder && requested >= poolSize) {
-      picked = [...candidates].sort((a, b) => a.question_number - b.question_number);
-    } else {
-      picked = shuffled(candidates).slice(0, requested);
-      if (keepOrder) picked.sort((a, b) => a.question_number - b.question_number);
-      else if (!shuffle) {
-        picked.sort(
-          (a, b) =>
-            a.paper_id.localeCompare(b.paper_id) || a.question_number - b.question_number,
-        );
-      }
+    let picked: Ref[] = shuffled(candidates).slice(0, requested);
+    if (!shuffle) {
+      picked.sort(
+        (a, b) => a.paper_id.localeCompare(b.paper_id) || a.question_number - b.question_number,
+      );
     }
 
     if (!picked.length) return json({ pool_size: poolSize, items: [], excluded });
