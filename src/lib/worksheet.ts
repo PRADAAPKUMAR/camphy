@@ -1,4 +1,6 @@
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
+import logoAsset from "@/assets/physicshq-lightning.png.asset.json";
+import brandFontAsset from "@/assets/Inter-ExtraBold.ttf.asset.json";
 
 export interface WorksheetItem {
   worksheet_number: number;
@@ -132,6 +134,8 @@ export interface WorksheetMeta {
   sourceLabel: string;
   questionCount: number;
   fileBase: string;
+  worksheetName: string;
+  showTotalMarks: boolean;
 }
 
 const A4 = { width: 210, height: 297 };
@@ -140,26 +144,156 @@ const CONTENT_WIDTH = A4.width - MARGIN.left - MARGIN.right;
 const CONTENT_BOTTOM = A4.height - MARGIN.bottom;
 const NUMBER_COL = 9; // mm reserved for the worksheet number
 const GAP_AFTER_QUESTION = 6;
+const CONTINUATION_HEADER_HEIGHT = 10;
 
-/** Shared brand strip used by both PDFs. */
-const drawBrandHeader = (doc: any, meta: WorksheetMeta, subtitle: string) => {
+let logoDataUrlPromise: Promise<string | null> | null = null;
+let brandFontPromise: Promise<string | null> | null = null;
+
+const blobToDataUrl = (blob: Blob) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Could not read brand asset"));
+    reader.onload = () => resolve(String(reader.result ?? ""));
+    reader.readAsDataURL(blob);
+  });
+
+const fetchAssetDataUrl = (url: string) =>
+  fetch(url)
+    .then((response) => (response.ok ? response.blob() : Promise.reject(new Error("Asset unavailable"))))
+    .then(blobToDataUrl)
+    .catch(() => null);
+
+const loadLogoDataUrl = () => {
+  logoDataUrlPromise ??= fetchAssetDataUrl(logoAsset.url);
+  return logoDataUrlPromise;
+};
+
+const loadBrandFont = () => {
+  brandFontPromise ??= fetchAssetDataUrl(brandFontAsset.url);
+  return brandFontPromise;
+};
+
+const applyBrandFont = (doc: any, fontDataUrl: string | null) => {
+  if (!fontDataUrl) {
+    doc.setFont("helvetica", "bold");
+    return;
+  }
+  try {
+    const base64 = fontDataUrl.split(",")[1];
+    if (!base64) throw new Error("Invalid font data");
+    doc.addFileToVFS("Inter-ExtraBold.ttf", base64);
+    doc.addFont("Inter-ExtraBold.ttf", "InterExtraBold", "normal");
+    doc.setFont("InterExtraBold", "normal");
+  } catch {
+    doc.setFont("helvetica", "bold");
+  }
+};
+
+const drawLogo = (doc: any, logoDataUrl: string | null, x: number, y: number, size: number) => {
+  if (logoDataUrl) doc.addImage(logoDataUrl, "PNG", x, y, size, size, undefined, "FAST");
+};
+
+const drawBrand = (
+  doc: any,
+  logoDataUrl: string | null,
+  fontDataUrl: string | null,
+  y: number,
+  compact = false,
+) => {
+  const logoSize = compact ? 5.5 : 12;
+  drawLogo(doc, logoDataUrl, MARGIN.left, y, logoSize);
+  applyBrandFont(doc, fontDataUrl);
+  doc.setFontSize(compact ? 8.5 : 14.5);
+  doc.setTextColor(15, 39, 78);
+  doc.text("PHYSICSHQ.IN", MARGIN.left + logoSize + (compact ? 2 : 3), y + logoSize * 0.7);
+  doc.setTextColor(0);
+};
+
+/** Full school-style header used only on the first page of the student worksheet. */
+const drawWorksheetHeader = (
+  doc: any,
+  meta: WorksheetMeta,
+  logoDataUrl: string | null,
+  fontDataUrl: string | null,
+) => {
   let y = MARGIN.top;
+  drawBrand(doc, logoDataUrl, fontDataUrl, y);
+  if (meta.showTotalMarks) {
+    doc.setDrawColor(90);
+    doc.roundedRect(A4.width - MARGIN.right - 48, y, 48, 12, 2, 2);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10.5);
+    doc.text(`Marks: ______ / ${meta.questionCount}`, A4.width - MARGIN.right - 24, y + 7.5, {
+      align: "center",
+    });
+  }
+  y += 17;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(15);
-  doc.text("PHYSICSHQ.IN", MARGIN.left, y);
+  doc.setFontSize(14);
+  const titleLines = doc.splitTextToSize(meta.worksheetName, CONTENT_WIDTH - 12).slice(0, 2);
+  doc.text(titleLines, A4.width / 2, y, { align: "center" });
+  y += titleLines.length * 6 + 2;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text(`Level: ${meta.levelLabel}`, MARGIN.left, y);
+  doc.text(meta.sourceLabel, A4.width - MARGIN.right, y, { align: "right" });
+  y += 5;
+  doc.setDrawColor(175);
+  doc.line(MARGIN.left, y, A4.width - MARGIN.right, y);
   y += 6;
-  doc.setFontSize(11);
-  doc.text(subtitle, MARGIN.left, y);
+  doc.setFontSize(9.5);
+  doc.text("Name: ______________________________", MARGIN.left, y);
+  doc.text("Class: __________________________", 112, y);
+  y += 6;
+  doc.text("Date: ______________________________", MARGIN.left, y);
+  doc.text("Time: ___________________________", 112, y);
+  y += 5;
+  doc.line(MARGIN.left, y, A4.width - MARGIN.right, y);
+  return y + 6;
+};
+
+const drawContinuationHeader = (
+  doc: any,
+  meta: WorksheetMeta,
+  logoDataUrl: string | null,
+  fontDataUrl: string | null,
+) => {
+  const y = MARGIN.top;
+  drawBrand(doc, logoDataUrl, fontDataUrl, y, true);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(90);
+  const title = doc.splitTextToSize(meta.worksheetName, 110)[0] ?? meta.worksheetName;
+  doc.text(`·  ${title}`, MARGIN.left + 44, y + 3.8);
+  doc.setDrawColor(190);
+  doc.line(MARGIN.left, y + 7, A4.width - MARGIN.right, y + 7);
+  doc.setTextColor(0);
+  return y + CONTINUATION_HEADER_HEIGHT;
+};
+
+const drawAnswerKeyHeader = (
+  doc: any,
+  meta: WorksheetMeta,
+  logoDataUrl: string | null,
+  fontDataUrl: string | null,
+) => {
+  let y = MARGIN.top;
+  drawBrand(doc, logoDataUrl, fontDataUrl, y);
+  y += 17;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  const titleLines = doc.splitTextToSize(meta.worksheetName, CONTENT_WIDTH).slice(0, 2);
+  doc.text(titleLines, MARGIN.left, y);
+  y += titleLines.length * 5.5 + 1;
+  doc.setFontSize(10.5);
+  doc.text("MCQ WORKSHEET — ANSWER KEY", MARGIN.left, y);
   y += 5;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9.5);
+  doc.setFontSize(9);
   doc.text(`Level: ${meta.levelLabel}`, MARGIN.left, y);
-  y += 4.5;
-  doc.text(`${meta.sourceLabel}`, MARGIN.left, y);
-  y += 4.5;
-  doc.text(`Questions: ${meta.questionCount}`, MARGIN.left, y);
-  y += 3;
-  doc.setDrawColor(150);
+  doc.text(`Questions: ${meta.questionCount}`, A4.width - MARGIN.right, y, { align: "right" });
+  y += 4;
+  doc.setDrawColor(175);
   doc.line(MARGIN.left, y, A4.width - MARGIN.right, y);
   return y + 6;
 };
@@ -185,38 +319,34 @@ const openPdfInNewTab = (doc: any, fileName: string) => {
 export const generateWorksheetPdf = async (loaded: LoadedImage[], meta: WorksheetMeta) => {
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
+  const [logoDataUrl, fontDataUrl] = await Promise.all([loadLogoDataUrl(), loadBrandFont()]);
 
-  let y = drawBrandHeader(doc, meta, "CAMBRIDGE PHYSICS — MCQ PRACTICE WORKSHEET");
-
-  doc.setFontSize(10);
-  doc.text("Name: ______________________________", MARGIN.left, y);
-  y += 6;
-  doc.text("Date: ______________________________", MARGIN.left, y);
-  y += 6;
-  doc.text("Time: ______________________________", MARGIN.left, y);
-  y += 8;
+  let y = drawWorksheetHeader(doc, meta, logoDataUrl, fontDataUrl);
 
   const imageWidth = CONTENT_WIDTH - NUMBER_COL;
+
+  const addContinuationPage = () => {
+    doc.addPage();
+    return drawContinuationHeader(doc, meta, logoDataUrl, fontDataUrl);
+  };
 
   loaded.forEach((entry, index) => {
     const renderHeight = (entry.height / entry.width) * imageWidth;
     // A whole question image never spans two pages.
     if (index > 0 && y + renderHeight > CONTENT_BOTTOM) {
-      doc.addPage();
-      y = MARGIN.top;
+      y = addContinuationPage();
     }
     // A single image taller than a full page is scaled down to one page.
     let w = imageWidth;
     let h = renderHeight;
-    const maxHeight = CONTENT_BOTTOM - MARGIN.top;
+    const maxHeight = CONTENT_BOTTOM - (MARGIN.top + CONTINUATION_HEADER_HEIGHT);
     if (h > maxHeight) {
       const scale = maxHeight / h;
       h = maxHeight;
       w = w * scale;
     }
     if (y + h > CONTENT_BOTTOM) {
-      doc.addPage();
-      y = MARGIN.top;
+      y = addContinuationPage();
     }
 
     doc.setFont("helvetica", "bold");
@@ -247,8 +377,9 @@ export const generateAnswerKeyPdf = async (
 ) => {
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
+  const [logoDataUrl, fontDataUrl] = await Promise.all([loadLogoDataUrl(), loadBrandFont()]);
 
-  let y = drawBrandHeader(doc, meta, "MCQ WORKSHEET — ANSWER KEY");
+  let y = drawAnswerKeyHeader(doc, meta, logoDataUrl, fontDataUrl);
   doc.setFontSize(10);
 
   const lineHeight = 6;

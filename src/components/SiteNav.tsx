@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, MoreHorizontal, X, Zap } from "lucide-react";
+import { Menu, MoreHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import IstClock from "@/components/IstClock";
+import logoAsset from "@/assets/physicshq-lightning.png.asset.json";
 
 
 const PRIMARY_NAV = [
@@ -36,7 +37,7 @@ const SiteNav = () => {
       <div className="container flex items-center justify-between py-2">
         <Link to="/" className="flex items-center gap-2 text-sm font-extrabold tracking-tight">
           <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-primary/20 bg-primary/10">
-            <Zap className="h-3.5 w-3.5 text-primary" />
+            <img src={logoAsset.url} alt="" className="h-6 w-6 object-contain" />
           </span>
           Physics<span className="gradient-text">HQ</span>
         </Link>

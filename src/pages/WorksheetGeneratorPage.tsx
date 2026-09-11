@@ -78,6 +78,8 @@ const WorksheetGeneratorPage = () => {
   const [customCount, setCustomCount] = useState("");
   const [shuffle, setShuffle] = useState(false);
   const [includeSources, setIncludeSources] = useState(true);
+  const [worksheetName, setWorksheetName] = useState("");
+  const [showTotalMarks, setShowTotalMarks] = useState(true);
 
   const [selection, setSelection] = useState<WorksheetSelection | null>(null);
   const [loaded, setLoaded] = useState<LoadedImage[] | null>(null);
@@ -145,11 +147,25 @@ const WorksheetGeneratorPage = () => {
     return `PhysicsHQ_${lvl}_Mixed_MCQ`;
   }, [level, source, picked]);
 
+  const defaultWorksheetName = useMemo(() => {
+    const levelName = level === "IGCSE" ? "IGCSE" : "AS";
+    if (source === "topic") {
+      if (picked.length === 1) return `${levelName} Physics — ${picked[0].label} MCQ Worksheet`;
+      if (picked.length > 1) return `${levelName} Physics — Mixed Topics MCQ Worksheet`;
+    }
+    if (source === "mistakes") return `${levelName} Physics — Mistake Revision Worksheet`;
+    return "Physics MCQ Practice Worksheet";
+  }, [level, source, picked]);
+
+  const resolvedWorksheetName = worksheetName.trim() || defaultWorksheetName;
+
   const meta = {
     levelLabel: LEVELS.find((l) => l.value === level)?.label ?? displayLevel(level),
     sourceLabel,
     questionCount: loaded?.length ?? 0,
     fileBase,
+    worksheetName: resolvedWorksheetName,
+    showTotalMarks,
   };
 
   const buildSelection = async () => {
@@ -452,6 +468,20 @@ const WorksheetGeneratorPage = () => {
           )}
 
           <div className="space-y-2">
+            <Label htmlFor="worksheet-name">Worksheet Name</Label>
+            <Input
+              id="worksheet-name"
+              value={worksheetName}
+              maxLength={100}
+              placeholder={defaultWorksheetName}
+              onChange={(event) => setWorksheetName(event.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Leave blank to use: {defaultWorksheetName}
+            </p>
+          </div>
+
+          <div className="space-y-2">
             <Label>Number of questions</Label>
             <div className="flex flex-wrap items-center gap-2">
               {COUNTS.map((c) => (
@@ -502,6 +532,10 @@ const WorksheetGeneratorPage = () => {
               <Switch id="src" checked={includeSources} onCheckedChange={setIncludeSources} />
               <Label htmlFor="src">Show sources on answer key</Label>
             </div>
+            <div className="flex items-center gap-2">
+              <Switch id="total-marks" checked={showTotalMarks} onCheckedChange={setShowTotalMarks} />
+              <Label htmlFor="total-marks">Show Total Marks</Label>
+            </div>
           </div>
 
           <Button onClick={buildSelection} disabled={busy} className="w-full gap-2">
@@ -534,6 +568,7 @@ const WorksheetGeneratorPage = () => {
                 </Badge>
               </div>
               <p className="text-muted-foreground">{sourceLabel}</p>
+              <p className="font-medium">{resolvedWorksheetName}</p>
 
               {!!topicBreakdown.length && (
                 <div className="space-y-1">
