@@ -1,6 +1,7 @@
-const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 import logoAsset from "@/assets/physicshq-lightning.png.asset.json";
-import brandFontAsset from "@/assets/Inter-ExtraBold.ttf.asset.json";
+import brandFontAsset from "@/assets/Inter-ExtraBold.woff2.asset.json";
+
+const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
 export interface WorksheetItem {
   worksheet_number: number;
@@ -31,6 +32,20 @@ export interface WorksheetSelection {
 }
 
 export type WorksheetSource = "random" | "topic" | "mistakes";
+
+export const getDefaultWorksheetName = (
+  level: string,
+  source: WorksheetSource,
+  topicNames: string[],
+) => {
+  const levelName = level === "IGCSE" ? "IGCSE" : "AS";
+  if (source === "topic") {
+    if (topicNames.length === 1) return `${levelName} Physics — ${topicNames[0]} MCQ Worksheet`;
+    if (topicNames.length > 1) return `${levelName} Physics — Mixed Topics MCQ Worksheet`;
+  }
+  if (source === "mistakes") return `${levelName} Physics — Mistake Revision Worksheet`;
+  return "Physics MCQ Practice Worksheet";
+};
 
 export interface WorksheetRequest {
   level?: string | null;
@@ -236,7 +251,8 @@ const drawWorksheetHeader = (
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.text(`Level: ${meta.levelLabel}`, MARGIN.left, y);
-  doc.text(meta.sourceLabel, A4.width - MARGIN.right, y, { align: "right" });
+  const sourceText = doc.splitTextToSize(meta.sourceLabel, 88)[0] ?? meta.sourceLabel;
+  doc.text(sourceText, A4.width - MARGIN.right, y, { align: "right" });
   y += 5;
   doc.setDrawColor(175);
   doc.line(MARGIN.left, y, A4.width - MARGIN.right, y);
