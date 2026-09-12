@@ -41,6 +41,7 @@ import {
   fetchWorksheetTopics,
   generateAnswerKeyPdf,
   generateWorksheetPdf,
+  getDefaultWorksheetName,
   loadWorksheetImages,
   sanitizeFilePart,
   type LoadedImage,
@@ -148,13 +149,7 @@ const WorksheetGeneratorPage = () => {
   }, [level, source, picked]);
 
   const defaultWorksheetName = useMemo(() => {
-    const levelName = level === "IGCSE" ? "IGCSE" : "AS";
-    if (source === "topic") {
-      if (picked.length === 1) return `${levelName} Physics — ${picked[0].label} MCQ Worksheet`;
-      if (picked.length > 1) return `${levelName} Physics — Mixed Topics MCQ Worksheet`;
-    }
-    if (source === "mistakes") return `${levelName} Physics — Mistake Revision Worksheet`;
-    return "Physics MCQ Practice Worksheet";
+    return getDefaultWorksheetName(level, source, picked.map((topic) => topic.label));
   }, [level, source, picked]);
 
   const resolvedWorksheetName = worksheetName.trim() || defaultWorksheetName;
