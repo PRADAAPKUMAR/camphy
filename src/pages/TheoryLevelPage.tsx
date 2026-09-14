@@ -5,6 +5,7 @@ import { ArrowLeft, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { compareSessions } from "@/lib/exam-sessions";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
@@ -28,16 +29,22 @@ const TheoryLevelPage = () => {
     enabled: !!decodedLevel,
   });
 
-  const sorted = useMemo(
-    () =>
-      [...(papers ?? [])].sort(
-        (a, b) =>
-          (b.year ?? 0) - (a.year ?? 0) ||
-          compareSessions(a.session, b.session) ||
-          (a.paper_code ?? "").localeCompare(b.paper_code ?? ""),
-      ),
+  const years = useMemo(
+    () => [...new Set((papers ?? []).map((paper) => paper.year))].sort((a, b) => b - a),
     [papers],
   );
+
+  const papersByYearAndSeries = useMemo(() => {
+    const grouped = new Map<number, Map<string, typeof papers>>();
+    (papers ?? []).forEach((paper) => {
+      const yearGroup = grouped.get(paper.year) ?? new Map<string, typeof papers>();
+      const seriesPapers = yearGroup.get(paper.session) ?? [];
+      seriesPapers.push(paper);
+      yearGroup.set(paper.session, seriesPapers);
+      grouped.set(paper.year, yearGroup);
+    });
+    return grouped;
+  }, [papers]);
 
   return (
     <div className="min-h-screen bg-background bg-grid">
@@ -65,40 +72,73 @@ const TheoryLevelPage = () => {
               <Skeleton key={i} className="h-32 rounded-2xl" />
             ))}
           </div>
-        ) : sorted.length === 0 ? (
+        ) : years.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No theory papers have been uploaded for {decodedLevel} yet.
           </p>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {sorted.map((p) => (
-              <Link
-                key={p.id}
-                to={`/theory-paper/${p.id}`}
-                className="glass-card-hover group flex flex-col gap-3 rounded-2xl p-5"
-              >
-                <div className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-primary" />
-                  <span className="font-mono text-sm font-bold">{p.paper_code}</span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {p.session} {p.year}
-                </p>
-                <div className="mt-auto flex flex-wrap gap-2">
-                  {p.question_storage_path && (
-                    <Badge variant="outline" className="border-border/40 text-xs">
-                      Questions
-                    </Badge>
-                  )}
-                  {p.answer_storage_path && (
-                    <Badge variant="outline" className="border-success/40 text-xs text-success">
-                      Answer key
-                    </Badge>
-                  )}
-                </div>
-              </Link>
-            ))}
-          </div>
+          <Tabs defaultValue={String(years[0])} className="w-full">
+            <TabsList className="mb-6 flex h-auto flex-wrap gap-1 rounded-lg bg-muted/50 p-1.5">
+              {years.map((year) => (
+                <TabsTrigger
+                  key={year}
+                  value={String(year)}
+                  className="rounded-md px-4 py-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                >
+                  {year}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            {years.map((year) => {
+              const series = Array.from(papersByYearAndSeries.get(year)?.entries() ?? []).sort(
+                ([a], [b]) => compareSessions(a, b),
+              );
+              return (
+                <TabsContent key={year} value={String(year)} className="space-y-8">
+                  {series.map(([session, sessionPapers]) => (
+                    <section key={session} aria-labelledby={`series-${year}-${session}`}>
+                      <h2
+                        id={`series-${year}-${session}`}
+                        className="mb-3 text-sm font-semibold uppercase text-muted-foreground"
+                      >
+                        {session}
+                      </h2>
+                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {[...(sessionPapers ?? [])]
+                          .sort((a, b) => a.paper_code.localeCompare(b.paper_code))
+                          .map((paper) => (
+                            <Link
+                              key={paper.id}
+                              to={`/theory-paper/${paper.id}`}
+                              className="glass-card-hover group flex flex-col gap-3 rounded-2xl p-5"
+                            >
+                              <div className="flex items-center gap-2">
+                                <FileText className="h-5 w-5 text-primary" />
+                                <span className="font-mono text-sm font-bold">{paper.paper_code}</span>
+                              </div>
+                              <p className="text-sm text-muted-foreground">{paper.session} {paper.year}</p>
+                              <div className="mt-auto flex flex-wrap gap-2">
+                                {paper.question_storage_path && (
+                                  <Badge variant="outline" className="border-border/40 text-xs">
+                                    Questions
+                                  </Badge>
+                                )}
+                                {paper.answer_storage_path && (
+                                  <Badge variant="outline" className="border-success/40 text-xs text-success">
+                                    Answer key
+                                  </Badge>
+                                )}
+                              </div>
+                            </Link>
+                          ))}
+                      </div>
+                    </section>
+                  ))}
+                </TabsContent>
+              );
+            })}
+          </Tabs>
         )}
       </main>
     </div>
