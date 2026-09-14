@@ -1,5 +1,4 @@
 import logoAsset from "@/assets/physicshq-lightning.png.asset.json";
-import brandFontAsset from "@/assets/Inter-ExtraBold.woff2.asset.json";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
@@ -162,7 +161,6 @@ const GAP_AFTER_QUESTION = 6;
 const CONTINUATION_HEADER_HEIGHT = 10;
 
 let logoDataUrlPromise: Promise<string | null> | null = null;
-let brandFontPromise: Promise<string | null> | null = null;
 
 const blobToDataUrl = (blob: Blob) =>
   new Promise<string>((resolve, reject) => {
@@ -183,27 +181,6 @@ const loadLogoDataUrl = () => {
   return logoDataUrlPromise;
 };
 
-const loadBrandFont = () => {
-  brandFontPromise ??= fetchAssetDataUrl(brandFontAsset.url);
-  return brandFontPromise;
-};
-
-const applyBrandFont = (doc: any, fontDataUrl: string | null) => {
-  if (!fontDataUrl) {
-    doc.setFont("helvetica", "bold");
-    return;
-  }
-  try {
-    const base64 = fontDataUrl.split(",")[1];
-    if (!base64) throw new Error("Invalid font data");
-    doc.addFileToVFS("Inter-ExtraBold.ttf", base64);
-    doc.addFont("Inter-ExtraBold.ttf", "InterExtraBold", "normal");
-    doc.setFont("InterExtraBold", "normal");
-  } catch {
-    doc.setFont("helvetica", "bold");
-  }
-};
-
 const drawLogo = (doc: any, logoDataUrl: string | null, x: number, y: number, size: number) => {
   if (logoDataUrl) doc.addImage(logoDataUrl, "PNG", x, y, size, size, undefined, "FAST");
 };
@@ -211,13 +188,12 @@ const drawLogo = (doc: any, logoDataUrl: string | null, x: number, y: number, si
 const drawBrand = (
   doc: any,
   logoDataUrl: string | null,
-  fontDataUrl: string | null,
   y: number,
   compact = false,
 ) => {
   const logoSize = compact ? 5.5 : 12;
   drawLogo(doc, logoDataUrl, MARGIN.left, y, logoSize);
-  applyBrandFont(doc, fontDataUrl);
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(compact ? 8.5 : 14.5);
   doc.setTextColor(15, 39, 78);
   doc.text("PHYSICSHQ.IN", MARGIN.left + logoSize + (compact ? 2 : 3), y + logoSize * 0.7);
@@ -229,10 +205,9 @@ const drawWorksheetHeader = (
   doc: any,
   meta: WorksheetMeta,
   logoDataUrl: string | null,
-  fontDataUrl: string | null,
 ) => {
   let y = MARGIN.top;
-  drawBrand(doc, logoDataUrl, fontDataUrl, y);
+  drawBrand(doc, logoDataUrl, y);
   if (meta.showTotalMarks) {
     doc.setDrawColor(90);
     doc.roundedRect(A4.width - MARGIN.right - 48, y, 48, 12, 2, 2);
@@ -272,10 +247,9 @@ const drawContinuationHeader = (
   doc: any,
   meta: WorksheetMeta,
   logoDataUrl: string | null,
-  fontDataUrl: string | null,
 ) => {
   const y = MARGIN.top;
-  drawBrand(doc, logoDataUrl, fontDataUrl, y, true);
+  drawBrand(doc, logoDataUrl, y, true);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.5);
   doc.setTextColor(90);
@@ -291,10 +265,9 @@ const drawAnswerKeyHeader = (
   doc: any,
   meta: WorksheetMeta,
   logoDataUrl: string | null,
-  fontDataUrl: string | null,
 ) => {
   let y = MARGIN.top;
-  drawBrand(doc, logoDataUrl, fontDataUrl, y);
+  drawBrand(doc, logoDataUrl, y);
   y += 17;
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
@@ -335,15 +308,15 @@ const openPdfInNewTab = (doc: any, fileName: string) => {
 export const generateWorksheetPdf = async (loaded: LoadedImage[], meta: WorksheetMeta) => {
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
-  const [logoDataUrl, fontDataUrl] = await Promise.all([loadLogoDataUrl(), loadBrandFont()]);
+  const logoDataUrl = await loadLogoDataUrl();
 
-  let y = drawWorksheetHeader(doc, meta, logoDataUrl, fontDataUrl);
+  let y = drawWorksheetHeader(doc, meta, logoDataUrl);
 
   const imageWidth = CONTENT_WIDTH - NUMBER_COL;
 
   const addContinuationPage = () => {
     doc.addPage();
-    return drawContinuationHeader(doc, meta, logoDataUrl, fontDataUrl);
+    return drawContinuationHeader(doc, meta, logoDataUrl);
   };
 
   loaded.forEach((entry, index) => {
@@ -393,9 +366,9 @@ export const generateAnswerKeyPdf = async (
 ) => {
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
-  const [logoDataUrl, fontDataUrl] = await Promise.all([loadLogoDataUrl(), loadBrandFont()]);
+  const logoDataUrl = await loadLogoDataUrl();
 
-  let y = drawAnswerKeyHeader(doc, meta, logoDataUrl, fontDataUrl);
+  let y = drawAnswerKeyHeader(doc, meta, logoDataUrl);
   doc.setFontSize(10);
 
   const lineHeight = 6;
