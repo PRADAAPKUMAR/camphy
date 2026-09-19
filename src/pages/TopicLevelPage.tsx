@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Target, ScrollText, FileText, ArrowLeft, LayoutGrid } from "lucide-react";
+import { Target, ScrollText, FileText, ArrowLeft, LayoutGrid, ChevronRight } from "lucide-react";
 import PhysicsBackground from "@/components/PhysicsBackground";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
