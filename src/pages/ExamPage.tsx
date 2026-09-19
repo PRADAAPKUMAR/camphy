@@ -28,6 +28,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import MobileExamShell from "@/components/MobileExamShell";
 import { savePerformanceRecord } from "@/lib/performance-history";
 import { syllabusVersionForLevel } from "@/lib/syllabus";
+import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const TOTAL_QUESTIONS = 40;
 const CACHE_TTL = 30 * 60 * 1000;
@@ -80,6 +82,7 @@ const ExamPage = () => {
     },
     enabled: !!paperId,
   });
+  useSyncGrade(paper?.level);
 
   // Prefetch the whole key once so feedback on selection is instant.
   const { data: answerKeyMap } = useQuery({
@@ -222,7 +225,7 @@ const ExamPage = () => {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">
         <p className="text-destructive font-medium">Paper not found</p>
-        <Button variant="outline" onClick={() => navigate("/papers")}>
+        <Button variant="outline" onClick={() => navigate("/")}> 
           Back to Papers
         </Button>
       </div>
@@ -233,7 +236,7 @@ const ExamPage = () => {
     <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/papers">Levels</Link></BreadcrumbLink>
+                <BreadcrumbLink asChild><Link to={gradeFromLevel(paper.level) ? gradePath(gradeFromLevel(paper.level) as "igcse" | "as" | "a2") : "/"}>Grade Home</Link></BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>

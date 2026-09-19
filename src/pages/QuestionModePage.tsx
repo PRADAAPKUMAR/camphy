@@ -23,6 +23,8 @@ import { useExplanation } from "@/hooks/use-explanation";
 import { useQuestionImages } from "@/hooks/use-question-images";
 import { savePerformanceRecord } from "@/lib/performance-history";
 import { syllabusVersionForLevel } from "@/lib/syllabus";
+import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
@@ -58,6 +60,7 @@ const QuestionModePage = () => {
     },
     enabled: !!paperId,
   });
+  useSyncGrade(paper?.level);
 
   const { data: images, isLoading: imagesLoading } = useQuestionImages(paperId);
 
@@ -210,7 +213,7 @@ const QuestionModePage = () => {
               <BreadcrumbList>
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link to="/papers">Levels</Link>
+                    <Link to={gradeFromLevel(paper.level) ? gradePath(gradeFromLevel(paper.level) as "igcse" | "as" | "a2") : "/"}>Grade Home</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />

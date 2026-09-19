@@ -11,6 +11,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 
@@ -32,6 +34,7 @@ const TopicTheoryPage = () => {
     },
     enabled: !!questionId,
   });
+  useSyncGrade(question?.level);
 
   // Convert Google Drive link to embeddable preview
   const getEmbedUrl = (url: string) =>
@@ -70,7 +73,7 @@ const TopicTheoryPage = () => {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/topic-practice">Topics</Link></BreadcrumbLink>
+                <BreadcrumbLink asChild><Link to={gradeFromLevel(question.level) ? gradePath(gradeFromLevel(question.level) as "igcse" | "as" | "a2") : "/"}>Grade Home</Link></BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>

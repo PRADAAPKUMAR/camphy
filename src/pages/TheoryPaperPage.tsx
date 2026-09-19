@@ -15,6 +15,8 @@ import {
 import TheoryExplanationDialog, {
   type TheoryExplanationPart,
 } from "@/components/theory/TheoryExplanationDialog";
+import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const PDFViewer = lazy(() => import("@/components/PDFViewer"));
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
@@ -52,6 +54,7 @@ const TheoryPaperPage = () => {
     enabled: !!paperId,
     staleTime: 60 * 60 * 1000,
   });
+  useSyncGrade(data?.paper?.level);
 
   const partsByQuestion = useMemo(() => {
     const map = new Map<number, TheoryExplanationPart[]>();
@@ -104,7 +107,7 @@ const TheoryPaperPage = () => {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/theory-papers">Theory</Link>
+                  <Link to={gradeFromLevel(paper.level) ? gradePath(gradeFromLevel(paper.level) as "igcse" | "as" | "a2") : "/"}>Grade Home</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />

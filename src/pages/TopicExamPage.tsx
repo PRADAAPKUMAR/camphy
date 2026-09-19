@@ -29,6 +29,8 @@ import MobileExamShell from "@/components/MobileExamShell";
 import { savePerformanceRecord } from "@/lib/performance-history";
 import { syllabusVersionForLevel } from "@/lib/syllabus";
 import { useTopicPracticeMap } from "@/hooks/use-syllabus";
+import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const CACHE_TTL = 30 * 60 * 1000;
 const cacheKey = (paperId: string) => `physicshq:topic-answer-key:${paperId}`;
@@ -80,6 +82,7 @@ const TopicExamPage = () => {
     },
     enabled: !!paperId,
   });
+  useSyncGrade(paper?.level);
 
   const totalQuestions = paper?.total_questions ?? 40;
 
@@ -237,7 +240,7 @@ const TopicExamPage = () => {
     <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/topic-practice">Topics</Link></BreadcrumbLink>
+                <BreadcrumbLink asChild><Link to={gradeFromLevel(paper.level) ? gradePath(gradeFromLevel(paper.level) as "igcse" | "as" | "a2") : "/"}>Grade Home</Link></BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
