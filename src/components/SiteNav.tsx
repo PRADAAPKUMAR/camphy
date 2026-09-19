@@ -36,7 +36,7 @@ const SiteNav = () => {
   </DropdownMenu>;
   return <nav className="relative z-40 border-b border-border/40 bg-background/85 backdrop-blur-xl">
     <div className="container flex items-center justify-between gap-3 py-2">
-      <Link to={grade ? `/grade/${grade}` : "/"} className="flex items-center gap-2 text-sm font-extrabold"><span className="flex h-7 w-7 items-center justify-center rounded-lg border border-primary/20 bg-primary/10"><img src={logoAsset.url} alt="" className="h-6 w-6 object-contain" /></span><span>Physics<span className="gradient-text">HQ</span></span></Link>
+      <Link to={grade ? `/grade/${grade}` : "/"} className="flex items-center gap-2 text-sm font-extrabold"><img src={logoAsset.url} alt="" className="h-7 w-7 object-contain" /><span>Physics<span className="gradient-text">HQ</span></span></Link>
       <div className="hidden items-center gap-1 lg:flex">{primary.map((item) => <Link key={item.to} to={item.to} className={linkClass(item.to)}>{item.label}</Link>)}
         <div className="relative"><Button type="button" variant="ghost" size="icon" onClick={() => setMoreOpen((v) => !v)} onBlur={() => window.setTimeout(() => setMoreOpen(false), 120)} aria-label="More pages"><MoreHorizontal className="h-4 w-4" /></Button>{moreOpen && <div className="absolute right-0 top-full z-50 mt-1 w-48 overflow-hidden rounded-xl border border-border/40 bg-card/95 p-1 shadow-lg backdrop-blur">{secondary.map((item) => <Link key={item.to} to={item.to} className={`block ${linkClass(item.to)}`}>{item.label}</Link>)}</div>}</div>
         {switcher}<span className="ml-1 border-l border-border/40 pl-3"><IstClock /></span>
