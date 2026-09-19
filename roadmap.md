@@ -1,5 +1,8 @@
 # Grade-first navigation
 
+- [x] Match the home-page atom motion shown in the supplied recording
+- [x] Restore AS Level MCQ past papers using the available content label
+- [x] Remove MCQ Past Papers from A2 Level navigation and dashboard
 - [x] Map each grade to its available Practice and Study Materials content
 - [x] Merge the navigation logo into the navigation background
 - [x] Restore a visible atom animation on the grade-selection page
