@@ -8,6 +8,9 @@ export interface GradeDefinition {
   syllabus: string;
   description: string;
   dbLevel: string;
+  practiceLevel: string;
+  materialsLevel: string;
+  mappedTopicalLevel?: "IGCSE" | "AS LEVEL";
   worksheetLevel?: "IGCSE" | "AS LEVEL";
 }
 
@@ -19,6 +22,9 @@ export const GRADES: Record<GradeKey, GradeDefinition> = {
     syllabus: "0625",
     description: "Cambridge IGCSE Physics",
     dbLevel: "IGCSE",
+    practiceLevel: "IGCSE",
+    materialsLevel: "IGCSE",
+    mappedTopicalLevel: "IGCSE",
     worksheetLevel: "IGCSE",
   },
   as: {
@@ -28,6 +34,9 @@ export const GRADES: Record<GradeKey, GradeDefinition> = {
     syllabus: "9702",
     description: "Cambridge International AS Level Physics",
     dbLevel: "AS Level",
+    practiceLevel: "AS LEVEL",
+    materialsLevel: "AS LEVEL",
+    mappedTopicalLevel: "AS LEVEL",
     worksheetLevel: "AS LEVEL",
   },
   a2: {
@@ -37,6 +46,8 @@ export const GRADES: Record<GradeKey, GradeDefinition> = {
     syllabus: "9702",
     description: "Cambridge International A Level Physics",
     dbLevel: "A2 Level",
+    practiceLevel: "A LEVEL",
+    materialsLevel: "A LEVEL",
   },
 };
 
@@ -61,8 +72,11 @@ export const gradeSectionPath = (grade: GradeKey, section: "mcq" | "theory" | "p
   const definition = GRADES[grade];
   if (section === "mcq") return `/papers/${encodeURIComponent(definition.dbLevel)}`;
   if (section === "theory") return `/theory-papers/${encodeURIComponent(definition.dbLevel)}`;
-  if (section === "practice") return `/topic-practice/${encodeURIComponent(definition.dbLevel)}`;
-  if (section === "materials") return `/materials/${encodeURIComponent(definition.dbLevel)}`;
+  if (section === "practice") {
+    if (grade === "igcse" && definition.mappedTopicalLevel) return `/topical-mcq/${encodeURIComponent(definition.mappedTopicalLevel)}`;
+    return `/topic-practice/${encodeURIComponent(definition.practiceLevel)}`;
+  }
+  if (section === "materials") return `/materials/${encodeURIComponent(definition.materialsLevel)}`;
   if (section === "worksheet") return definition.worksheetLevel ? `/worksheet-generator/${grade}` : gradePath(grade);
   return `/performance/${grade}`;
 };

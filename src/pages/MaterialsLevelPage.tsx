@@ -16,13 +16,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { gradeFromLevel, gradePath, GRADES } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const MaterialsLevelPage = () => {
   const { level } = useParams<{ level: string }>();
   const decodedLevel = decodeURIComponent(level || "");
   const grade = gradeFromLevel(decodedLevel);
+  const contentLevel = grade ? GRADES[grade].materialsLevel : decodedLevel;
   useSyncGrade(decodedLevel);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -49,18 +50,18 @@ const MaterialsLevelPage = () => {
   };
 
   const { data: materials, isLoading } = useQuery({
-    queryKey: ["study_materials", decodedLevel],
+    queryKey: ["study_materials", contentLevel],
     queryFn: async () => {
       const supabase = await getSupabase();
       const { data, error } = await supabase
         .from("study_materials")
         .select("*")
-        .eq("level", decodedLevel)
+        .eq("level", contentLevel)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
-    enabled: !!decodedLevel,
+    enabled: !!contentLevel,
   });
 
   // Parse folder_path into segments array
@@ -198,13 +199,13 @@ const MaterialsLevelPage = () => {
               <BreadcrumbSeparator />
               {currentPath.length === 0 ? (
                 <BreadcrumbItem>
-                  <BreadcrumbPage>{decodedLevel}</BreadcrumbPage>
+                     <BreadcrumbPage>{grade ? GRADES[grade].label : decodedLevel}</BreadcrumbPage>
                 </BreadcrumbItem>
               ) : (
                 <>
                   <BreadcrumbItem>
                     <BreadcrumbLink className="cursor-pointer" onClick={navigateToRoot}>
-                      {decodedLevel}
+                       {grade ? GRADES[grade].label : decodedLevel}
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                   {currentPath.map((seg, i) => (
@@ -236,7 +237,7 @@ const MaterialsLevelPage = () => {
               <h1 className="text-3xl font-extrabold tracking-tight">
                 {currentPath.length > 0
                   ? currentPath[currentPath.length - 1]
-                  : `Materials — ${decodedLevel}`}
+                   : `Materials — ${grade ? GRADES[grade].label : decodedLevel}`}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {subfolders.length > 0 && `${subfolders.length} folder${subfolders.length !== 1 ? "s" : ""}`}

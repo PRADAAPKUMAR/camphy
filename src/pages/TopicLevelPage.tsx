@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { gradeFromLevel, gradePath, GRADES } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
 import {
   Breadcrumb,
@@ -25,36 +25,37 @@ const TopicLevelPage = () => {
   const navigate = useNavigate();
   const decodedLevel = decodeURIComponent(level || "");
   const grade = gradeFromLevel(decodedLevel);
+  const contentLevel = grade ? GRADES[grade].practiceLevel : decodedLevel;
   useSyncGrade(decodedLevel);
 
   const { data: mcqPapers, isLoading: mcqLoading } = useQuery({
-    queryKey: ["topicwise_mcq", decodedLevel],
+    queryKey: ["topicwise_mcq", contentLevel],
     queryFn: async () => {
       const supabase = await getSupabase();
       const { data, error } = await supabase
         .from("topicwise_mcq_papers")
         .select("*")
-        .eq("level", decodedLevel)
+        .eq("level", contentLevel)
         .order("topic");
       if (error) throw error;
       return data;
     },
-    enabled: !!decodedLevel,
+    enabled: !!contentLevel,
   });
 
   const { data: theoryQuestions, isLoading: theoryLoading } = useQuery({
-    queryKey: ["topicwise_theory", decodedLevel],
+    queryKey: ["topicwise_theory", contentLevel],
     queryFn: async () => {
       const supabase = await getSupabase();
       const { data, error } = await supabase
         .from("topicwise_theory_questions")
         .select("*")
-        .eq("level", decodedLevel)
+        .eq("level", contentLevel)
         .order("topic");
       if (error) throw error;
       return data;
     },
-    enabled: !!decodedLevel,
+    enabled: !!contentLevel,
   });
 
   const isLoading = mcqLoading || theoryLoading;
@@ -120,7 +121,7 @@ const TopicLevelPage = () => {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight">{decodedLevel} — Topic Practice</h1>
+              <h1 className="text-3xl font-extrabold tracking-tight">{grade ? GRADES[grade].label : decodedLevel} — Topic Practice</h1>
               <p className="text-sm text-muted-foreground">
                 {mcqTopics.length} MCQ topics · {theoryTopics.length} Theory topics
               </p>
@@ -130,9 +131,9 @@ const TopicLevelPage = () => {
       </header>
 
       <main className="container relative py-8">
-        {grade !== "a2" && (
+        {grade && GRADES[grade].mappedTopicalLevel && (
           <Link
-            to={`/topical-mcq/${encodeURIComponent(grade === "igcse" ? "IGCSE" : "AS LEVEL")}`}
+            to={`/topical-mcq/${encodeURIComponent(GRADES[grade].mappedTopicalLevel ?? "")}`}
             className="glass-card-hover mb-6 flex items-center justify-between gap-4 rounded-xl p-5"
           >
             <span className="flex items-center gap-3">
