@@ -99,13 +99,7 @@ export const averageSecondsPerQuestion = (records: PerformanceRecord[]) => {
   return count ? Math.round(total / count) : 0;
 };
 
-export const normalizeLevel = (level: string) => {
-  const l = (level ?? "").trim().toUpperCase();
-  if (l === "IGCSE") return "IGCSE";
-  if (l === "AS LEVEL" || l === "AS") return "AS Level";
-  if (l === "A2 LEVEL" || l === "A2") return "A2 Level";
-  return level;
-};
+export { normalizeGradeLabel as normalizeLevel } from "@/lib/grades";
 
 export const readPerformanceHistory = (): PerformanceRecord[] => {
   try {
@@ -132,6 +126,18 @@ export const savePerformanceRecord = (record: PerformanceRecord) => {
 export const clearPerformanceHistory = () => {
   try {
     localStorage.removeItem(PERFORMANCE_KEY);
+  } catch {
+    // ignore
+  }
+};
+
+export const clearPerformanceHistoryForLevel = (level: string) => {
+  try {
+    const normalized = level.trim().toUpperCase();
+    const kept = readPerformanceHistory().filter((record) =>
+      (record.level ?? "").trim().toUpperCase() !== normalized,
+    );
+    localStorage.setItem(PERFORMANCE_KEY, JSON.stringify(kept));
   } catch {
     // ignore
   }

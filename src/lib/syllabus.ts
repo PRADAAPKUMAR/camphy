@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { normalizeGradeLabel } from "@/lib/grades";
 
 /** Cambridge syllabus codes handled by PhysicsHQ. */
 export type SyllabusCode = "0625" | "9702";
@@ -34,11 +35,7 @@ export interface QuestionTopicMapping {
 
 /** Canonical display labels. "A2" is a PhysicsHQ-only label, never a syllabus. */
 export const displayLevel = (level?: string | null) => {
-  const l = (level ?? "").trim().toUpperCase();
-  if (l === "IGCSE") return "IGCSE";
-  if (l === "AS" || l === "AS LEVEL") return "AS Level";
-  if (l === "A2" || l === "A2 LEVEL" || l === "A LEVEL") return "A Level";
-  return level ?? "";
+  return normalizeGradeLabel(level);
 };
 
 /** Which Cambridge syllabus a level/paper belongs to. */

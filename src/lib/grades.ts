@@ -48,6 +48,11 @@ export const gradeFromLevel = (value?: string | null): GradeKey | null => {
   return null;
 };
 
+export const normalizeGradeLabel = (value?: string | null) => {
+  const grade = gradeFromLevel(value);
+  return grade ? GRADES[grade].label : value ?? "";
+};
+
 export const isGradeKey = (value?: string): value is GradeKey =>
   !!value && GRADE_KEYS.includes(value.toLowerCase() as GradeKey);
 
