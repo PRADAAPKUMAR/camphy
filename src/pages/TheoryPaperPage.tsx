@@ -87,7 +87,7 @@ const TheoryPaperPage = () => {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">
         <p className="font-medium text-destructive">Paper not found</p>
-        <Button variant="outline" onClick={() => navigate("/theory-papers")}>
+        <Button variant="outline" onClick={() => navigate("/")}> 
           Back to theory papers
         </Button>
       </div>

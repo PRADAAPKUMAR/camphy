@@ -116,8 +116,6 @@ const SubjectPage = () => {
               <BreadcrumbItem>
                 <BreadcrumbPage>MCQ Past Papers</BreadcrumbPage>
               </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem className="sr-only"><BreadcrumbPage>{decodedLevel}</BreadcrumbPage></BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-3 mb-2">

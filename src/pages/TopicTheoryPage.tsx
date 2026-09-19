@@ -56,7 +56,7 @@ const TopicTheoryPage = () => {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">
         <p className="text-destructive font-medium">Question not found</p>
-        <Button variant="outline" onClick={() => navigate("/topic-practice")}>
+        <Button variant="outline" onClick={() => navigate("/")}> 
           Back to Topics
         </Button>
       </div>

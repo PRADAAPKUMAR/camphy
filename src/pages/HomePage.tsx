@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { Link } from "react-router-dom";
 import { Atom, ArrowRight, FlaskConical, Microscope } from "lucide-react";
 import { GRADES, GRADE_KEYS, gradePath } from "@/lib/grades";
 import { useTileTransition } from "@/hooks/use-tile-transition";
@@ -31,8 +32,8 @@ const HomePage = () => {
         })}
       </div>
       <div className="mx-auto mt-10 flex max-w-5xl justify-center gap-6 text-xs text-muted-foreground">
-        <a href="/study-tools" className="transition-colors hover:text-foreground">Study Tools</a>
-        <a href="/about" className="transition-colors hover:text-foreground">About PhysicsHQ</a>
+        <Link to="/study-tools" className="transition-colors hover:text-foreground">Study Tools</Link>
+        <Link to="/about" className="transition-colors hover:text-foreground">About PhysicsHQ</Link>
       </div>
     </main>
   </div>;

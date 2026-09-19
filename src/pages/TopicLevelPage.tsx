@@ -113,10 +113,6 @@ const TopicLevelPage = () => {
               <BreadcrumbItem>
                 <BreadcrumbPage>Practice</BreadcrumbPage>
               </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage className="sr-only">{decodedLevel}</BreadcrumbPage>
-              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-3">
