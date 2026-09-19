@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { Atom, ArrowRight, FlaskConical, Microscope } from "lucide-react";
+import HomeAtomAnimation from "@/components/HomeAtomAnimation";
 import { GRADES, GRADE_KEYS, gradePath } from "@/lib/grades";
 import { useTileTransition } from "@/hooks/use-tile-transition";
 
@@ -14,8 +15,8 @@ const HomePage = () => {
     <header className="relative border-b border-border/40">
       <div className="container py-16 text-center sm:py-20">
         <p className="mb-3 font-mono text-xs font-semibold uppercase text-primary">Cambridge Physics</p>
-        <div className="relative mx-auto flex w-fit items-center justify-center">
-          <Atom className="absolute h-28 w-28 text-primary/15 motion-safe:animate-[spin_18s_linear_infinite] sm:h-36 sm:w-36" aria-hidden="true" />
+        <div className="relative mx-auto flex min-h-40 w-fit items-center justify-center sm:min-h-52">
+          <HomeAtomAnimation />
           <h1 className="relative text-4xl font-extrabold sm:text-6xl">Physics<span className="gradient-text">HQ</span></h1>
         </div>
         <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground sm:text-lg">Select your grade to open its papers, practice, study materials and performance.</p>

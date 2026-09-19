@@ -10,6 +10,7 @@ export interface GradeDefinition {
   dbLevel: string;
   practiceLevel: string;
   materialsLevel: string;
+  hasMcqPapers: boolean;
   mappedTopicalLevel?: "IGCSE" | "AS LEVEL";
   worksheetLevel?: "IGCSE" | "AS LEVEL";
 }
@@ -24,6 +25,7 @@ export const GRADES: Record<GradeKey, GradeDefinition> = {
     dbLevel: "IGCSE",
     practiceLevel: "IGCSE",
     materialsLevel: "IGCSE",
+    hasMcqPapers: true,
     mappedTopicalLevel: "IGCSE",
     worksheetLevel: "IGCSE",
   },
@@ -33,9 +35,10 @@ export const GRADES: Record<GradeKey, GradeDefinition> = {
     shortLabel: "AS",
     syllabus: "9702",
     description: "Cambridge International AS Level Physics",
-    dbLevel: "AS Level",
+    dbLevel: "AS LEVEL",
     practiceLevel: "AS LEVEL",
     materialsLevel: "AS LEVEL",
+    hasMcqPapers: true,
     mappedTopicalLevel: "AS LEVEL",
     worksheetLevel: "AS LEVEL",
   },
@@ -48,6 +51,7 @@ export const GRADES: Record<GradeKey, GradeDefinition> = {
     dbLevel: "A2 Level",
     practiceLevel: "A LEVEL",
     materialsLevel: "A LEVEL",
+    hasMcqPapers: false,
   },
 };
 
@@ -70,7 +74,7 @@ export const isGradeKey = (value?: string): value is GradeKey =>
 export const gradePath = (grade: GradeKey) => `/grade/${grade}`;
 export const gradeSectionPath = (grade: GradeKey, section: "mcq" | "theory" | "practice" | "materials" | "worksheet" | "performance") => {
   const definition = GRADES[grade];
-  if (section === "mcq") return `/papers/${encodeURIComponent(definition.dbLevel)}`;
+  if (section === "mcq") return definition.hasMcqPapers ? `/papers/${encodeURIComponent(definition.dbLevel)}` : gradePath(grade);
   if (section === "theory") return `/theory-papers/${encodeURIComponent(definition.dbLevel)}`;
   if (section === "practice") {
     if (grade === "igcse" && definition.mappedTopicalLevel) return `/topical-mcq/${encodeURIComponent(definition.mappedTopicalLevel)}`;
@@ -82,7 +86,7 @@ export const gradeSectionPath = (grade: GradeKey, section: "mcq" | "theory" | "p
 };
 
 export const equivalentGradePath = (pathname: string, grade: GradeKey) => {
-  if (pathname.startsWith("/papers/")) return gradeSectionPath(grade, "mcq");
+  if (pathname.startsWith("/papers/")) return GRADES[grade].hasMcqPapers ? gradeSectionPath(grade, "mcq") : gradePath(grade);
   if (pathname.startsWith("/theory-papers/")) return gradeSectionPath(grade, "theory");
   if (pathname.startsWith("/topic-practice/") || pathname.startsWith("/topical-mcq/")) return gradeSectionPath(grade, "practice");
   if (pathname.startsWith("/materials/")) return gradeSectionPath(grade, "materials");

@@ -14,7 +14,7 @@ const GradeDashboardPage = () => {
   const details = GRADES[grade];
   const GradeIcon = icons[grade];
   const items = [
-    { section: "mcq" as const, title: "MCQ Past Papers", desc: "Full Cambridge multiple-choice papers by year and series.", icon: ClipboardList, tone: "primary" },
+    ...(details.hasMcqPapers ? [{ section: "mcq" as const, title: "MCQ Past Papers", desc: "Full Cambridge multiple-choice papers by year and series.", icon: ClipboardList, tone: "primary" }] : []),
     { section: "theory" as const, title: "Theory Past Papers", desc: "Structured papers, official answers and explanations.", icon: FileText, tone: "accent" },
     { section: "practice" as const, title: "Practice", desc: "Strengthen individual topics with MCQ and theory sets.", icon: Target, tone: "success" },
     { section: "materials" as const, title: "Study Materials", desc: "Open notes, revision guides and learning resources.", icon: BookOpen, tone: "accent" },

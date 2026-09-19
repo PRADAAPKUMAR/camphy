@@ -18,7 +18,7 @@ const SiteNav = () => {
   const [moreOpen, setMoreOpen] = useState(false);
   const primary = grade ? [
     { label: "Grade Home", to: `/grade/${grade}` },
-    { label: "MCQ Papers", to: gradeSectionPath(grade, "mcq") },
+    ...(GRADES[grade].hasMcqPapers ? [{ label: "MCQ Papers", to: gradeSectionPath(grade, "mcq") }] : []),
     { label: "Theory", to: gradeSectionPath(grade, "theory") },
     { label: "Practice", to: gradeSectionPath(grade, "practice") },
     { label: "Materials", to: gradeSectionPath(grade, "materials") },
