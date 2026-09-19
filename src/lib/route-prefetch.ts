@@ -8,6 +8,7 @@ type Loader = () => Promise<unknown>;
 
 const loaders: Array<[RegExp, Loader]> = [
   [/^\/$/, () => import("@/pages/HomePage")],
+  [/^\/grade\/[^/]+$/, () => import("@/pages/GradeDashboardPage")],
   [/^\/papers$/, () => import("@/pages/Index")],
   [/^\/papers\/[^/]+$/, () => import("@/pages/SubjectPage")],
   [/^\/exam\//, () => import("@/pages/ExamPage")],
@@ -27,8 +28,8 @@ const loaders: Array<[RegExp, Loader]> = [
   [/^\/theory-paper\//, () => import("@/pages/TheoryPaperPage")],
   [/^\/about$/, () => import("@/pages/AboutPage")],
   [/^\/study-tools$/, () => import("@/pages/StudyToolsPage")],
-  [/^\/worksheet-generator$/, () => import("@/pages/WorksheetGeneratorPage")],
-  [/^\/performance$/, () => import("@/pages/PerformancePage")],
+  [/^\/worksheet-generator(?:\/[^/]+)?$/, () => import("@/pages/WorksheetGeneratorPage")],
+  [/^\/performance(?:\/[^/]+)?$/, () => import("@/pages/PerformancePage")],
 ];
 
 const warmed = new Set<string>();

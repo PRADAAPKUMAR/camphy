@@ -16,10 +16,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const MaterialsLevelPage = () => {
   const { level } = useParams<{ level: string }>();
   const decodedLevel = decodeURIComponent(level || "");
+  const grade = gradeFromLevel(decodedLevel);
+  useSyncGrade(decodedLevel);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState("");
@@ -185,11 +189,11 @@ const MaterialsLevelPage = () => {
           <Breadcrumb className="mb-5">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/">Home</Link></BreadcrumbLink>
+                <BreadcrumbLink asChild><Link to={grade ? gradePath(grade) : "/"}>Grade Home</Link></BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/materials">Materials</Link></BreadcrumbLink>
+                <BreadcrumbPage>Study Materials</BreadcrumbPage>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               {currentPath.length === 0 ? (

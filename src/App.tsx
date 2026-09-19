@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { usePageTransition } from "@/hooks/use-page-transition";
 import RunningTimerBar from "@/components/study/RunningTimerBar";
 import SiteNav from "@/components/SiteNav";
+import { GradeProvider } from "@/contexts/GradeContext";
 
 const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
 const SpeedInsights = lazy(() => import("@vercel/speed-insights/react").then(m => ({ default: m.SpeedInsights })));
@@ -34,6 +35,8 @@ const PerformancePage = lazy(() => import("./pages/PerformancePage"));
 const QuestionModePage = lazy(() => import("./pages/QuestionModePage"));
 const AdminUploadPage = lazy(() => import("./pages/AdminUploadPage"));
 const WorksheetGeneratorPage = lazy(() => import("./pages/WorksheetGeneratorPage"));
+const GradeDashboardPage = lazy(() => import("./pages/GradeDashboardPage"));
+const GradeSectionRedirect = lazy(() => import("./pages/GradeSectionRedirect"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -109,28 +112,31 @@ const RouterContent = () => {
     }>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/papers" element={<Index />} />
+        <Route path="/grade/:grade" element={<GradeDashboardPage />} />
+        <Route path="/papers" element={<GradeSectionRedirect section="mcq" />} />
         <Route path="/papers/:level" element={<SubjectPage />} />
         <Route path="/exam/:paperId" element={<ExamPage />} />
         <Route path="/question-mode/:paperId" element={<QuestionModePage />} />
         <Route path="/admin/upload" element={<AdminUploadPage />} />
-        <Route path="/worksheet-generator" element={<WorksheetGeneratorPage />} />
-        <Route path="/materials" element={<MaterialsPage />} />
+        <Route path="/worksheet-generator" element={<GradeSectionRedirect section="worksheet" />} />
+        <Route path="/worksheet-generator/:grade" element={<WorksheetGeneratorPage />} />
+        <Route path="/materials" element={<GradeSectionRedirect section="materials" />} />
         <Route path="/materials/:level" element={<MaterialsLevelPage />} />
         <Route path="/view-drive" element={<DriveViewerPage />} />
-        <Route path="/topic-practice" element={<TopicPracticePage />} />
+        <Route path="/topic-practice" element={<GradeSectionRedirect section="practice" />} />
         <Route path="/topic-practice/:level" element={<TopicLevelPage />} />
         <Route path="/topic-exam/:paperId" element={<TopicExamPage />} />
         <Route path="/topical-mcq" element={<TopicalMcqPage />} />
         <Route path="/topical-mcq/:level" element={<TopicalMcqLevelPage />} />
         <Route path="/topical-mcq/:level/:topicSlug" element={<TopicalMcqSessionPage />} />
         <Route path="/topic-theory/:questionId" element={<TopicTheoryPage />} />
-        <Route path="/theory-papers" element={<TheoryPapersPage />} />
+        <Route path="/theory-papers" element={<GradeSectionRedirect section="theory" />} />
         <Route path="/theory-papers/:level" element={<TheoryLevelPage />} />
         <Route path="/theory-paper/:paperId" element={<TheoryPaperPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/study-tools" element={<StudyToolsPage />} />
-        <Route path="/performance" element={<PerformancePage />} />
+        <Route path="/performance" element={<GradeSectionRedirect section="performance" />} />
+        <Route path="/performance/:grade" element={<PerformancePage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
@@ -145,7 +151,9 @@ const App = () => (
       <TooltipProvider>
         <DeferredShell />
         <BrowserRouter>
-          <RouterContent />
+          <GradeProvider>
+            <RouterContent />
+          </GradeProvider>
         </BrowserRouter>
       </TooltipProvider>
     </Suspense>

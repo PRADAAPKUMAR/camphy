@@ -1,109 +1,49 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, MoreHorizontal, X } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Check, ChevronDown, Menu, MoreHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import IstClock from "@/components/IstClock";
 import logoAsset from "@/assets/physicshq-lightning.png.asset.json";
+import { equivalentGradePath, gradeSectionPath, GRADES, GRADE_KEYS, type GradeKey } from "@/lib/grades";
+import { useSelectedGrade } from "@/contexts/GradeContext";
 
-
-const PRIMARY_NAV = [
-  { label: "Papers", to: "/papers" },
-  { label: "Topic Practice", to: "/topic-practice" },
-  { label: "Study Materials", to: "/materials" },
-  { label: "Performance", to: "/performance" },
-];
-
-const SECONDARY_NAV = [
-  { label: "Worksheet Generator", to: "/worksheet-generator" },
-  { label: "Study Tools", to: "/study-tools" },
-  { label: "About", to: "/about" },
-];
-
-const isActive = (pathname: string, to: string) =>
-  pathname === to || (to !== "/" && pathname.startsWith(`${to}/`));
+const isActive = (pathname: string, to: string) => pathname === to || (to !== "/" && pathname.startsWith(`${to}/`));
 
 const SiteNav = () => {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const { grade, setGrade } = useSelectedGrade();
   const [menuOpen, setMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
-
-  const linkClass = (to: string) =>
-    `rounded-lg px-2.5 py-1.5 text-[13px] font-medium transition-colors hover:bg-muted/30 hover:text-foreground ${
-      isActive(pathname, to) ? "bg-muted/30 text-foreground" : "text-muted-foreground"
-    }`;
-
-  return (
-    <nav className="relative z-40 border-b border-border/40 bg-background/85 backdrop-blur-xl">
-      <div className="container flex items-center justify-between py-2">
-        <Link to="/" className="flex items-center gap-2 text-sm font-extrabold tracking-tight">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg border border-primary/20 bg-primary/10">
-            <img src={logoAsset.url} alt="" className="h-6 w-6 object-contain" />
-          </span>
-          Physics<span className="gradient-text">HQ</span>
-        </Link>
-
-        <div className="hidden items-center gap-1 md:flex">
-          {PRIMARY_NAV.map((item) => (
-            <Link key={item.to} to={item.to} className={linkClass(item.to)}>
-              {item.label}
-            </Link>
-          ))}
-          <div className="relative">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              onClick={() => setMoreOpen((open) => !open)}
-              onBlur={() => window.setTimeout(() => setMoreOpen(false), 120)}
-              aria-label="More pages"
-              aria-expanded={moreOpen}
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-            {moreOpen && (
-              <div className="absolute right-0 top-full z-50 mt-1 w-44 overflow-hidden rounded-xl border border-border/40 bg-card/95 p-1 shadow-lg backdrop-blur">
-                {SECONDARY_NAV.map((item) => (
-                  <Link key={item.to} to={item.to} className={`block ${linkClass(item.to)}`}>
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-          <span className="ml-2 border-l border-border/40 pl-3">
-            <IstClock />
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2 md:hidden">
-          <IstClock compact />
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            onClick={() => setMenuOpen((open) => !open)}
-          >
-            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
-        </div>
+  const primary = grade ? [
+    { label: "Grade Home", to: `/grade/${grade}` },
+    { label: "MCQ Papers", to: gradeSectionPath(grade, "mcq") },
+    { label: "Theory", to: gradeSectionPath(grade, "theory") },
+    { label: "Practice", to: gradeSectionPath(grade, "practice") },
+    { label: "Materials", to: gradeSectionPath(grade, "materials") },
+  ] : [];
+  const secondary = grade ? [
+    ...(GRADES[grade].worksheetLevel ? [{ label: "Worksheet Generator", to: gradeSectionPath(grade, "worksheet") }] : []),
+    { label: "Performance", to: gradeSectionPath(grade, "performance") },
+    { label: "Study Tools", to: "/study-tools" }, { label: "About", to: "/about" },
+  ] : [{ label: "Study Tools", to: "/study-tools" }, { label: "About", to: "/about" }];
+  const linkClass = (to: string) => `rounded-lg px-2.5 py-1.5 text-[13px] font-medium transition-colors hover:bg-muted/30 hover:text-foreground ${isActive(pathname, to) ? "bg-muted/30 text-foreground" : "text-muted-foreground"}`;
+  const switchGrade = (next: GradeKey) => { setGrade(next); navigate(equivalentGradePath(pathname, next)); setMenuOpen(false); };
+  const switcher = <DropdownMenu>
+    <DropdownMenuTrigger asChild><Button variant="outline" size="sm" className="h-8 gap-1.5 border-border/50 px-2.5 text-xs" aria-label="Switch grade">{grade ? GRADES[grade].shortLabel : "Select grade"}<ChevronDown className="h-3.5 w-3.5" /></Button></DropdownMenuTrigger>
+    <DropdownMenuContent align="end" className="w-44">{GRADE_KEYS.map((key) => <DropdownMenuItem key={key} onSelect={() => switchGrade(key)} className="justify-between"><span>{GRADES[key].label}</span>{grade === key && <Check className="h-4 w-4 text-primary" />}</DropdownMenuItem>)}</DropdownMenuContent>
+  </DropdownMenu>;
+  return <nav className="relative z-40 border-b border-border/40 bg-background/85 backdrop-blur-xl">
+    <div className="container flex items-center justify-between gap-3 py-2">
+      <Link to={grade ? `/grade/${grade}` : "/"} className="flex items-center gap-2 text-sm font-extrabold"><span className="flex h-7 w-7 items-center justify-center rounded-lg border border-primary/20 bg-primary/10"><img src={logoAsset.url} alt="" className="h-6 w-6 object-contain" /></span><span>Physics<span className="gradient-text">HQ</span></span></Link>
+      <div className="hidden items-center gap-1 lg:flex">{primary.map((item) => <Link key={item.to} to={item.to} className={linkClass(item.to)}>{item.label}</Link>)}
+        <div className="relative"><Button type="button" variant="ghost" size="icon" onClick={() => setMoreOpen((v) => !v)} onBlur={() => window.setTimeout(() => setMoreOpen(false), 120)} aria-label="More pages"><MoreHorizontal className="h-4 w-4" /></Button>{moreOpen && <div className="absolute right-0 top-full z-50 mt-1 w-48 overflow-hidden rounded-xl border border-border/40 bg-card/95 p-1 shadow-lg backdrop-blur">{secondary.map((item) => <Link key={item.to} to={item.to} className={`block ${linkClass(item.to)}`}>{item.label}</Link>)}</div>}</div>
+        {switcher}<span className="ml-1 border-l border-border/40 pl-3"><IstClock /></span>
       </div>
-
-      {menuOpen && (
-        <div className="container flex flex-col gap-1 pb-4 md:hidden">
-          {[...PRIMARY_NAV, ...SECONDARY_NAV].map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              onClick={() => setMenuOpen(false)}
-              className={linkClass(item.to)}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      )}
-    </nav>
-  );
+      <div className="flex items-center gap-2 lg:hidden">{switcher}<IstClock compact /><Button variant="ghost" size="icon" aria-label={menuOpen ? "Close menu" : "Open menu"} onClick={() => setMenuOpen((v) => !v)}>{menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}</Button></div>
+    </div>
+    {menuOpen && <div className="container flex flex-col gap-1 pb-4 lg:hidden">{[...primary, ...secondary].map((item) => <Link key={item.to} to={item.to} onClick={() => setMenuOpen(false)} className={linkClass(item.to)}>{item.label}</Link>)}</div>}
+  </nav>;
 };
-
 export default SiteNav;

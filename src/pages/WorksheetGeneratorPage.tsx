@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -35,6 +35,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { displayLevel } from "@/lib/syllabus";
+import { GRADES, isGradeKey, type GradeKey } from "@/lib/grades";
 import { collectWrongQuestions, readPerformanceHistory } from "@/lib/performance-history";
 import {
   fetchWorksheetSelection,
@@ -71,7 +72,10 @@ interface Picked {
 }
 
 const WorksheetGeneratorPage = () => {
-  const [level, setLevel] = useState("IGCSE");
+  const { grade: rawGrade } = useParams<{ grade: string }>();
+  const grade = isGradeKey(rawGrade) ? rawGrade.toLowerCase() as GradeKey : "igcse";
+  const gradeDefinition = GRADES[grade];
+  const level = gradeDefinition.worksheetLevel ?? "IGCSE";
   const [source, setSource] = useState<WorksheetSource>("random");
   const [picked, setPicked] = useState<Picked[]>([]);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -87,6 +91,14 @@ const WorksheetGeneratorPage = () => {
   const [failed, setFailed] = useState<{ paper_code: string; question_number: number }[]>([]);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPicked([]);
+    setExpanded({});
+    setSelection(null);
+    setLoaded(null);
+    setFailed([]);
+  }, [level]);
 
   const { data: topicGroups, isLoading: topicsLoading } = useQuery({
     queryKey: ["worksheet-topics", level],
@@ -243,6 +255,8 @@ const WorksheetGeneratorPage = () => {
 
   const problems = [...(selection?.excluded ?? []), ...failed.map((f) => ({ ...f, reason: "image unavailable" }))];
 
+  if (!gradeDefinition.worksheetLevel) return <Navigate to={`/grade/${grade}`} replace />;
+
   return (
     <div className="min-h-screen bg-background bg-grid">
       <header className="border-b border-border/40">
@@ -251,7 +265,7 @@ const WorksheetGeneratorPage = () => {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/">Home</Link>
+                  <Link to={`/grade/${grade}`}>{gradeDefinition.label}</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -280,28 +294,8 @@ const WorksheetGeneratorPage = () => {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>Level</Label>
-              <Select
-                value={level}
-                onValueChange={(v) => {
-                  setLevel(v);
-                  setPicked([]);
-                  setExpanded({});
-                  reset();
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {LEVELS.map((l) => (
-                    <SelectItem key={l.value} value={l.value}>
-                      {l.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex h-10 items-center rounded-md border border-input bg-background px-3 text-sm font-medium">{LEVELS.find((item) => item.value === level)?.label}</div>
             </div>
-
             <div className="space-y-2">
               <Label>Source</Label>
               <Select

@@ -23,6 +23,8 @@ import { useQuestionImages } from "@/hooks/use-question-images";
 import { savePerformanceRecord } from "@/lib/performance-history";
 import { displayLevel, syllabusVersionForLevel } from "@/lib/syllabus";
 import { buildTopicalSet } from "@/lib/topical-bank";
+import { gradeFromLevel, gradeSectionPath } from "@/lib/grades";
+import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
@@ -32,6 +34,8 @@ const fmtSeconds = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padSta
 const TopicalMcqSessionPage = () => {
   const { level = "", topicSlug = "" } = useParams<{ level: string; topicSlug: string }>();
   const navigate = useNavigate();
+  const grade = gradeFromLevel(level);
+  useSyncGrade(level);
 
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [correctAnswers, setCorrectAnswers] = useState<Record<number, string>>({});
@@ -238,7 +242,7 @@ const TopicalMcqSessionPage = () => {
               <BreadcrumbList>
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link to="/topical-mcq">Topical MCQ</Link>
+                    <Link to={grade ? gradeSectionPath(grade, "practice") : "/"}>Practice</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
@@ -280,7 +284,7 @@ const TopicalMcqSessionPage = () => {
               </div>
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button variant="outline" onClick={() => navigate("/performance")}>
+              <Button variant="outline" onClick={() => navigate(grade ? gradeSectionPath(grade, "performance") : "/")}> 
                 View performance
               </Button>
               <Button

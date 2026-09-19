@@ -1,12 +1,14 @@
 import { useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Target, ScrollText, FileText, ArrowLeft } from "lucide-react";
+import { Target, ScrollText, FileText, ArrowLeft, LayoutGrid, ChevronRight } from "lucide-react";
 import PhysicsBackground from "@/components/PhysicsBackground";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { useSyncGrade } from "@/hooks/use-sync-grade";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -22,6 +24,8 @@ const TopicLevelPage = () => {
   const { level } = useParams<{ level: string }>();
   const navigate = useNavigate();
   const decodedLevel = decodeURIComponent(level || "");
+  const grade = gradeFromLevel(decodedLevel);
+  useSyncGrade(decodedLevel);
 
   const { data: mcqPapers, isLoading: mcqLoading } = useQuery({
     queryKey: ["topicwise_mcq", decodedLevel],
@@ -103,20 +107,16 @@ const TopicLevelPage = () => {
           <Breadcrumb className="mb-5">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/">Home</Link></BreadcrumbLink>
+                <BreadcrumbLink asChild><Link to={grade ? gradePath(grade) : "/"}>Grade Home</Link></BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/topic-practice">Topic Practice</Link></BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{decodedLevel}</BreadcrumbPage>
+                <BreadcrumbPage>Practice</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/topic-practice")}>
+            <Button variant="ghost" size="icon" onClick={() => navigate(grade ? gradePath(grade) : "/")}> 
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
@@ -130,6 +130,18 @@ const TopicLevelPage = () => {
       </header>
 
       <main className="container relative py-8">
+        {grade !== "a2" && (
+          <Link
+            to={`/topical-mcq/${encodeURIComponent(grade === "igcse" ? "IGCSE" : "AS LEVEL")}`}
+            className="glass-card-hover mb-6 flex items-center justify-between gap-4 rounded-xl p-5"
+          >
+            <span className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary"><LayoutGrid className="h-5 w-5" /></span>
+              <span><span className="block font-bold">Mapped Past-Paper Topical MCQ</span><span className="block text-xs text-muted-foreground">Practice individual questions grouped by syllabus topic and subtopic.</span></span>
+            </span>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </Link>
+        )}
         {!hasMCQ && !hasTheory ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Target className="h-12 w-12 text-muted-foreground/40 mb-4" />

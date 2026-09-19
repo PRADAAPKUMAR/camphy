@@ -23,6 +23,8 @@ import { useExplanation } from "@/hooks/use-explanation";
 import { useQuestionImages } from "@/hooks/use-question-images";
 import { savePerformanceRecord } from "@/lib/performance-history";
 import { syllabusVersionForLevel } from "@/lib/syllabus";
+import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
@@ -58,6 +60,7 @@ const QuestionModePage = () => {
     },
     enabled: !!paperId,
   });
+  useSyncGrade(paper?.level);
 
   const { data: images, isLoading: imagesLoading } = useQuestionImages(paperId);
 
@@ -192,7 +195,7 @@ const QuestionModePage = () => {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">
         <p className="font-medium text-destructive">Paper not found</p>
-        <Button variant="outline" onClick={() => navigate("/papers")}>
+        <Button variant="outline" onClick={() => navigate("/")}> 
           Back to Papers
         </Button>
       </div>
@@ -210,7 +213,7 @@ const QuestionModePage = () => {
               <BreadcrumbList>
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link to="/papers">Levels</Link>
+                    <Link to={gradeFromLevel(paper.level) ? gradePath(gradeFromLevel(paper.level) as "igcse" | "as" | "a2") : "/"}>Grade Home</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
@@ -260,7 +263,10 @@ const QuestionModePage = () => {
               </div>
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button variant="outline" onClick={() => navigate("/performance")}>
+              <Button variant="outline" onClick={() => {
+                const grade = gradeFromLevel(paper.level);
+                navigate(grade ? `/performance/${grade}` : "/");
+              }}>
                 View performance
               </Button>
               <Button variant="outline" onClick={() => navigate(`/papers/${encodeURIComponent(paper.level)}`)}>

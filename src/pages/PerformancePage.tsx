@@ -1,5 +1,5 @@
 import { lazy, Suspense, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, BarChart3, Target, ListChecks, Trophy, Trash2, TrendingUp, FileText, Layers, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,10 +17,12 @@ import {
 import {
   readPerformanceHistory,
   clearPerformanceHistory,
+  clearPerformanceHistoryForLevel,
   normalizeLevel,
   practiceTypeOf,
   type PerformanceRecord,
 } from "@/lib/performance-history";
+import { gradeFromLevel, gradeSectionPath, GRADES, isGradeKey, type GradeKey } from "@/lib/grades";
 
 const PhysicsBackground = lazy(() => import("@/components/PhysicsBackground"));
 const ScoreTrendChart = lazy(() => import("@/components/performance/ScoreTrendChart"));
@@ -60,8 +62,16 @@ const fmtDate = (iso: string) => {
 const avg = (nums: number[]) => (nums.length ? Math.round(nums.reduce((a, b) => a + b, 0) / nums.length) : 0);
 
 const PerformancePage = () => {
+  const { grade: rawGrade } = useParams<{ grade: string }>();
   const navigate = useNavigate();
-  const [history, setHistory] = useState<PerformanceRecord[]>(() => readPerformanceHistory());
+  const invalidGrade = !!rawGrade && !isGradeKey(rawGrade);
+  const grade = (rawGrade?.toLowerCase() as GradeKey | undefined) ?? null;
+  const gradeDetails = grade ? GRADES[grade] : null;
+  const [allHistory, setAllHistory] = useState<PerformanceRecord[]>(() => readPerformanceHistory());
+  const history = useMemo(
+    () => grade ? allHistory.filter((record) => gradeFromLevel(record.level) === grade) : allHistory,
+    [allHistory, grade],
+  );
 
   const sorted = useMemo(
     () => [...history].sort((a, b) => +new Date(b.completedAt) - +new Date(a.completedAt)),
@@ -124,9 +134,12 @@ const PerformancePage = () => {
     return { previous, recent, delta: recent - previous };
   }, [history.length, sorted]);
 
+  if (invalidGrade) return <Navigate to="/" replace />;
+
   const onClear = () => {
-    clearPerformanceHistory();
-    setHistory([]);
+    if (gradeDetails) clearPerformanceHistoryForLevel(gradeDetails.dbLevel);
+    else clearPerformanceHistory();
+    setAllHistory(readPerformanceHistory());
   };
 
   return (
@@ -140,10 +153,10 @@ const PerformancePage = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate("/")}
+            onClick={() => navigate(grade ? `/grade/${grade}` : "/")}
             className="mb-4 gap-1 text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="h-4 w-4" /> Home
+            <ArrowLeft className="h-4 w-4" /> {gradeDetails ? `${gradeDetails.label} Home` : "Home"}
           </Button>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -151,7 +164,7 @@ const PerformancePage = () => {
                 <BarChart3 className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">Physics Performance</h1>
+                <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{gradeDetails ? `${gradeDetails.label} Performance` : "Physics Performance"}</h1>
                 <p className="text-xs text-muted-foreground sm:text-sm">
                   Your practice progress, stored privately on this device.
                 </p>
@@ -161,14 +174,14 @@ const PerformancePage = () => {
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2">
-                    <Trash2 className="h-4 w-4" /> Clear My History
+                    <Trash2 className="h-4 w-4" /> Clear {gradeDetails?.shortLabel ?? "My"} History
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>Clear your local history?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This removes the practice records saved in this browser only. Nothing else is affected.
+                      This removes {gradeDetails ? `your ${gradeDetails.label} practice records` : "the practice records"} saved in this browser only. Nothing else is affected.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
@@ -192,7 +205,7 @@ const PerformancePage = () => {
             <p className="mb-6 text-sm text-muted-foreground">
               Complete your first practice paper to start tracking your progress.
             </p>
-            <Button onClick={() => navigate("/papers")} className="gap-2">
+            <Button onClick={() => navigate(grade ? gradeSectionPath(grade, "mcq") : "/")} className="gap-2">
               Start Practicing
             </Button>
           </div>
@@ -372,7 +385,7 @@ const PerformancePage = () => {
               <SectionTitle>Keep Improving</SectionTitle>
               <div className="grid gap-3 sm:grid-cols-2">
                 <Link
-                  to="/papers"
+                  to={grade ? gradeSectionPath(grade, "mcq") : "/papers"}
                   className="glass-card flex items-center justify-between gap-3 rounded-xl px-4 py-3.5 transition-colors hover:border-primary/40"
                 >
                   <span className="flex items-center gap-2 text-sm font-semibold">
@@ -381,7 +394,7 @@ const PerformancePage = () => {
                   <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                 </Link>
                 <Link
-                  to="/topic-practice"
+                  to={grade ? gradeSectionPath(grade, "practice") : "/topic-practice"}
                   className="glass-card flex items-center justify-between gap-3 rounded-xl px-4 py-3.5 transition-colors hover:border-primary/40"
                 >
                   <span className="flex items-center gap-2 text-sm font-semibold">
@@ -395,7 +408,7 @@ const PerformancePage = () => {
         )}
 
         <p className="mt-10 text-center text-xs text-muted-foreground">
-          Records are saved only in this browser. <Link to="/papers" className="underline">Practice more papers</Link>.
+          Records are saved only in this browser. <Link to={grade ? gradeSectionPath(grade, "mcq") : "/papers"} className="underline">Practice more papers</Link>.
         </p>
       </main>
     </div>
