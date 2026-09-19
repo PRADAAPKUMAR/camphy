@@ -64,7 +64,7 @@ const avg = (nums: number[]) => (nums.length ? Math.round(nums.reduce((a, b) => 
 const PerformancePage = () => {
   const { grade: rawGrade } = useParams<{ grade: string }>();
   const navigate = useNavigate();
-  if (rawGrade && !isGradeKey(rawGrade)) return <Navigate to="/" replace />;
+  const invalidGrade = !!rawGrade && !isGradeKey(rawGrade);
   const grade = (rawGrade?.toLowerCase() as GradeKey | undefined) ?? null;
   const gradeDetails = grade ? GRADES[grade] : null;
   const [allHistory, setAllHistory] = useState<PerformanceRecord[]>(() => readPerformanceHistory());
@@ -133,6 +133,8 @@ const PerformancePage = () => {
     const recent = avg(chrono.slice(half).map((r) => r.percentage));
     return { previous, recent, delta: recent - previous };
   }, [history.length, sorted]);
+
+  if (invalidGrade) return <Navigate to="/" replace />;
 
   const onClear = () => {
     if (gradeDetails) clearPerformanceHistoryForLevel(gradeDetails.dbLevel);
