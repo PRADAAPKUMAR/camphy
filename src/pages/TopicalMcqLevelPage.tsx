@@ -15,11 +15,15 @@ import {
 } from "@/components/ui/breadcrumb";
 import { fetchBankTopics, slugifyTopic } from "@/lib/topical-bank";
 import { displayLevel } from "@/lib/syllabus";
+import { gradeFromLevel, gradeSectionPath } from "@/lib/grades";
+import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 /** Topics of one level's past-paper MCQ bank. */
 const TopicalMcqLevelPage = () => {
   const { level = "" } = useParams<{ level: string }>();
   const navigate = useNavigate();
+  const grade = gradeFromLevel(level);
+  useSyncGrade(level);
 
   const { data: topics, isLoading } = useQuery({
     queryKey: ["topical-bank-topics", level],
@@ -38,7 +42,7 @@ const TopicalMcqLevelPage = () => {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to="/topical-mcq">Topical MCQ</Link>
+                  <Link to={grade ? gradeSectionPath(grade, "practice") : "/"}>Practice</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -48,7 +52,7 @@ const TopicalMcqLevelPage = () => {
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/topical-mcq")}>
+            <Button variant="ghost" size="icon" onClick={() => navigate(grade ? gradeSectionPath(grade, "practice") : "/")}> 
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>

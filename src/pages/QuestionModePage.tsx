@@ -263,7 +263,10 @@ const QuestionModePage = () => {
               </div>
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button variant="outline" onClick={() => navigate("/performance")}>
+              <Button variant="outline" onClick={() => {
+                const grade = gradeFromLevel(paper.level);
+                navigate(grade ? `/performance/${grade}` : "/");
+              }}>
                 View performance
               </Button>
               <Button variant="outline" onClick={() => navigate(`/papers/${encodeURIComponent(paper.level)}`)}>
