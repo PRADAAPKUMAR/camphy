@@ -131,9 +131,9 @@ const TopicLevelPage = () => {
       </header>
 
       <main className="container relative py-8">
-        {grade?.mappedTopicalLevel && (
+        {grade && GRADES[grade].mappedTopicalLevel && (
           <Link
-            to={`/topical-mcq/${encodeURIComponent(grade.mappedTopicalLevel)}`}
+            to={`/topical-mcq/${encodeURIComponent(GRADES[grade].mappedTopicalLevel ?? "")}`}
             className="glass-card-hover mb-6 flex items-center justify-between gap-4 rounded-xl p-5"
           >
             <span className="flex items-center gap-3">
