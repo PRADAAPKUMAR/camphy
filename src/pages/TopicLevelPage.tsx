@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { useSyncGrade } from "@/hooks/use-sync-grade";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -22,6 +24,8 @@ const TopicLevelPage = () => {
   const { level } = useParams<{ level: string }>();
   const navigate = useNavigate();
   const decodedLevel = decodeURIComponent(level || "");
+  const grade = gradeFromLevel(decodedLevel);
+  useSyncGrade(decodedLevel);
 
   const { data: mcqPapers, isLoading: mcqLoading } = useQuery({
     queryKey: ["topicwise_mcq", decodedLevel],
@@ -103,20 +107,20 @@ const TopicLevelPage = () => {
           <Breadcrumb className="mb-5">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/">Home</Link></BreadcrumbLink>
+                <BreadcrumbLink asChild><Link to={grade ? gradePath(grade) : "/"}>Grade Home</Link></BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/topic-practice">Topic Practice</Link></BreadcrumbLink>
+                <BreadcrumbPage>Practice</BreadcrumbPage>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>{decodedLevel}</BreadcrumbPage>
+                <BreadcrumbPage className="sr-only">{decodedLevel}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/topic-practice")}>
+            <Button variant="ghost" size="icon" onClick={() => navigate(grade ? gradePath(grade) : "/")}> 
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>

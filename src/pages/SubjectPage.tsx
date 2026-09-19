@@ -16,11 +16,15 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { compareSessions } from "@/lib/exam-sessions";
+import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const SubjectPage = () => {
   const { level } = useParams<{ level: string }>();
   const navigate = useNavigate();
   const decodedLevel = decodeURIComponent(level || "");
+  const grade = gradeFromLevel(decodedLevel);
+  useSyncGrade(decodedLevel);
 
   const { data: papers, isLoading } = useQuery({
     queryKey: ["papers", decodedLevel],
@@ -106,16 +110,14 @@ const SubjectPage = () => {
           <Breadcrumb className="mb-5">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/">Home</Link></BreadcrumbLink>
+                <BreadcrumbLink asChild><Link to={grade ? gradePath(grade) : "/"}>Grade Home</Link></BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/papers">Levels</Link></BreadcrumbLink>
+                <BreadcrumbPage>MCQ Past Papers</BreadcrumbPage>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{decodedLevel}</BreadcrumbPage>
-              </BreadcrumbItem>
+              <BreadcrumbItem className="sr-only"><BreadcrumbPage>{decodedLevel}</BreadcrumbPage></BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-3 mb-2">

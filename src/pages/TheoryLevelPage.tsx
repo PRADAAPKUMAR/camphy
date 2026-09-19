@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { compareSessions } from "@/lib/exam-sessions";
+import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
@@ -14,6 +16,8 @@ const TheoryLevelPage = () => {
   const { level } = useParams<{ level: string }>();
   const navigate = useNavigate();
   const decodedLevel = decodeURIComponent(level ?? "");
+  const grade = gradeFromLevel(decodedLevel);
+  useSyncGrade(decodedLevel);
 
   const { data: papers, isLoading } = useQuery({
     queryKey: ["theory_papers", decodedLevel],
@@ -53,10 +57,10 @@ const TheoryLevelPage = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate("/theory-papers")}
+            onClick={() => navigate(grade ? gradePath(grade) : "/")}
             className="mb-4 gap-1 text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="h-4 w-4" /> Levels
+            <ArrowLeft className="h-4 w-4" /> Grade Home
           </Button>
           <h1 className="text-3xl font-extrabold tracking-tight">{decodedLevel} — Theory Papers</h1>
           <p className="text-sm text-muted-foreground">
