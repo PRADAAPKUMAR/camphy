@@ -5,4 +5,4 @@
 - [x] Add grade-aware header navigation and switcher
 - [x] Scope worksheet and performance to active grade
 - [x] Update breadcrumbs, back links, detail synchronization, and prefetch routes
-- [ ] Verify builds and grade navigation flows
+- [x] Verify builds and grade navigation flows
