@@ -12,3 +12,6 @@
 - [x] Scope worksheet and performance to active grade
 - [x] Update breadcrumbs, back links, detail synchronization, and prefetch routes
 - [x] Verify builds and grade navigation flows
+- [x] Show the IGCSE mapped topical MCQ bank from its Practice page
+- [x] Match AS Level theory papers regardless of label capitalization
+- [x] Make the navigation three-dot options reliably clickable

@@ -15,7 +15,6 @@ const SiteNav = () => {
   const navigate = useNavigate();
   const { grade, setGrade } = useSelectedGrade();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
   const primary = grade ? [
     { label: "Grade Home", to: `/grade/${grade}` },
     ...(GRADES[grade].hasMcqPapers ? [{ label: "MCQ Papers", to: gradeSectionPath(grade, "mcq") }] : []),
@@ -38,7 +37,18 @@ const SiteNav = () => {
     <div className="container flex items-center justify-between gap-3 py-2">
       <Link to={grade ? `/grade/${grade}` : "/"} className="flex items-center gap-2 text-sm font-extrabold"><img src={logoAsset.url} alt="" className="h-7 w-7 object-contain" /><span>Physics<span className="gradient-text">HQ</span></span></Link>
       <div className="hidden items-center gap-1 lg:flex">{primary.map((item) => <Link key={item.to} to={item.to} className={linkClass(item.to)}>{item.label}</Link>)}
-        <div className="relative"><Button type="button" variant="ghost" size="icon" onClick={() => setMoreOpen((v) => !v)} onBlur={() => window.setTimeout(() => setMoreOpen(false), 120)} aria-label="More pages"><MoreHorizontal className="h-4 w-4" /></Button>{moreOpen && <div className="absolute right-0 top-full z-50 mt-1 w-48 overflow-hidden rounded-xl border border-border/40 bg-card/95 p-1 shadow-lg backdrop-blur">{secondary.map((item) => <Link key={item.to} to={item.to} className={`block ${linkClass(item.to)}`}>{item.label}</Link>)}</div>}</div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button type="button" variant="ghost" size="icon" aria-label="More pages"><MoreHorizontal className="h-4 w-4" /></Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            {secondary.map((item) => (
+              <DropdownMenuItem key={item.to} asChild>
+                <Link to={item.to} className={linkClass(item.to)}>{item.label}</Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
         {switcher}<span className="ml-1 border-l border-border/40 pl-3"><IstClock /></span>
       </div>
       <div className="flex items-center gap-2 lg:hidden">{switcher}<IstClock compact /><Button variant="ghost" size="icon" aria-label={menuOpen ? "Close menu" : "Open menu"} onClick={() => setMenuOpen((v) => !v)}>{menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}</Button></div>
