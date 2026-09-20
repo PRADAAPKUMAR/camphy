@@ -26,7 +26,7 @@ const TheoryLevelPage = () => {
       const { data, error } = await supabase
         .from("theory_papers")
         .select("*")
-        .eq("level", decodedLevel);
+        .ilike("level", decodedLevel);
       if (error) throw error;
       return data ?? [];
     },
