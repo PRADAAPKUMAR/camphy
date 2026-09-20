@@ -76,10 +76,7 @@ export const gradeSectionPath = (grade: GradeKey, section: "mcq" | "theory" | "p
   const definition = GRADES[grade];
   if (section === "mcq") return definition.hasMcqPapers ? `/papers/${encodeURIComponent(definition.dbLevel)}` : gradePath(grade);
   if (section === "theory") return `/theory-papers/${encodeURIComponent(definition.dbLevel)}`;
-  if (section === "practice") {
-    if (grade === "igcse" && definition.mappedTopicalLevel) return `/topical-mcq/${encodeURIComponent(definition.mappedTopicalLevel)}`;
-    return `/topic-practice/${encodeURIComponent(definition.practiceLevel)}`;
-  }
+  if (section === "practice") return `/topic-practice/${encodeURIComponent(definition.practiceLevel)}`;
   if (section === "materials") return `/materials/${encodeURIComponent(definition.materialsLevel)}`;
   if (section === "worksheet") return definition.worksheetLevel ? `/worksheet-generator/${grade}` : gradePath(grade);
   return `/performance/${grade}`;
