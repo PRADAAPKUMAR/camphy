@@ -4,7 +4,6 @@ import { Check, ChevronDown, Menu, MoreHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import IstClock from "@/components/IstClock";
-import logoAsset from "@/assets/physicshq-lightning.png.asset.json";
 import { equivalentGradePath, gradeSectionPath, GRADES, GRADE_KEYS, type GradeKey } from "@/lib/grades";
 import { useSelectedGrade } from "@/contexts/GradeContext";
 
@@ -35,7 +34,7 @@ const SiteNav = () => {
   </DropdownMenu>;
   return <nav className="relative z-40 border-b border-border/40 bg-background/85 backdrop-blur-xl">
     <div className="container flex items-center justify-between gap-3 py-2">
-      <Link to={grade ? `/grade/${grade}` : "/"} className="flex items-center gap-2 text-sm font-extrabold"><img src={logoAsset.url} alt="" className="h-7 w-7 object-contain" /><span>Physics<span className="gradient-text">HQ</span></span></Link>
+      <Link to={grade ? `/grade/${grade}` : "/"} className="flex items-center gap-2 text-sm font-extrabold"><img src="/favicon.png" alt="PhysicsHQ" width="28" height="28" className="h-7 w-7 shrink-0 object-contain" /><span>Physics<span className="gradient-text">HQ</span></span></Link>
       <div className="hidden items-center gap-1 lg:flex">{primary.map((item) => <Link key={item.to} to={item.to} className={linkClass(item.to)}>{item.label}</Link>)}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
