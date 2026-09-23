@@ -29,6 +29,7 @@ const loaders: Array<[RegExp, Loader]> = [
   [/^\/about$/, () => import("@/pages/AboutPage")],
   [/^\/study-tools$/, () => import("@/pages/StudyToolsPage")],
   [/^\/worksheet-generator(?:\/[^/]+)?$/, () => import("@/pages/WorksheetGeneratorPage")],
+  [/^\/classroom-quiz\/[^/]+$/, () => import("@/pages/ClassroomQuizPage")],
   [/^\/performance(?:\/[^/]+)?$/, () => import("@/pages/PerformancePage")],
 ];
 

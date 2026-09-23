@@ -72,13 +72,14 @@ export const isGradeKey = (value?: string): value is GradeKey =>
   !!value && GRADE_KEYS.includes(value.toLowerCase() as GradeKey);
 
 export const gradePath = (grade: GradeKey) => `/grade/${grade}`;
-export const gradeSectionPath = (grade: GradeKey, section: "mcq" | "theory" | "practice" | "materials" | "worksheet" | "performance") => {
+export const gradeSectionPath = (grade: GradeKey, section: "mcq" | "theory" | "practice" | "materials" | "worksheet" | "performance" | "quiz") => {
   const definition = GRADES[grade];
   if (section === "mcq") return definition.hasMcqPapers ? `/papers/${encodeURIComponent(definition.dbLevel)}` : gradePath(grade);
   if (section === "theory") return `/theory-papers/${encodeURIComponent(definition.dbLevel)}`;
   if (section === "practice") return `/topic-practice/${encodeURIComponent(definition.practiceLevel)}`;
   if (section === "materials") return `/materials/${encodeURIComponent(definition.materialsLevel)}`;
   if (section === "worksheet") return definition.worksheetLevel ? `/worksheet-generator/${grade}` : gradePath(grade);
+  if (section === "quiz") return definition.mappedTopicalLevel ? `/classroom-quiz/${grade}` : gradePath(grade);
   return `/performance/${grade}`;
 };
 
@@ -89,5 +90,6 @@ export const equivalentGradePath = (pathname: string, grade: GradeKey) => {
   if (pathname.startsWith("/materials/")) return gradeSectionPath(grade, "materials");
   if (pathname.startsWith("/performance")) return gradeSectionPath(grade, "performance");
   if (pathname.startsWith("/worksheet-generator") && GRADES[grade].worksheetLevel) return gradeSectionPath(grade, "worksheet");
+  if (pathname.startsWith("/classroom-quiz") && GRADES[grade].mappedTopicalLevel) return gradeSectionPath(grade, "quiz");
   return gradePath(grade);
 };

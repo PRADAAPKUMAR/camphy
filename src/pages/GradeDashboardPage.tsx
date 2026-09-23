@@ -1,5 +1,5 @@
 import { Link, Navigate, useParams } from "react-router-dom";
-import { Atom, BarChart3, BookOpen, ClipboardList, FilePlus2, FileText, FlaskConical, Microscope, Target, ArrowRight } from "lucide-react";
+import { Atom, BarChart3, BookOpen, ClipboardList, FilePlus2, FileText, FlaskConical, Gamepad2, Microscope, Target, ArrowRight } from "lucide-react";
 import PhysicsBackground from "@/components/PhysicsBackground";
 import { GRADES, gradeSectionPath, isGradeKey, type GradeKey } from "@/lib/grades";
 import { useTileTransition } from "@/hooks/use-tile-transition";
@@ -19,6 +19,7 @@ const GradeDashboardPage = () => {
     { section: "practice" as const, title: "Practice", desc: "Strengthen individual topics with MCQ and theory sets.", icon: Target, tone: "success" },
     { section: "materials" as const, title: "Study Materials", desc: "Open notes, revision guides and learning resources.", icon: BookOpen, tone: "accent" },
     ...(details.worksheetLevel ? [{ section: "worksheet" as const, title: "Worksheet Generator", desc: "Create custom printable MCQ worksheets and answer keys.", icon: FilePlus2, tone: "primary" }] : []),
+    ...(details.mappedTopicalLevel ? [{ section: "quiz" as const, title: "Classroom Quiz", desc: "Run a timed team MCQ game with live scoring.", icon: Gamepad2, tone: "accent" }] : []),
     { section: "performance" as const, title: "Performance", desc: `Review only your ${details.label} attempts, topics and mistakes.`, icon: BarChart3, tone: "success" },
   ];
   const tones: Record<string, string> = {
