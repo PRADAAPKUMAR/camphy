@@ -22,6 +22,7 @@ const SiteNav = () => {
     { label: "Materials", to: gradeSectionPath(grade, "materials") },
   ] : [];
   const secondary = grade ? [
+    ...(GRADES[grade].mappedTopicalLevel ? [{ label: "Classroom Quiz", to: gradeSectionPath(grade, "quiz") }] : []),
     ...(GRADES[grade].worksheetLevel ? [{ label: "Worksheet Generator", to: gradeSectionPath(grade, "worksheet") }] : []),
     { label: "Performance", to: gradeSectionPath(grade, "performance") },
     { label: "Study Tools", to: "/study-tools" }, { label: "About", to: "/about" },

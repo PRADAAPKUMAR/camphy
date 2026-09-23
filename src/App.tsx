@@ -37,6 +37,7 @@ const AdminUploadPage = lazy(() => import("./pages/AdminUploadPage"));
 const WorksheetGeneratorPage = lazy(() => import("./pages/WorksheetGeneratorPage"));
 const GradeDashboardPage = lazy(() => import("./pages/GradeDashboardPage"));
 const GradeSectionRedirect = lazy(() => import("./pages/GradeSectionRedirect"));
+const ClassroomQuizPage = lazy(() => import("./pages/ClassroomQuizPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -77,6 +78,7 @@ const RouterContent = () => {
   const navExcluded =
     /^\/(exam|question-mode|topic-exam)\//.test(pathname) ||
     /^\/topical-mcq\/[^/]+\/[^/]+\/?$/.test(pathname) ||
+    pathname.startsWith("/classroom-quiz/") ||
     pathname === "/view-drive" ||
     pathname.startsWith("/topic-theory/");
 
@@ -120,6 +122,7 @@ const RouterContent = () => {
         <Route path="/admin/upload" element={<AdminUploadPage />} />
         <Route path="/worksheet-generator" element={<GradeSectionRedirect section="worksheet" />} />
         <Route path="/worksheet-generator/:grade" element={<WorksheetGeneratorPage />} />
+        <Route path="/classroom-quiz/:grade" element={<ClassroomQuizPage />} />
         <Route path="/materials" element={<GradeSectionRedirect section="materials" />} />
         <Route path="/materials/:level" element={<MaterialsLevelPage />} />
         <Route path="/view-drive" element={<DriveViewerPage />} />
