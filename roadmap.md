@@ -15,3 +15,11 @@
 - [x] Show the IGCSE mapped topical MCQ bank from its Practice page
 - [x] Match AS Level theory papers regardless of label capitalization
 - [x] Make the navigation three-dot options reliably clickable
+
+# Classroom team quiz
+
+- [ ] Add an IGCSE/AS-only quiz entry and routes
+- [ ] Build random/topical setup with 2–6 teams and question timer
+- [ ] Build teacher-recorded locked answers, speed scoring, and automatic reveal
+- [ ] Build live leaderboard and final results board
+- [ ] Verify random/topical gameplay and grade restrictions
