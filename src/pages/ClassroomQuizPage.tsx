@@ -1,8 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Check, ChevronRight, Clock3, Crown, Gamepad2, Medal, Plus, RotateCcw, Trophy, Users, X } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, Clock3, Crown, Flag, Gamepad2, Lightbulb, Medal, Plus, RotateCcw, Trophy, Users, X } from "lucide-react";
 import { toast } from "sonner";
+import ExplanationDialog from "@/components/ExplanationDialog";
+import { useExplanation } from "@/hooks/use-explanation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -86,6 +99,7 @@ const ClassroomQuizPage = () => {
   const [current, setCurrent] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState(30);
   const [answers, setAnswers] = useState<Record<string, TeamAnswer>>({});
+  const [answeredQuestionCount, setAnsweredQuestionCount] = useState(0);
   const [loadingGame, setLoadingGame] = useState(false);
   const revealGuard = useRef(false);
 
@@ -98,6 +112,11 @@ const ClassroomQuizPage = () => {
 
   const selectedSet = useMemo(() => new Set(selectedTopicIds), [selectedTopicIds]);
   const currentQuestion = questions[current];
+  const explanationSource = useMemo(
+    () => currentQuestion?.paper_id ? { paper_id: currentQuestion.paper_id } : null,
+    [currentQuestion?.paper_id],
+  );
+  const explanation = useExplanation(explanationSource);
   const ranked = useMemo(() => rankTeams(teams), [teams]);
   const allAnswered = teams.length > 0 && teams.every((team) => answers[team.id]);
 
@@ -117,6 +136,7 @@ const ClassroomQuizPage = () => {
       }),
     );
     setAnswers(scored);
+    setAnsweredQuestionCount((count) => count + 1);
     setPhase("reveal");
   }, [answers, currentQuestion, duration, phase]);
 
@@ -178,6 +198,7 @@ const ClassroomQuizPage = () => {
       setQuestions(playable);
       setTeams((previous) => previous.map((team) => ({ ...team, name: team.name.trim(), score: 0, correct: 0 })));
       setCurrent(0);
+      setAnsweredQuestionCount(0);
       setAnswers({});
       setSecondsLeft(duration);
       revealGuard.current = false;
@@ -212,6 +233,7 @@ const ClassroomQuizPage = () => {
     setQuestions([]);
     setAnswers({});
     setCurrent(0);
+    setAnsweredQuestionCount(0);
     setTeams((previous) => previous.map((team) => ({ ...team, score: 0, correct: 0 })));
   };
 
@@ -287,7 +309,7 @@ const ClassroomQuizPage = () => {
         <div className="mb-8 text-center"><Trophy className="mx-auto mb-4 h-14 w-14 text-primary" /><p className="font-mono text-xs text-primary">FINAL RESULTS</p><h1 className="mt-1 text-4xl font-extrabold">{ranked[0]?.rank === ranked[1]?.rank ? "It’s a tie!" : `${ranked[0]?.name} wins!`}</h1></div>
         <div className="space-y-3">{ranked.map((team, index) => <div key={team.id} className={`glass-card flex items-center gap-4 rounded-xl p-5 ${team.rank === 1 ? "border-primary/50 glow-sm" : ""}`}>
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-muted text-lg font-black">{team.rank === 1 ? <Crown className="h-6 w-6 text-primary" /> : team.rank}</div>
-          <div className="min-w-0 flex-1"><p className="truncate text-lg font-bold">{team.name}</p><p className="text-sm text-muted-foreground">{team.correct}/{questions.length} correct</p></div>
+          <div className="min-w-0 flex-1"><p className="truncate text-lg font-bold">{team.name}</p><p className="text-sm text-muted-foreground">{team.correct}/{answeredQuestionCount} correct</p></div>
           <p className="text-2xl font-black tabular-nums">{team.score.toLocaleString()}</p>
         </div>)}</div>
         <div className="mt-8 flex flex-wrap justify-center gap-3"><Button size="lg" className="gap-2" onClick={restart}><RotateCcw className="h-4 w-4" /> Play again</Button><Button size="lg" variant="outline" onClick={() => navigate(`/grade/${grade}`)}>Grade home</Button></div>
@@ -300,7 +322,19 @@ const ClassroomQuizPage = () => {
       <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3">
         <div><p className="font-mono text-xs text-primary">QUESTION {current + 1} OF {questions.length}</p><h1 className="text-lg font-bold">Classroom Quiz</h1></div>
         <div className={`flex min-w-32 items-center justify-center gap-2 rounded-lg border px-5 py-2 font-mono text-2xl font-black tabular-nums ${secondsLeft <= 5 && phase === "question" ? "border-destructive/50 bg-destructive/10 text-destructive animate-pulse" : "border-primary/30 bg-primary/10 text-primary"}`}><Clock3 className="h-5 w-5" />{fmtTime(secondsLeft)}</div>
-        <Badge variant="outline" className="text-sm">{Object.keys(answers).length}/{teams.length} locked</Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="hidden text-sm sm:inline-flex">{Object.keys(answers).length}/{teams.length} locked</Badge>
+          <AlertDialog>
+            <AlertDialogTrigger asChild><Button variant="outline" size="sm" className="gap-2"><Flag className="h-4 w-4" /> End quiz</Button></AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>End the quiz now?</AlertDialogTitle>
+                <AlertDialogDescription>Current scores will be kept. An unanswered question will not earn points.</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter><AlertDialogCancel>Continue quiz</AlertDialogCancel><AlertDialogAction onClick={() => setPhase("results")}>Show results</AlertDialogAction></AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
     </header>
     <main className="mx-auto grid max-w-[1500px] gap-4 p-3 lg:grid-cols-[minmax(0,1fr)_390px] lg:p-5">
@@ -320,13 +354,17 @@ const ClassroomQuizPage = () => {
             {phase === "reveal" && <p className={`mt-2 text-right text-sm font-bold ${answer?.points ? "text-success" : "text-muted-foreground"}`}>{answer?.points ? `+${answer.points.toLocaleString()} points` : "No points"}</p>}
           </div>;
         })}</div>
-        {phase === "reveal" && <Button size="lg" className="w-full gap-2" onClick={nextQuestion}>{current >= questions.length - 1 ? "Show final results" : "Next question"}<ChevronRight className="h-5 w-5" /></Button>}
+        {phase === "reveal" && <div className="grid gap-3 sm:grid-cols-2">
+          <Button size="lg" variant="outline" className="gap-2" onClick={() => explanation.openExplanation(currentQuestion.question_number)}><Lightbulb className="h-5 w-5" /> View explanation</Button>
+          <Button size="lg" className="gap-2" onClick={nextQuestion}>{current >= questions.length - 1 ? "Show final results" : "Next question"}<ChevronRight className="h-5 w-5" /></Button>
+        </div>}
       </section>
       <aside className="space-y-4">
         <div className="glass-card rounded-xl p-4"><div className="mb-3 flex items-center gap-2"><Medal className="h-5 w-5 text-primary" /><h2 className="font-bold">Live leaderboard</h2></div><div className="space-y-2">{ranked.map((team) => <div key={team.id} className="flex items-center gap-3 rounded-lg bg-muted/20 p-3"><span className="w-6 text-center font-black text-muted-foreground">{team.rank}</span><span className="min-w-0 flex-1 truncate font-semibold">{team.name}</span><strong className="tabular-nums">{team.score.toLocaleString()}</strong></div>)}</div></div>
         {phase === "question" && <Button variant="outline" className="w-full" onClick={reveal}>End answering now</Button>}
       </aside>
     </main>
+    <ExplanationDialog open={explanation.open} onOpenChange={explanation.setOpen} question={explanation.question} isLoading={explanation.isLoading} data={explanation.data} />
   </div>;
 };
 

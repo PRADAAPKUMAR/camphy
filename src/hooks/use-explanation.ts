@@ -11,7 +11,7 @@ export const useExplanation = (source: Source | null) => {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<ExplanationData | null>(null);
-  const [cache, setCache] = useState<Record<number, ExplanationData>>({});
+  const [cache, setCache] = useState<Record<string, ExplanationData>>({});
 
   const openExplanation = useCallback(
     async (q: number) => {
@@ -19,7 +19,9 @@ export const useExplanation = (source: Source | null) => {
       setQuestion(q);
       setOpen(true);
 
-      const cached = cache[q];
+      const sourceId = "paper_id" in source ? `paper:${source.paper_id}` : `topic:${source.topic_paper_id}`;
+      const cacheKey = `${sourceId}:${q}`;
+      const cached = cache[cacheKey];
       if (cached) {
         setData(cached);
         setIsLoading(false);
@@ -35,7 +37,7 @@ export const useExplanation = (source: Source | null) => {
         });
         if (error) throw error;
         const payload = res as ExplanationData;
-        setCache((prev) => ({ ...prev, [q]: payload }));
+        setCache((prev) => ({ ...prev, [cacheKey]: payload }));
         setData(payload);
       } catch {
         toast.error("Could not load the explanation");
