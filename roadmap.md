@@ -23,3 +23,9 @@
 - [x] Build teacher-recorded locked answers, speed scoring, and automatic reveal
 - [x] Build live leaderboard and final results board
 - [x] Verify random/topical gameplay and grade restrictions
+
+# Classroom quiz controls
+
+- [x] Show explanations only after each question is revealed
+- [x] Add confirmed early quiz completion and show current results
+- [ ] Verify both classroom quiz controls
