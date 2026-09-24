@@ -18,8 +18,8 @@
 
 # Classroom team quiz
 
-- [ ] Add an IGCSE/AS-only quiz entry and routes
-- [ ] Build random/topical setup with 2–6 teams and question timer
-- [ ] Build teacher-recorded locked answers, speed scoring, and automatic reveal
-- [ ] Build live leaderboard and final results board
-- [ ] Verify random/topical gameplay and grade restrictions
+- [x] Add an IGCSE/AS-only quiz entry and routes
+- [x] Build random/topical setup with 2–6 teams and question timer
+- [x] Build teacher-recorded locked answers, speed scoring, and automatic reveal
+- [x] Build live leaderboard and final results board
+- [x] Verify random/topical gameplay and grade restrictions
