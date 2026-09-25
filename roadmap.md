@@ -28,4 +28,4 @@
 
 - [x] Show explanations only after each question is revealed
 - [x] Add confirmed early quiz completion and show current results
-- [ ] Verify both classroom quiz controls
+- [x] Verify both classroom quiz controls
