@@ -15,7 +15,7 @@
       {
         "name": "list_levels",
         "title": "List levels",
-        "description": "List the physics levels available on Physics HQ (e.g. IGCSE, AS LEVEL, A2 LEVEL) together with how many past papers, topic-wise MCQ practice sets, topic-wise theory questions, and study materials exist for each level.",
+        "description": "List the physics levels available on Physics HQ (e.g. IGCSE, AS LEVEL, A LEVEL) together with how many past papers, topic-wise MCQ practice sets, topic-wise theory questions, and study materials exist for each level.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
@@ -31,7 +31,7 @@
       {
         "name": "list_papers",
         "title": "List past papers",
-        "description": "List Cambridge past-paper MCQ practice papers on Physics HQ. Filter by level (IGCSE, AS LEVEL, A2 LEVEL), paper code, session (e.g. May/June, October/November), or year. Returns paper metadata and a URL to the PDF question paper.",
+        "description": "List Cambridge past-paper MCQ practice papers on Physics HQ. Filter by level (IGCSE, AS LEVEL, A LEVEL), paper code, session (e.g. May/June, October/November), or year. Returns paper metadata and a URL to the PDF question paper.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
@@ -42,7 +42,7 @@
           "properties": {
             "level": {
               "type": "string",
-              "description": "Filter by level, e.g. 'IGCSE', 'AS LEVEL', 'A2 LEVEL'."
+              "description": "Filter by level, e.g. 'IGCSE', 'AS LEVEL', 'A LEVEL'."
             },
             "paper_code": {
               "type": "string",
@@ -113,7 +113,7 @@
           "properties": {
             "level": {
               "type": "string",
-              "description": "Filter by level (e.g. 'A2 LEVEL')."
+              "description": "Filter by level (e.g. 'A LEVEL')."
             },
             "topic": {
               "type": "string",
