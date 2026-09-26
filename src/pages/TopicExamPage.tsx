@@ -29,7 +29,7 @@ import MobileExamShell from "@/components/MobileExamShell";
 import { savePerformanceRecord } from "@/lib/performance-history";
 import { syllabusVersionForLevel } from "@/lib/syllabus";
 import { useTopicPracticeMap } from "@/hooks/use-syllabus";
-import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const CACHE_TTL = 30 * 60 * 1000;
@@ -245,7 +245,7 @@ const TopicExamPage = () => {
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to={`/topic-practice/${encodeURIComponent(paper.level)}`}>{paper.level}</Link>
+                  <Link to={`/topic-practice/${encodeURIComponent(paper.level)}`}>{normalizeGradeLabel(paper.level)}</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />

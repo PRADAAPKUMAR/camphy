@@ -28,7 +28,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import MobileExamShell from "@/components/MobileExamShell";
 import { savePerformanceRecord } from "@/lib/performance-history";
 import { syllabusVersionForLevel } from "@/lib/syllabus";
-import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const TOTAL_QUESTIONS = 40;
@@ -240,7 +240,7 @@ const ExamPage = () => {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to={`/papers/${encodeURIComponent(paper.level)}`}>{paper.level}</Link></BreadcrumbLink>
+                <BreadcrumbLink asChild><Link to={`/papers/${encodeURIComponent(paper.level)}`}>{normalizeGradeLabel(paper.level)}</Link></BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>

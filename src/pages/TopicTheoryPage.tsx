@@ -11,7 +11,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
@@ -78,7 +78,7 @@ const TopicTheoryPage = () => {
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to={`/topic-practice/${encodeURIComponent(question.level)}`}>{question.level}</Link>
+                  <Link to={`/topic-practice/${encodeURIComponent(question.level)}`}>{normalizeGradeLabel(question.level)}</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />

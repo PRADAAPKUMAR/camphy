@@ -5,7 +5,7 @@ export default defineTool({
   name: "list_levels",
   title: "List levels",
   description:
-    "List the physics levels available on Physics HQ (e.g. IGCSE, AS LEVEL, A2 LEVEL) together with how many past papers, topic-wise MCQ practice sets, topic-wise theory questions, and study materials exist for each level.",
+    "List the physics levels available on Physics HQ (e.g. IGCSE, AS LEVEL, A LEVEL) together with how many past papers, topic-wise MCQ practice sets, topic-wise theory questions, and study materials exist for each level.",
   inputSchema: {},
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async () => {

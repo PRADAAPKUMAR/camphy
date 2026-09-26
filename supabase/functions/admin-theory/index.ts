@@ -29,7 +29,7 @@ const parseName = (filename: string) => {
   const level = IGCSE_CODES.has(syllabus_code)
     ? "IGCSE"
     : Number(component[0]) >= 4
-      ? "A Level"
+      ? "A2 Level"
       : "AS Level";
   return {
     syllabus_code,

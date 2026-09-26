@@ -34,7 +34,7 @@ const IGCSE_CODES = new Set(["0625", "0972", "0654", "0653"]);
 export const levelForPaper = (syllabusCode: string, component: string): string => {
   if (IGCSE_CODES.has(syllabusCode)) return "IGCSE";
   const first = Number(component[0]);
-  if (first >= 4) return "A Level";
+  if (first >= 4) return "A2 Level";
   return "AS Level";
 };
 
@@ -62,4 +62,4 @@ export const parseTheoryFilename = (filename: string): ParsedTheoryFilename | nu
   };
 };
 
-export const THEORY_LEVELS = ["IGCSE", "AS Level", "A Level"] as const;
+export const THEORY_LEVELS = ["IGCSE", "AS Level", "A2 Level"] as const;

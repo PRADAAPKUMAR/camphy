@@ -8,7 +8,7 @@ export default defineTool({
   description:
     "List topic-wise theory (structured) question sets on Physics HQ. Each entry has a question PDF and a matching answer-key PDF. Optionally filter by level or topic substring.",
   inputSchema: {
-    level: z.string().optional().describe("Filter by level (e.g. 'A2 LEVEL')."),
+    level: z.string().optional().describe("Filter by level (e.g. 'A LEVEL')."),
     topic: z.string().optional().describe("Case-insensitive substring match on topic."),
     limit: z.number().int().min(1).max(200).optional(),
   },

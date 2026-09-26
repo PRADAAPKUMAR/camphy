@@ -264,7 +264,7 @@ const PerformancePage = () => {
                     return (
                       <div key={l.level} className="glass-card rounded-2xl p-5">
                         <div className="mb-3 flex items-center justify-between">
-                          <h3 className="font-bold">{l.level}</h3>
+                          <h3 className="font-bold">{normalizeGradeLabel(l.level)}</h3>
                           <Badge variant="secondary" className="bg-secondary/60 text-xs">
                             {l.attempts} attempt{l.attempts !== 1 ? "s" : ""}
                           </Badge>
