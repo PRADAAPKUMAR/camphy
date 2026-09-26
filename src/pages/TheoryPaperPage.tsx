@@ -15,7 +15,7 @@ import {
 import TheoryExplanationDialog, {
   type TheoryExplanationPart,
 } from "@/components/theory/TheoryExplanationDialog";
-import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const PDFViewer = lazy(() => import("@/components/PDFViewer"));
@@ -114,7 +114,7 @@ const TheoryPaperPage = () => {
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
                   <Link to={`/theory-papers/${encodeURIComponent(paper.level)}`}>
-                    {paper.level}
+                    {normalizeGradeLabel(paper.level)}
                   </Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>

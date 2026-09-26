@@ -23,7 +23,7 @@ import { useExplanation } from "@/hooks/use-explanation";
 import { useQuestionImages } from "@/hooks/use-question-images";
 import { savePerformanceRecord } from "@/lib/performance-history";
 import { syllabusVersionForLevel } from "@/lib/syllabus";
-import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
@@ -219,7 +219,7 @@ const QuestionModePage = () => {
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link to={`/papers/${encodeURIComponent(paper.level)}`}>{paper.level}</Link>
+                    <Link to={`/papers/${encodeURIComponent(paper.level)}`}>{normalizeGradeLabel(paper.level)}</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />

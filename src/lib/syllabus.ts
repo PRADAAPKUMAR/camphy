@@ -33,7 +33,7 @@ export interface QuestionTopicMapping {
   verified: boolean;
 }
 
-/** Canonical display labels. "A2" is a PhysicsHQ-only label, never a syllabus. */
+/** Canonical Cambridge qualification display labels. */
 export const displayLevel = (level?: string | null) => {
   return normalizeGradeLabel(level);
 };

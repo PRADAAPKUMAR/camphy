@@ -22,7 +22,7 @@ function anonSupabase() {
 var list_levels_default = defineTool({
   name: "list_levels",
   title: "List levels",
-  description: "List the physics levels available on Physics HQ (e.g. IGCSE, AS LEVEL, A2 LEVEL) together with how many past papers, topic-wise MCQ practice sets, topic-wise theory questions, and study materials exist for each level.",
+  description: "List the physics levels available on Physics HQ (e.g. IGCSE, AS LEVEL, A LEVEL) together with how many past papers, topic-wise MCQ practice sets, topic-wise theory questions, and study materials exist for each level.",
   inputSchema: {},
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async () => {
@@ -61,9 +61,9 @@ import { z } from "npm:zod@^3.25.76";
 var list_papers_default = defineTool2({
   name: "list_papers",
   title: "List past papers",
-  description: "List Cambridge past-paper MCQ practice papers on Physics HQ. Filter by level (IGCSE, AS LEVEL, A2 LEVEL), paper code, session (e.g. May/June, October/November), or year. Returns paper metadata and a URL to the PDF question paper.",
+  description: "List Cambridge past-paper MCQ practice papers on Physics HQ. Filter by level (IGCSE, AS LEVEL, A LEVEL), paper code, session (e.g. May/June, October/November), or year. Returns paper metadata and a URL to the PDF question paper.",
   inputSchema: {
-    level: z.string().optional().describe("Filter by level, e.g. 'IGCSE', 'AS LEVEL', 'A2 LEVEL'."),
+    level: z.string().optional().describe("Filter by level, e.g. 'IGCSE', 'AS LEVEL', 'A LEVEL'."),
     paper_code: z.string().optional().describe("Filter by Cambridge paper code (e.g. '9702/12')."),
     session: z.string().optional().describe("Filter by exam session (e.g. 'May/June')."),
     year: z.number().int().optional().describe("Filter by year (e.g. 2023)."),
@@ -121,7 +121,7 @@ var list_topic_theory_default = defineTool4({
   title: "List topic-wise theory questions",
   description: "List topic-wise theory (structured) question sets on Physics HQ. Each entry has a question PDF and a matching answer-key PDF. Optionally filter by level or topic substring.",
   inputSchema: {
-    level: z3.string().optional().describe("Filter by level (e.g. 'A2 LEVEL')."),
+    level: z3.string().optional().describe("Filter by level (e.g. 'A LEVEL')."),
     topic: z3.string().optional().describe("Case-insensitive substring match on topic."),
     limit: z3.number().int().min(1).max(200).optional()
   },
@@ -176,7 +176,7 @@ var mcp_default = defineMcp({
   name: "physics-hq-mcp",
   title: "Physics HQ",
   version: "0.1.0",
-  instructions: "Read-only tools for Physics HQ, a Cambridge physics practice site by PRADAAP KUMAR. Use `list_levels` to see which levels (IGCSE, AS LEVEL, A2 LEVEL) are available and how much content each has. Use `list_papers` for full past-paper MCQs, `list_topic_mcq_practice` for topic-focused MCQ sets, `list_topic_theory_questions` for topic-focused structured questions (with answer keys), and `list_study_materials` for notes and revision resources. All tools return public content only.",
+  instructions: "Read-only tools for Physics HQ, a Cambridge physics practice site by PRADAAP KUMAR. Use `list_levels` to see which levels (IGCSE, AS LEVEL, A LEVEL) are available and how much content each has. Use `list_papers` for full past-paper MCQs, `list_topic_mcq_practice` for topic-focused MCQ sets, `list_topic_theory_questions` for topic-focused structured questions (with answer keys), and `list_study_materials` for notes and revision resources. All tools return public content only.",
   tools: [list_levels_default, list_papers_default, list_topic_mcq_default, list_topic_theory_default, list_study_materials_default]
 });
 

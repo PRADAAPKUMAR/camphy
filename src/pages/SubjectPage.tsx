@@ -16,7 +16,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { compareSessions } from "@/lib/exam-sessions";
-import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const SubjectPage = () => {
@@ -123,7 +123,7 @@ const SubjectPage = () => {
               <FlaskConical className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight">Physics — {decodedLevel}</h1>
+              <h1 className="text-3xl font-extrabold tracking-tight">Physics — {normalizeGradeLabel(decodedLevel)}</h1>
               <p className="text-sm text-muted-foreground">
                 {papers?.length ?? 0} paper{(papers?.length ?? 0) !== 1 ? "s" : ""} available
               </p>

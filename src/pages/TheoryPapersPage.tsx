@@ -7,19 +7,20 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { THEORY_LEVELS } from "@/lib/theory-filenames";
+import { normalizeGradeLabel } from "@/lib/grades";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
 const levelIcons: Record<string, React.ReactNode> = {
   IGCSE: <Microscope className="h-6 w-6" />,
   "AS Level": <FlaskConical className="h-6 w-6" />,
-  "A2 Level": <Atom className="h-6 w-6" />,
+  "A Level": <Atom className="h-6 w-6" />,
 };
 
 const levelDescriptions: Record<string, string> = {
   IGCSE: "International General Certificate of Secondary Education",
   "AS Level": "Advanced Subsidiary Level",
-  "A2 Level": "Advanced Level (Year 2)",
+  "A Level": "Advanced Level",
 };
 
 const TheoryPapersPage = () => {
@@ -96,11 +97,11 @@ const TheoryPapersPage = () => {
                     className="glass-card-hover group flex flex-col gap-4 rounded-2xl p-7"
                   >
                     <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
-                      {levelIcons[level]}
+                      {levelIcons[normalizeGradeLabel(level)]}
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold">{level}</h2>
-                      <p className="text-xs text-muted-foreground">{levelDescriptions[level]}</p>
+                      <h2 className="text-xl font-bold">{normalizeGradeLabel(level)}</h2>
+                      <p className="text-xs text-muted-foreground">{levelDescriptions[normalizeGradeLabel(level)]}</p>
                     </div>
                     <div className="mt-auto flex flex-wrap gap-2">
                       <Badge variant="outline" className="border-border/40 text-xs">

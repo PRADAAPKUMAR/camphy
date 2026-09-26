@@ -33,11 +33,11 @@ export const PAPER_PRESETS: PresetGroup[] = [
     ],
   },
   {
-    level: "A2 Level",
+    level: "A Level",
     color: "var(--study-4)",
     papers: [
-      { label: "A2 P4 — A Level Structured Questions", minutes: 120 },
-      { label: "A2 P5 — Planning, Analysis & Evaluation", minutes: 75 },
+      { label: "A Level P4 — Structured Questions", minutes: 120 },
+      { label: "A Level P5 — Planning, Analysis & Evaluation", minutes: 75 },
     ],
   },
   {

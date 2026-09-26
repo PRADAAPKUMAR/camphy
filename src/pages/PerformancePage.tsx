@@ -22,7 +22,7 @@ import {
   practiceTypeOf,
   type PerformanceRecord,
 } from "@/lib/performance-history";
-import { gradeFromLevel, gradeSectionPath, GRADES, isGradeKey, type GradeKey } from "@/lib/grades";
+import { gradeFromLevel, gradeSectionPath, GRADES, isGradeKey, normalizeGradeLabel, type GradeKey } from "@/lib/grades";
 
 const PhysicsBackground = lazy(() => import("@/components/PhysicsBackground"));
 const ScoreTrendChart = lazy(() => import("@/components/performance/ScoreTrendChart"));
@@ -112,8 +112,8 @@ const PerformancePage = () => {
       cur.total += r.totalQuestions || 0;
       map.set(level, cur);
     });
-    const order = ["IGCSE", "AS Level", "A2 Level"];
-    return Array.from(map.values()).sort((a, b) => order.indexOf(a.level) - order.indexOf(b.level));
+    const order = ["IGCSE", "AS Level", "A Level"];
+    return Array.from(map.values()).sort((a, b) => order.indexOf(normalizeGradeLabel(a.level)) - order.indexOf(normalizeGradeLabel(b.level)));
   }, [history]);
 
   const trend = useMemo(
@@ -264,7 +264,7 @@ const PerformancePage = () => {
                     return (
                       <div key={l.level} className="glass-card rounded-2xl p-5">
                         <div className="mb-3 flex items-center justify-between">
-                          <h3 className="font-bold">{l.level}</h3>
+                          <h3 className="font-bold">{normalizeGradeLabel(l.level)}</h3>
                           <Badge variant="secondary" className="bg-secondary/60 text-xs">
                             {l.attempts} attempt{l.attempts !== 1 ? "s" : ""}
                           </Badge>
