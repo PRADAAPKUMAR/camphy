@@ -22,7 +22,7 @@ import {
   practiceTypeOf,
   type PerformanceRecord,
 } from "@/lib/performance-history";
-import { gradeFromLevel, gradeSectionPath, GRADES, isGradeKey, type GradeKey } from "@/lib/grades";
+import { gradeFromLevel, gradeSectionPath, GRADES, isGradeKey, normalizeGradeLabel, type GradeKey } from "@/lib/grades";
 
 const PhysicsBackground = lazy(() => import("@/components/PhysicsBackground"));
 const ScoreTrendChart = lazy(() => import("@/components/performance/ScoreTrendChart"));
@@ -112,8 +112,8 @@ const PerformancePage = () => {
       cur.total += r.totalQuestions || 0;
       map.set(level, cur);
     });
-    const order = ["IGCSE", "AS Level", "A2 Level"];
-    return Array.from(map.values()).sort((a, b) => order.indexOf(a.level) - order.indexOf(b.level));
+    const order = ["IGCSE", "AS Level", "A Level"];
+    return Array.from(map.values()).sort((a, b) => order.indexOf(normalizeGradeLabel(a.level)) - order.indexOf(normalizeGradeLabel(b.level)));
   }, [history]);
 
   const trend = useMemo(

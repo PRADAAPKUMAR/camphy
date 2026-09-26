@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { compareSessions } from "@/lib/exam-sessions";
-import { gradeFromLevel, gradePath } from "@/lib/grades";
+import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
@@ -62,7 +62,7 @@ const TheoryLevelPage = () => {
           >
             <ArrowLeft className="h-4 w-4" /> Grade Home
           </Button>
-          <h1 className="text-3xl font-extrabold tracking-tight">{decodedLevel} — Theory Papers</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight">{normalizeGradeLabel(decodedLevel)} — Theory Papers</h1>
           <p className="text-sm text-muted-foreground">
             Open a paper to read the questions, official answer key and explanations
           </p>
@@ -78,7 +78,7 @@ const TheoryLevelPage = () => {
           </div>
         ) : years.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No theory papers have been uploaded for {decodedLevel} yet.
+            No theory papers have been uploaded for {normalizeGradeLabel(decodedLevel)} yet.
           </p>
         ) : (
           <Tabs defaultValue={String(years[0])} className="w-full">

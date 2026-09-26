@@ -1,5 +1,6 @@
 # Grade-first navigation
 
+- [x] Rename every user-facing A2 label to A Level while preserving existing content links
 - [x] Match the home-page atom motion shown in the supplied recording
 - [x] Restore AS Level MCQ past papers using the available content label
 - [x] Remove MCQ Past Papers from A2 Level navigation and dashboard

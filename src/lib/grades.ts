@@ -44,8 +44,8 @@ export const GRADES: Record<GradeKey, GradeDefinition> = {
   },
   a2: {
     key: "a2",
-    label: "A2 Level",
-    shortLabel: "A2",
+    label: "A Level",
+    shortLabel: "A Level",
     syllabus: "9702",
     description: "Cambridge International A Level Physics",
     dbLevel: "A2 Level",

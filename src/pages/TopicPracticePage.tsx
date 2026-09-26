@@ -13,15 +13,16 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { normalizeGradeLabel } from "@/lib/grades";
 
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 
-const levelOrder = ["IGCSE", "AS Level", "A2 Level"];
+const levelOrder = ["IGCSE", "AS Level", "A Level"];
 
 const levelIcons: Record<string, React.ReactNode> = {
   IGCSE: <FlaskConical className="h-5 w-5" />,
   "AS Level": <Target className="h-5 w-5" />,
-  "A2 Level": <FileText className="h-5 w-5" />,
+  "A Level": <FileText className="h-5 w-5" />,
 };
 
 const TopicPracticePage = () => {
@@ -63,7 +64,7 @@ const TopicPracticePage = () => {
       ...Object.keys(mcqLevels || {}),
       ...Object.keys(theoryLevels || {}),
     ])
-  ).sort((a, b) => levelOrder.indexOf(a) - levelOrder.indexOf(b));
+  ).sort((a, b) => levelOrder.indexOf(normalizeGradeLabel(a)) - levelOrder.indexOf(normalizeGradeLabel(b)));
 
   if (isLoading) {
     return (
@@ -147,9 +148,9 @@ const TopicPracticePage = () => {
                 {...tileProps(`/topic-practice/${encodeURIComponent(lvl)}`)}
               >
                 <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary mb-4 transition-all group-hover:bg-primary group-hover:text-primary-foreground group-hover:glow-sm">
-                  {levelIcons[lvl] || <Target className="h-5 w-5" />}
+                  {levelIcons[normalizeGradeLabel(lvl)] || <Target className="h-5 w-5" />}
                 </div>
-                <h3 className="text-xl font-bold mb-1">{lvl}</h3>
+                <h3 className="text-xl font-bold mb-1">{normalizeGradeLabel(lvl)}</h3>
                 <p className="text-sm text-muted-foreground">
                   {mcqLevels?.[lvl] ?? 0} MCQ · {theoryLevels?.[lvl] ?? 0} Theory
                 </p>
