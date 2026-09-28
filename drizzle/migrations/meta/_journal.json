@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790555862059,
+      "tag": "0000_add_theory_question_topic_mappings",
+      "breakpoints": true
+    }
+  ]
+}
