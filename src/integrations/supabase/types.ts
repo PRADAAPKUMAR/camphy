@@ -637,6 +637,86 @@ export type Database = {
         }
         Relationships: []
       }
+      theory_question_mappings: {
+        Row: {
+          created_at: string
+          end_page: number
+          id: string
+          question_number: number
+          shared_page_warning: boolean
+          start_page: number
+          theory_paper_id: string
+          updated_at: string
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          end_page: number
+          id?: string
+          question_number: number
+          shared_page_warning?: boolean
+          start_page: number
+          theory_paper_id: string
+          updated_at?: string
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          end_page?: number
+          id?: string
+          question_number?: number
+          shared_page_warning?: boolean
+          start_page?: number
+          theory_paper_id?: string
+          updated_at?: string
+          verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "theory_question_mappings_theory_paper_id_fkey"
+            columns: ["theory_paper_id"]
+            isOneToOne: false
+            referencedRelation: "theory_papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      theory_question_topics: {
+        Row: {
+          created_at: string
+          id: string
+          mapping_id: string
+          syllabus_topic_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mapping_id: string
+          syllabus_topic_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mapping_id?: string
+          syllabus_topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "theory_question_topics_mapping_id_fkey"
+            columns: ["mapping_id"]
+            isOneToOne: false
+            referencedRelation: "theory_question_mappings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "theory_question_topics_syllabus_topic_id_fkey"
+            columns: ["syllabus_topic_id"]
+            isOneToOne: false
+            referencedRelation: "syllabus_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       topic_practice_syllabus_map: {
         Row: {
           created_at: string
