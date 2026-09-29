@@ -17,9 +17,11 @@ import {
 import { readFileAsBase64 } from "@/lib/question-images";
 import { parseTheoryFilename, THEORY_LEVELS } from "@/lib/theory-filenames";
 import { compareSessions } from "@/lib/exam-sessions";
+import TheoryMappingEditor from "@/components/admin/TheoryMappingEditor";
 
 interface TheoryPaperRow {
   id: string;
+  syllabus_code: string;
   level: string;
   paper_code: string;
   session: string;
@@ -57,6 +59,7 @@ const TheoryAdminPanel = ({ call }: Props) => {
   const [progress, setProgress] = useState(0);
 
   const [selectedPaper, setSelectedPaper] = useState<string>("");
+  const [mappingPaperId, setMappingPaperId] = useState<string>("");
   const [explanations, setExplanations] = useState<ExplanationRow[]>([]);
   const [form, setForm] = useState({
     id: "",
@@ -326,6 +329,14 @@ const TheoryAdminPanel = ({ call }: Props) => {
                     variant="outline"
                     size="sm"
                     className="h-8 text-xs"
+                    onClick={() => setMappingPaperId(mappingPaperId === p.id ? "" : p.id)}
+                  >
+                    Page & topics
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs"
                     onClick={() => loadExplanations(p.id)}
                   >
                     Explanations
@@ -344,6 +355,15 @@ const TheoryAdminPanel = ({ call }: Props) => {
           </div>
         )}
       </div>
+
+      {mappingPaperId && (() => {
+        const paper = sortedPapers.find((item) => item.id === mappingPaperId);
+        return paper ? (
+          <div className="glass-card rounded-2xl p-5">
+            <TheoryMappingEditor paper={paper} call={call} />
+          </div>
+        ) : null;
+      })()}
 
       {selectedPaper && (
         <div className="glass-card space-y-4 rounded-2xl p-5">

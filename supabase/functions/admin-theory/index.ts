@@ -73,6 +73,78 @@ Deno.serve(async (req) => {
       return json({ papers: data ?? [] });
     }
 
+    if (action === "mapping_data") {
+      const { paper_id } = body;
+      if (typeof paper_id !== "string") return json({ error: "Invalid paper_id" }, 400);
+      const { data: paper, error: paperError } = await supabase
+        .from("theory_papers")
+        .select("syllabus_code")
+        .eq("id", paper_id)
+        .maybeSingle();
+      if (paperError || !paper) return json({ error: paperError?.message ?? "Paper not found" }, 400);
+      const { data: version } = await supabase
+        .from("syllabus_versions")
+        .select("id")
+        .eq("syllabus_code", paper.syllabus_code)
+        .eq("is_current", true)
+        .maybeSingle();
+      const { data: topics, error: topicError } = version?.id
+        ? await supabase.from("syllabus_topics").select("id, topic_code, topic_name, level, display_order").eq("syllabus_version_id", version.id).eq("is_active", true).order("display_order")
+        : { data: [], error: null };
+      if (topicError) return json({ error: topicError.message }, 400);
+      const { data: mappings, error: mappingError } = await supabase
+        .from("theory_question_mappings")
+        .select("id, question_number, start_page, end_page, verified, shared_page_warning, theory_question_topics(syllabus_topic_id)")
+        .eq("theory_paper_id", paper_id)
+        .order("question_number");
+      if (mappingError) return json({ error: mappingError.message }, 400);
+      return json({
+        topics: topics ?? [],
+        mappings: (mappings ?? []).map((mapping) => ({
+          ...mapping,
+          topic_ids: (mapping.theory_question_topics ?? []).map((link) => link.syllabus_topic_id),
+          theory_question_topics: undefined,
+        })),
+      });
+    }
+
+    if (action === "save_mappings") {
+      const { paper_id, mappings } = body;
+      if (typeof paper_id !== "string" || !Array.isArray(mappings)) return json({ error: "Invalid mappings" }, 400);
+      const normalized = [];
+      for (const item of mappings) {
+        const question_number = Number(item?.question_number);
+        const start_page = Number(item?.start_page);
+        const end_page = Number(item?.end_page);
+        const topic_ids = Array.isArray(item?.topic_ids) ? [...new Set(item.topic_ids.filter((id: unknown) => typeof id === "string"))] : [];
+        if (!Number.isInteger(question_number) || question_number < 1 || !Number.isInteger(start_page) || start_page < 1 || !Number.isInteger(end_page) || end_page < start_page) {
+          return json({ error: `Invalid page mapping for Q${question_number || "?"}` }, 400);
+        }
+        if (item?.verified === true && topic_ids.length === 0) return json({ error: `Reviewed Q${question_number} needs at least one topic` }, 400);
+        normalized.push({ question_number, start_page, end_page, verified: item?.verified === true, shared_page_warning: item?.shared_page_warning === true, topic_ids });
+      }
+      const keptQuestions = normalized.map((item) => item.question_number);
+      let staleQuery = supabase.from("theory_question_mappings").delete().eq("theory_paper_id", paper_id);
+      if (keptQuestions.length) staleQuery = staleQuery.not("question_number", "in", `(${keptQuestions.join(",")})`);
+      const { error: staleError } = await staleQuery;
+      if (staleError) return json({ error: staleError.message }, 400);
+      for (const item of normalized) {
+        const { data: mapping, error: upsertError } = await supabase
+          .from("theory_question_mappings")
+          .upsert({ theory_paper_id: paper_id, question_number: item.question_number, start_page: item.start_page, end_page: item.end_page, verified: item.verified, shared_page_warning: item.shared_page_warning }, { onConflict: "theory_paper_id,question_number" })
+          .select("id")
+          .single();
+        if (upsertError) return json({ error: upsertError.message }, 400);
+        const { error: clearError } = await supabase.from("theory_question_topics").delete().eq("mapping_id", mapping.id);
+        if (clearError) return json({ error: clearError.message }, 400);
+        if (item.topic_ids.length) {
+          const { error: linkError } = await supabase.from("theory_question_topics").insert(item.topic_ids.map((syllabus_topic_id) => ({ mapping_id: mapping.id, syllabus_topic_id })));
+          if (linkError) return json({ error: linkError.message }, 400);
+        }
+      }
+      return json({ ok: true, saved: normalized.length });
+    }
+
     // Upload one PDF; level/session/year/component come from the filename.
     if (action === "upload_pdf") {
       const { filename, data_base64, level_override } = body;

@@ -60,7 +60,7 @@ export const createTheoryTopicalPdf = async (questions: TheoryTopicalQuestion[])
   }
 
   const bytes = await output.save();
-  const blob = new Blob([bytes], { type: "application/pdf" });
+  const blob = new Blob([Uint8Array.from(bytes).buffer], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
   const popup = window.open(url, "_blank", "noopener,noreferrer");
   if (!popup) {

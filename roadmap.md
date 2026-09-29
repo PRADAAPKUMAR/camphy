@@ -33,10 +33,10 @@
 
 # Theory topical PDF preparation
 
-- [ ] Store reviewed question page ranges and multiple syllabus topics per question
-- [ ] Add admin mapping and review controls for every theory paper
-- [ ] Add topic-based theory question selection across papers
-- [ ] Merge selected original PDF pages into a newly ordered PDF
-- [ ] Add sequential generated question labels, page numbers, and source references
-- [ ] Validate missing mappings, unavailable PDFs, duplicates, and rare shared pages
+- [x] Store reviewed question page ranges and multiple syllabus topics per question
+- [x] Add admin mapping and review controls for every theory paper
+- [x] Add topic-based theory question selection across papers
+- [x] Merge selected original PDF pages into a newly ordered PDF
+- [x] Add sequential generated question labels, page numbers, and source references
+- [x] Validate missing mappings, unavailable PDFs, duplicates, and rare shared pages
 - [ ] Verify multi-topic questions appear under every mapped topic but merge only once

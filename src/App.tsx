@@ -29,6 +29,7 @@ const TopicTheoryPage = lazy(() => import("./pages/TopicTheoryPage"));
 const TheoryPapersPage = lazy(() => import("./pages/TheoryPapersPage"));
 const TheoryLevelPage = lazy(() => import("./pages/TheoryLevelPage"));
 const TheoryPaperPage = lazy(() => import("./pages/TheoryPaperPage"));
+const TheoryTopicalPdfPage = lazy(() => import("./pages/TheoryTopicalPdfPage"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const StudyToolsPage = lazy(() => import("./pages/StudyToolsPage"));
 const PerformancePage = lazy(() => import("./pages/PerformancePage"));
@@ -136,6 +137,7 @@ const RouterContent = () => {
         <Route path="/theory-papers" element={<GradeSectionRedirect section="theory" />} />
         <Route path="/theory-papers/:level" element={<TheoryLevelPage />} />
         <Route path="/theory-paper/:paperId" element={<TheoryPaperPage />} />
+        <Route path="/theory-topical/:level" element={<TheoryTopicalPdfPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/study-tools" element={<StudyToolsPage />} />
         <Route path="/performance" element={<GradeSectionRedirect section="performance" />} />
