@@ -26,6 +26,7 @@ const loaders: Array<[RegExp, Loader]> = [
   [/^\/theory-papers$/, () => import("@/pages/TheoryPapersPage")],
   [/^\/theory-papers\/[^/]+$/, () => import("@/pages/TheoryLevelPage")],
   [/^\/theory-paper\//, () => import("@/pages/TheoryPaperPage")],
+  [/^\/theory-topical\/[^/]+$/, () => import("@/pages/TheoryTopicalPdfPage")],
   [/^\/about$/, () => import("@/pages/AboutPage")],
   [/^\/study-tools$/, () => import("@/pages/StudyToolsPage")],
   [/^\/worksheet-generator(?:\/[^/]+)?$/, () => import("@/pages/WorksheetGeneratorPage")],

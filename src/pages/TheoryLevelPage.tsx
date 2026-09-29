@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, FileText } from "lucide-react";
+import { ArrowLeft, FileStack, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -62,10 +62,13 @@ const TheoryLevelPage = () => {
           >
             <ArrowLeft className="h-4 w-4" /> Grade Home
           </Button>
-          <h1 className="text-3xl font-extrabold tracking-tight">{normalizeGradeLabel(decodedLevel)} — Theory Papers</h1>
-          <p className="text-sm text-muted-foreground">
-            Open a paper to read the questions, official answer key and explanations
-          </p>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-extrabold tracking-tight">{normalizeGradeLabel(decodedLevel)} — Theory Papers</h1>
+              <p className="text-sm text-muted-foreground">Open a paper to read the questions, official answer key and explanations</p>
+            </div>
+            <Button asChild className="gap-2"><Link to={`/theory-topical/${encodeURIComponent(decodedLevel)}`}><FileStack className="h-4 w-4" />Build topical PDF</Link></Button>
+          </div>
         </div>
       </header>
 
