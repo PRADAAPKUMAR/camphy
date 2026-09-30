@@ -39,4 +39,4 @@
 - [x] Merge selected original PDF pages into a newly ordered PDF
 - [x] Add sequential generated question labels, page numbers, and source references
 - [x] Validate missing mappings, unavailable PDFs, duplicates, and rare shared pages
-- [ ] Verify multi-topic questions appear under every mapped topic but merge only once
+- [x] Verify multi-topic questions appear under every mapped topic but merge only once
