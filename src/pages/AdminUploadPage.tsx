@@ -25,6 +25,7 @@ import { compareSessions } from "@/lib/exam-sessions";
 
 import TableGridEditor, { type ColumnMeta } from "@/components/admin/TableGridEditor";
 import TheoryAdminPanel from "@/components/admin/TheoryAdminPanel";
+import { useAuth } from "@/contexts/AuthContext";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
@@ -73,30 +74,30 @@ const extractFiles = async (input: File[]): Promise<File[]> => {
 
 
 
-const callTheory = async (passcode: string, body: Record<string, unknown>) => {
+const callTheory = async (body: Record<string, unknown>) => {
   const supabase = await getSupabase();
   const { data, error } = await supabase.functions.invoke("admin-theory", {
-    body: { passcode, ...body },
+    body,
   });
   if (error) throw new Error(data?.error ?? error.message);
   if (data?.error) throw new Error(data.error);
   return data;
 };
 
-const callAdmin = async (passcode: string, body: Record<string, unknown>) => {
+const callAdmin = async (body: Record<string, unknown>) => {
   const supabase = await getSupabase();
   const { data, error } = await supabase.functions.invoke("admin-upload-question", {
-    body: { passcode, ...body },
+    body,
   });
   if (error) throw new Error(data?.error ?? error.message);
   if (data?.error) throw new Error(data.error);
   return data;
 };
 
-const callTables = async (passcode: string, body: Record<string, unknown>) => {
+const callTables = async (body: Record<string, unknown>) => {
   const supabase = await getSupabase();
   const { data, error } = await supabase.functions.invoke("admin-table-editor", {
-    body: { passcode, ...body },
+    body,
   });
   if (error) throw new Error(data?.error ?? error.message);
   if (data?.error) throw new Error(data.error);
@@ -104,8 +105,8 @@ const callTables = async (passcode: string, body: Record<string, unknown>) => {
 };
 
 const AdminUploadPage = () => {
-  const [passcode, setPasscode] = useState("");
-  const [unlocked, setUnlocked] = useState(false);
+  const { user, role, loading: authLoading } = useAuth();
+  const unlocked = role === "admin";
   const [view, setView] = useState<string | null>(null);
   const [level, setLevel] = useState<string>("");
   const [paperId, setPaperId] = useState<string>("");
@@ -119,7 +120,7 @@ const AdminUploadPage = () => {
   const { data: tables, isLoading: tablesLoading } = useQuery({
     queryKey: ["admin-tables"],
     queryFn: async () => {
-      const data = await callTables(passcode, { action: "tables" });
+      const data = await callTables({ action: "tables" });
       return (data?.tables ?? []) as { name: string; columns: ColumnMeta[] }[];
     },
     enabled: unlocked,
@@ -158,22 +159,12 @@ const AdminUploadPage = () => {
     [papers, level],
   );
 
-  const unlock = async () => {
-    try {
-      await callAdmin(passcode, { action: "verify" });
-      setUnlocked(true);
-      toast.success("Admin unlocked");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Invalid passcode");
-    }
-  };
-
   const loadStatus = async (id: string) => {
     setPaperId(id);
     setUploaded([]);
     if (!id) return;
     try {
-      const data = await callAdmin(passcode, { action: "status", paper_id: id });
+      const data = await callAdmin({ action: "status", paper_id: id });
       setUploaded((data?.questions ?? []) as number[]);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not load status");
@@ -336,25 +327,14 @@ const AdminUploadPage = () => {
     }
   };
 
+  if (authLoading) return <div className="flex min-h-screen items-center justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>;
   if (!unlocked) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background bg-grid p-6">
         <div className="glass-card w-full max-w-sm space-y-4 rounded-2xl p-6">
-          <h1 className="text-lg font-bold">Admin console</h1>
-          <div className="space-y-2">
-            <Label htmlFor="passcode">Passcode</Label>
-            <Input
-              id="passcode"
-              type="password"
-              value={passcode}
-              onChange={(e) => setPasscode(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && unlock()}
-              placeholder="Enter admin passcode"
-            />
-          </div>
-          <Button className="w-full" onClick={unlock} disabled={!passcode}>
-            Unlock
-          </Button>
+          <h1 className="text-lg font-bold">Administrator access required</h1>
+          <p className="text-sm text-muted-foreground">{user ? "This account does not have administrator permission." : "Sign in with an administrator account to continue."}</p>
+          {!user && <Button className="w-full" asChild><Link to="/auth?returnTo=%2Fadmin%2Fupload">Sign in</Link></Button>}
           <Button variant="ghost" className="w-full gap-2 text-muted-foreground" asChild>
             <Link to="/">
               <ArrowLeft className="h-4 w-4" /> Back home
@@ -444,7 +424,7 @@ const AdminUploadPage = () => {
           <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground" onClick={() => setView(null)}>
             <ArrowLeft className="h-4 w-4" /> All tiles
           </Button>
-          <TheoryAdminPanel call={(body) => callTheory(passcode, body)} />
+          <TheoryAdminPanel call={callTheory} />
         </div>
       </div>
     );
@@ -463,7 +443,7 @@ const AdminUploadPage = () => {
               <TableGridEditor
                 table={meta.name}
                 columns={meta.columns}
-                call={(body) => callTables(passcode, body)}
+                call={callTables}
               />
             ) : (
               <p className="text-sm text-muted-foreground">Table not found.</p>
