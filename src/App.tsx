@@ -5,6 +5,8 @@ import { usePageTransition } from "@/hooks/use-page-transition";
 import RunningTimerBar from "@/components/study/RunningTimerBar";
 import SiteNav from "@/components/SiteNav";
 import { GradeProvider } from "@/contexts/GradeContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProgressMergePrompt from "@/components/ProgressMergePrompt";
 
 const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
 const SpeedInsights = lazy(() => import("@vercel/speed-insights/react").then(m => ({ default: m.SpeedInsights })));
@@ -39,6 +41,11 @@ const WorksheetGeneratorPage = lazy(() => import("./pages/WorksheetGeneratorPage
 const GradeDashboardPage = lazy(() => import("./pages/GradeDashboardPage"));
 const GradeSectionRedirect = lazy(() => import("./pages/GradeSectionRedirect"));
 const ClassroomQuizPage = lazy(() => import("./pages/ClassroomQuizPage"));
+const AuthPage = lazy(() => import("./pages/AuthPage"));
+const AuthCallbackPage = lazy(() => import("./pages/AuthCallbackPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -124,6 +131,11 @@ const RouterContent = () => {
         <Route path="/worksheet-generator" element={<GradeSectionRedirect section="worksheet" />} />
         <Route path="/worksheet-generator/:grade" element={<WorksheetGeneratorPage />} />
         <Route path="/classroom-quiz/:grade" element={<ClassroomQuizPage />} />
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/materials" element={<GradeSectionRedirect section="materials" />} />
         <Route path="/materials/:level" element={<MaterialsLevelPage />} />
         <Route path="/view-drive" element={<DriveViewerPage />} />
@@ -156,9 +168,12 @@ const App = () => (
       <TooltipProvider>
         <DeferredShell />
         <BrowserRouter>
-          <GradeProvider>
-            <RouterContent />
-          </GradeProvider>
+          <AuthProvider>
+            <GradeProvider>
+              <RouterContent />
+              <ProgressMergePrompt />
+            </GradeProvider>
+          </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
     </Suspense>
