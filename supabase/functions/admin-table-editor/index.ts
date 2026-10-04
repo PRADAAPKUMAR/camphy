@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { requireAdmin } from "../_shared/require-user.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -86,13 +87,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const passcode = Deno.env.get("ADMIN_UPLOAD_PASSCODE");
-    if (!passcode) return json({ error: "Admin passcode is not configured" }, 500);
-
     const body = await req.json();
-    if (typeof body?.passcode !== "string" || body.passcode !== passcode) {
-      return json({ error: "Invalid passcode" }, 401);
-    }
+    await requireAdmin(req);
 
     const action = body.action;
     const tables = await introspect();
@@ -172,6 +168,8 @@ Deno.serve(async (req) => {
 
     return json({ error: "Unknown action" }, 400);
   } catch (e) {
+    if (e instanceof Error && e.message === "UNAUTHENTICATED") return json({ error: "Sign in required" }, 401);
+    if (e instanceof Error && e.message === "FORBIDDEN") return json({ error: "Administrator access required" }, 403);
     return json({ error: e instanceof Error ? e.message : "Internal server error" }, 500);
   }
 });

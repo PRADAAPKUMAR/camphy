@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Check, ChevronDown, Menu, MoreHorizontal, X } from "lucide-react";
+import { Check, ChevronDown, LogIn, LogOut, Menu, MoreHorizontal, Shield, UserRound, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import IstClock from "@/components/IstClock";
 import { equivalentGradePath, gradeSectionPath, GRADES, GRADE_KEYS, type GradeKey } from "@/lib/grades";
 import { useSelectedGrade } from "@/contexts/GradeContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const isActive = (pathname: string, to: string) => pathname === to || (to !== "/" && pathname.startsWith(`${to}/`));
 
@@ -13,6 +15,7 @@ const SiteNav = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { grade, setGrade } = useSelectedGrade();
+  const { user, profile, role, signOut } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const primary = grade ? [
     { label: "Grade Home", to: `/grade/${grade}` },
@@ -33,6 +36,10 @@ const SiteNav = () => {
     <DropdownMenuTrigger asChild><Button variant="outline" size="sm" className="h-8 gap-1.5 border-border/50 px-2.5 text-xs" aria-label="Switch grade">{grade ? GRADES[grade].shortLabel : "Select grade"}<ChevronDown className="h-3.5 w-3.5" /></Button></DropdownMenuTrigger>
     <DropdownMenuContent align="end" className="w-44">{GRADE_KEYS.map((key) => <DropdownMenuItem key={key} onSelect={() => switchGrade(key)} className="justify-between"><span>{GRADES[key].label}</span>{grade === key && <Check className="h-4 w-4 text-primary" />}</DropdownMenuItem>)}</DropdownMenuContent>
   </DropdownMenu>;
+  const account = user ? <DropdownMenu>
+    <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label="Account menu"><Avatar className="h-8 w-8"><AvatarImage src={profile?.avatar_url ?? undefined} alt="" /><AvatarFallback>{(profile?.display_name || user.email || "U").slice(0, 1).toUpperCase()}</AvatarFallback></Avatar></Button></DropdownMenuTrigger>
+    <DropdownMenuContent align="end" className="w-56"><DropdownMenuLabel className="truncate">{profile?.display_name || user.email}</DropdownMenuLabel><DropdownMenuSeparator /><DropdownMenuItem asChild><Link to="/profile"><UserRound className="mr-2 h-4 w-4" />Profile &amp; preferences</Link></DropdownMenuItem>{role === "admin" && <DropdownMenuItem asChild><Link to="/admin/upload"><Shield className="mr-2 h-4 w-4" />Admin console</Link></DropdownMenuItem>}<DropdownMenuSeparator /><DropdownMenuItem onSelect={() => void signOut()}><LogOut className="mr-2 h-4 w-4" />Sign out</DropdownMenuItem></DropdownMenuContent>
+  </DropdownMenu> : <Button variant="outline" size="sm" asChild><Link to={`/auth?returnTo=${encodeURIComponent(pathname)}`}><LogIn className="mr-1.5 h-4 w-4" />Sign in</Link></Button>;
   return <nav className="relative z-40 border-b border-border/40 bg-background/85 backdrop-blur-xl">
     <div className="container flex items-center justify-between gap-3 py-2">
       <Link to={grade ? `/grade/${grade}` : "/"} className="flex items-center gap-2 text-sm font-extrabold"><img src="/favicon.png" alt="PhysicsHQ" width="28" height="28" className="h-7 w-7 shrink-0 object-contain" /><span>Physics<span className="gradient-text">HQ</span></span></Link>
@@ -49,9 +56,9 @@ const SiteNav = () => {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        {switcher}<span className="ml-1 border-l border-border/40 pl-3"><IstClock /></span>
+        {switcher}{account}<span className="ml-1 border-l border-border/40 pl-3"><IstClock /></span>
       </div>
-      <div className="flex items-center gap-2 lg:hidden">{switcher}<IstClock compact /><Button variant="ghost" size="icon" aria-label={menuOpen ? "Close menu" : "Open menu"} onClick={() => setMenuOpen((v) => !v)}>{menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}</Button></div>
+      <div className="flex items-center gap-2 lg:hidden">{switcher}{account}<IstClock compact /><Button variant="ghost" size="icon" aria-label={menuOpen ? "Close menu" : "Open menu"} onClick={() => setMenuOpen((v) => !v)}>{menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}</Button></div>
     </div>
     {menuOpen && <div className="container flex flex-col gap-1 pb-4 lg:hidden">{[...primary, ...secondary].map((item) => <Link key={item.to} to={item.to} onClick={() => setMenuOpen(false)} className={linkClass(item.to)}>{item.label}</Link>)}</div>}
   </nav>;

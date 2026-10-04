@@ -118,6 +118,11 @@ export const savePerformanceRecord = (record: PerformanceRecord) => {
     const history = readPerformanceHistory();
     history.push(record);
     localStorage.setItem(PERFORMANCE_KEY, JSON.stringify(history.slice(-200)));
+    import("@/integrations/supabase/client").then(({ supabase }) =>
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session) void import("@/lib/account-progress").then(({ syncPerformanceRecord }) => syncPerformanceRecord(record));
+      }),
+    );
   } catch {
     // ignore quota / privacy-mode failures
   }

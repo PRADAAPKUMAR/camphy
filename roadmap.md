@@ -40,3 +40,13 @@
 - [x] Add sequential generated question labels, page numbers, and source references
 - [x] Validate missing mappings, unavailable PDFs, duplicates, and rare shared pages
 - [x] Verify multi-topic questions appear under every mapped topic but merge only once
+
+# Secure accounts and profiles
+
+- [x] Stage one-row profiles, protected roles, and detailed activity storage
+- [x] Add email/Google account interface, recovery, profile setup, and deletion
+- [x] Keep anonymous study and add optional deduplicated progress merging
+- [x] Replace shared administrator passcode checks with verified roles
+- [ ] Activate staged account structures and auth providers when the draft is accepted
+- [ ] Assign the requesting user's registered account as first administrator
+- [ ] Run authenticated end-to-end tests after activation
