@@ -270,7 +270,7 @@ const AdminUploadPage = () => {
           readFileAsBase64(p.file),
           imageDimensions(p.file),
         ]);
-        await callAdmin(passcode, {
+        await callAdmin({
           action: "upload",
           paper_id: target,
           question_number: p.question,
@@ -319,7 +319,7 @@ const AdminUploadPage = () => {
 
   const removeQuestion = async (q: number) => {
     try {
-      await callAdmin(passcode, { action: "delete", paper_id: paperId, question_number: q });
+      await callAdmin({ action: "delete", paper_id: paperId, question_number: q });
       setUploaded((prev) => prev.filter((n) => n !== q));
       toast.success(`Removed Q${q}`);
     } catch (e) {
