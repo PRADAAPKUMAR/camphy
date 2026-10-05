@@ -234,6 +234,54 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          account_type: Database["public"]["Enums"]["account_type"]
+          avatar_url: string | null
+          country: string | null
+          created_at: string
+          display_name: string
+          full_name: string
+          grade: Database["public"]["Enums"]["profile_grade"] | null
+          id: string
+          preferences: Json
+          school: string | null
+          setup_completed: boolean
+          updated_at: string
+          usage_summary: Json
+        }
+        Insert: {
+          account_type?: Database["public"]["Enums"]["account_type"]
+          avatar_url?: string | null
+          country?: string | null
+          created_at?: string
+          display_name?: string
+          full_name?: string
+          grade?: Database["public"]["Enums"]["profile_grade"] | null
+          id: string
+          preferences?: Json
+          school?: string | null
+          setup_completed?: boolean
+          updated_at?: string
+          usage_summary?: Json
+        }
+        Update: {
+          account_type?: Database["public"]["Enums"]["account_type"]
+          avatar_url?: string | null
+          country?: string | null
+          created_at?: string
+          display_name?: string
+          full_name?: string
+          grade?: Database["public"]["Enums"]["profile_grade"] | null
+          id?: string
+          preferences?: Json
+          school?: string | null
+          setup_completed?: boolean
+          updated_at?: string
+          usage_summary?: Json
+        }
+        Relationships: []
+      }
       question_explanations: {
         Row: {
           correct_option: string | null
@@ -1129,15 +1177,75 @@ export type Database = {
         }
         Relationships: []
       }
+      user_activity: {
+        Row: {
+          activity_type: string
+          created_at: string
+          event_key: string
+          id: string
+          occurred_at: string
+          payload: Json
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          event_key: string
+          id?: string
+          occurred_at?: string
+          payload?: Json
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          event_key?: string
+          id?: string
+          occurred_at?: string
+          payload?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       get_explanation_counts: { Args: never; Returns: Json }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      account_type: "student" | "teacher"
+      app_role: "user" | "admin"
+      profile_grade: "igcse" | "as" | "a2"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1264,6 +1372,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      account_type: ["student", "teacher"],
+      app_role: ["user", "admin"],
+      profile_grade: ["igcse", "as", "a2"],
+    },
   },
 } as const

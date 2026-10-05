@@ -8,6 +8,13 @@
       "when": 1790555862059,
       "tag": "0000_add_theory_question_topic_mappings",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791169287041,
+      "tag": "0001_secure_accounts",
+      "breakpoints": true
     }
   ]
 }
