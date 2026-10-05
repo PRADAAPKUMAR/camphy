@@ -42,20 +42,20 @@ const HomePage = () => {
     return levels.size;
   }, [data?.levels]);
 
-  return <div className="relative min-h-screen overflow-x-hidden bg-background bg-grid">
+  return <div className="relative min-h-screen overflow-x-clip bg-background bg-grid">
     <Suspense fallback={null}><PhysicsBackground /></Suspense>
-    <header className="relative flex min-h-[calc(100vh-56px)] flex-col justify-center border-b border-border/40 pb-24 pt-36">
+    <header className="relative flex flex-col justify-center border-b border-border/40 px-0 pb-10 pt-12 sm:pb-12 sm:pt-16 lg:min-h-[520px]">
       <div className="container relative z-10 text-center">
         <p className="mb-3 font-mono text-xs font-semibold uppercase text-primary">Cambridge Physics</p>
-        <div className="relative mx-auto flex min-h-40 w-fit items-center justify-center sm:min-h-52">
+        <div className="relative mx-auto flex min-h-28 w-fit items-center justify-center sm:min-h-36">
           <HomeAtomAnimation />
-          <h1 className="relative text-4xl font-extrabold sm:text-6xl">Physics<span className="gradient-text">HQ</span></h1>
+          <h1 className="relative text-4xl font-extrabold sm:text-5xl">Physics<span className="gradient-text">HQ</span></h1>
         </div>
-        <p className="mt-3 text-xl font-semibold sm:text-2xl">Master Physics. Practice Smarter.</p>
-        <p className="mx-auto mt-4 max-w-xl text-base text-muted-foreground">
+        <p className="mt-2 text-lg font-semibold sm:text-xl">Master Physics. Practice Smarter.</p>
+        <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground sm:text-base">
           Cambridge IGCSE, AS &amp; A Level Physics learning, revision and examination practice.
         </p>
-        <div className="mt-10 flex flex-wrap justify-center gap-3">
+        <div className="mt-6 flex flex-wrap justify-center gap-2 sm:gap-3">
           {[
             { label: "Past papers", value: data?.papers },
             { label: "Topic sets", value: data?.topics },
@@ -63,8 +63,8 @@ const HomePage = () => {
             { label: "Worked explanations", value: data?.explanations },
             { label: "Levels", value: levelsCount || 3 },
           ].map((stat) => (
-            <span key={stat.label} className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/40 px-4 py-2 text-sm font-medium text-muted-foreground backdrop-blur-sm">
-              <span className="text-base font-bold text-primary">{stat.value ?? "—"}</span>
+            <span key={stat.label} className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/40 px-3 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur-sm sm:text-sm">
+              <span className="font-bold text-primary sm:text-base">{stat.value ?? "—"}</span>
               <span>{stat.label}</span>
             </span>
           ))}
@@ -74,12 +74,12 @@ const HomePage = () => {
         </p>
       </div>
     </header>
-    <main className="container relative py-10 sm:py-14">
+    <main className="container relative py-8 sm:py-10">
       <div className="mx-auto grid max-w-5xl gap-5 sm:grid-cols-3">
         {GRADE_KEYS.map((key) => {
           const grade = GRADES[key]; const Icon = gradeIcons[key]; const to = gradePath(key);
-          return <button key={key} type="button" {...tileProps(to)} className="glass-card-hover group flex min-h-72 flex-col rounded-xl p-7 text-left">
-            <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground"><Icon className="h-7 w-7" /></div>
+          return <button key={key} type="button" {...tileProps(to)} className="glass-card-hover group flex min-h-60 flex-col rounded-xl p-6 text-left">
+            <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground"><Icon className="h-6 w-6" /></div>
             <p className="font-mono text-xs text-primary">{grade.syllabus}</p>
             <h2 className="mt-1 text-2xl font-extrabold">{grade.label}</h2>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{grade.description}</p>
