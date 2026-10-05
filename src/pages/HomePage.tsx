@@ -42,7 +42,7 @@ const HomePage = () => {
     return levels.size;
   }, [data?.levels]);
 
-  return <div className="relative min-h-screen bg-background bg-grid">
+  return <div className="relative min-h-screen overflow-x-hidden bg-background bg-grid">
     <Suspense fallback={null}><PhysicsBackground /></Suspense>
     <header className="relative flex min-h-[calc(100vh-56px)] flex-col justify-center border-b border-border/40 pb-24 pt-36">
       <div className="container relative z-10 text-center">

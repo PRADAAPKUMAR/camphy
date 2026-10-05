@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
     const supabase = admin();
     const action = body.action ?? "upload";
 
-    // Verify the passcode only.
+    // Verify the signed-in administrator role only.
     if (action === "verify") return json({ ok: true });
 
     // Which questions of a paper already have an image.

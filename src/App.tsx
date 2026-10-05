@@ -1,12 +1,13 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
 import { usePageTransition } from "@/hooks/use-page-transition";
 import RunningTimerBar from "@/components/study/RunningTimerBar";
 import SiteNav from "@/components/SiteNav";
 import { GradeProvider } from "@/contexts/GradeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProgressMergePrompt from "@/components/ProgressMergePrompt";
+import { useAuth } from "@/contexts/AuthContext";
 
 const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
 const SpeedInsights = lazy(() => import("@vercel/speed-insights/react").then(m => ({ default: m.SpeedInsights })));
@@ -83,6 +84,7 @@ const DeferredShell = () => {
 const RouterContent = () => {
   usePageTransition();
   const { pathname } = useLocation();
+  const { user, profile } = useAuth();
   const navExcluded =
     /^\/(exam|question-mode|topic-exam)\//.test(pathname) ||
     /^\/topical-mcq\/[^/]+\/[^/]+\/?$/.test(pathname) ||
@@ -92,6 +94,7 @@ const RouterContent = () => {
 
   return (
     <>
+    {user && profile && !profile.setup_completed && pathname !== "/profile" && !pathname.startsWith("/auth") && <Navigate to="/profile" replace />}
     {!navExcluded && <SiteNav />}
     <Suspense fallback={
       <div className="min-h-screen bg-background">
