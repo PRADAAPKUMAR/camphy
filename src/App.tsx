@@ -8,8 +8,8 @@ import { GradeProvider } from "@/contexts/GradeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProgressMergePrompt from "@/components/ProgressMergePrompt";
 import { useAuth } from "@/contexts/AuthContext";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
-const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
 const SpeedInsights = lazy(() => import("@vercel/speed-insights/react").then(m => ({ default: m.SpeedInsights })));
 const Analytics = lazy(() => import("@vercel/analytics/react").then(m => ({ default: m.Analytics })));
 const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
@@ -125,6 +125,7 @@ const RouterContent = () => {
     }>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/index" element={<Navigate to="/" replace />} />
         <Route path="/grade/:grade" element={<GradeDashboardPage />} />
         <Route path="/papers" element={<GradeSectionRedirect section="mcq" />} />
         <Route path="/papers/:level" element={<SubjectPage />} />
@@ -167,19 +168,17 @@ const RouterContent = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <Suspense fallback={null}>
-      <TooltipProvider>
-        <DeferredShell />
-        <BrowserRouter>
-          <AuthProvider>
-            <GradeProvider>
-              <RouterContent />
-              <ProgressMergePrompt />
-            </GradeProvider>
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </Suspense>
+    <TooltipProvider>
+      <DeferredShell />
+      <BrowserRouter>
+        <AuthProvider>
+          <GradeProvider>
+            <RouterContent />
+            <ProgressMergePrompt />
+          </GradeProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </TooltipProvider>
   </QueryClientProvider>
 );
 
