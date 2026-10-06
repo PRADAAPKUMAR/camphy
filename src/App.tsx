@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProgressMergePrompt from "@/components/ProgressMergePrompt";
 import { useAuth } from "@/contexts/AuthContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import AppErrorBoundary from "@/components/AppErrorBoundary";
 
 const SpeedInsights = lazy(() => import("@vercel/speed-insights/react").then(m => ({ default: m.SpeedInsights })));
 const Analytics = lazy(() => import("@vercel/analytics/react").then(m => ({ default: m.Analytics })));
@@ -167,19 +168,21 @@ const RouterContent = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <DeferredShell />
-      <BrowserRouter>
-        <AuthProvider>
-          <GradeProvider>
-            <RouterContent />
-            <ProgressMergePrompt />
-          </GradeProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <AppErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <DeferredShell />
+        <BrowserRouter>
+          <AuthProvider>
+            <GradeProvider>
+              <RouterContent />
+              <ProgressMergePrompt />
+            </GradeProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </AppErrorBoundary>
 );
 
 export default App;

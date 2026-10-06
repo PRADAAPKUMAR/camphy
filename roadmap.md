@@ -50,3 +50,9 @@
 - [ ] Activate staged account structures and auth providers when the draft is accepted
 - [ ] Assign the requesting user's registered account as first administrator
 - [ ] Run authenticated end-to-end tests after activation
+
+# Preview startup reliability
+
+- [x] Remove preview-only component instrumentation and custom chunk splitting
+- [x] Add visible startup and render failure fallbacks
+- [ ] Verify all primary routes in a fresh preview session
