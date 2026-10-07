@@ -55,4 +55,4 @@
 
 - [x] Remove preview-only component instrumentation and custom chunk splitting
 - [x] Add visible startup and render failure fallbacks
-- [ ] Verify all primary routes in a fresh preview session
+- [x] Verify all primary routes in a fresh preview session
