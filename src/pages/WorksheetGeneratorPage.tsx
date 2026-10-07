@@ -237,7 +237,8 @@ const WorksheetGeneratorPage = () => {
     try {
       if (kind === "worksheet") await generateWorksheetPdf(loaded, meta);
       else await generateAnswerKeyPdf(loaded, meta, includeSources);
-    } catch {
+    } catch (error) {
+      console.error("Worksheet PDF generation failed", error);
       toast.error("PDF generation failed");
     } finally {
       setBusy(false);
