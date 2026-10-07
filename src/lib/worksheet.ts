@@ -117,8 +117,23 @@ const loadOne = (item: WorksheetItem): Promise<LoadedImage | null> =>
       )
       .then((dataUrl) => {
         const img = new Image();
-        img.onload = () =>
-          resolve({ item, dataUrl, width: img.naturalWidth, height: img.naturalHeight });
+        img.onload = () => {
+          // Re-encode as JPEG so the PDF engine always receives a format it accepts
+          // (source files may be PNG/WebP despite .jpg names).
+          try {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) throw new Error("no canvas");
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+            resolve({ item, dataUrl: canvas.toDataURL("image/jpeg", 0.92), width: img.naturalWidth, height: img.naturalHeight });
+          } catch {
+            resolve(null);
+          }
+        };
         img.onerror = () => resolve(null);
         img.src = dataUrl;
       })
@@ -182,7 +197,12 @@ const loadLogoDataUrl = () => {
 };
 
 const drawLogo = (doc: any, logoDataUrl: string | null, x: number, y: number, size: number) => {
-  if (logoDataUrl) doc.addImage(logoDataUrl, "PNG", x, y, size, size, undefined, "FAST");
+  if (!logoDataUrl || !logoDataUrl.startsWith("data:image/")) return;
+  try {
+    doc.addImage(logoDataUrl, x, y, size, size, undefined, "FAST");
+  } catch {
+    /* logo is decorative; never block the worksheet */
+  }
 };
 
 const drawBrand = (
