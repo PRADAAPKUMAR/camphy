@@ -56,3 +56,10 @@
 - [x] Remove preview-only component instrumentation and custom chunk splitting
 - [x] Add visible startup and render failure fallbacks
 - [x] Verify all primary routes in a fresh preview session
+
+# MCQ PDF reliability
+
+- [x] Validate the logo response and keep decorative image failures nonfatal
+- [x] Guard PDF opening with link/save fallbacks and isolate question image failures
+- [x] Show actionable PDF errors and warn about incomplete question images
+- [ ] Verify regression tests and both PDF actions for IGCSE and AS

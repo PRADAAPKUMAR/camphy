@@ -1,5 +1,3 @@
-import logoAsset from "@/assets/physicshq-lightning.png.asset.json";
-
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
 export interface WorksheetItem {
@@ -187,12 +185,17 @@ const blobToDataUrl = (blob: Blob) =>
 
 const fetchAssetDataUrl = (url: string) =>
   fetch(url)
-    .then((response) => (response.ok ? response.blob() : Promise.reject(new Error("Asset unavailable"))))
+    .then((response) => {
+      if (!response.ok || !response.headers.get("content-type")?.toLowerCase().startsWith("image/")) {
+        throw new Error("Brand image unavailable");
+      }
+      return response.blob();
+    })
     .then(blobToDataUrl)
     .catch(() => null);
 
 const loadLogoDataUrl = () => {
-  logoDataUrlPromise ??= fetchAssetDataUrl(logoAsset.url);
+  logoDataUrlPromise ??= fetchAssetDataUrl(`${import.meta.env.BASE_URL}favicon.png`);
   return logoDataUrlPromise;
 };
 
@@ -309,20 +312,36 @@ const drawAnswerKeyHeader = (
 
 /** Opens the finished PDF in a new browser tab instead of downloading it. */
 const openPdfInNewTab = (doc: any, fileName: string) => {
-  const blob: Blob = doc.output("blob");
-  const url = URL.createObjectURL(
-    new Blob([blob], { type: "application/pdf" }),
-  );
-  const tab = window.open(url, "_blank");
-  if (!tab) {
-    // Popup blocked — fall back to a normal download so the work isn't lost.
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    a.click();
+  let url: string | undefined;
+  try {
+    const blob: Blob | null = doc.output("blob");
+    if (!blob || !blob.size) throw new Error("The PDF document is empty");
+    url = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
+    try {
+      if (window.open(url, "_blank")) return;
+    } catch {
+      // Some embedded browsers throw rather than return null for blocked popups.
+    }
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = fileName;
+    document.body.appendChild(anchor);
+    try {
+      anchor.click();
+    } finally {
+      anchor.remove();
+    }
+  } catch {
+    // Last resort when blob URLs or link activation are unavailable.
+    doc.save(fileName);
+  } finally {
+    const objectUrl = url;
+    if (objectUrl) {
+      setTimeout(() => {
+        try { URL.revokeObjectURL(objectUrl); } catch { /* Browser cleanup only. */ }
+      }, 60_000);
+    }
   }
-  // Revoke late so the new tab has time to load the document.
-  setTimeout(() => URL.revokeObjectURL(url), 60_000);
 };
 
 export const generateWorksheetPdf = async (loaded: LoadedImage[], meta: WorksheetMeta) => {
@@ -333,6 +352,7 @@ export const generateWorksheetPdf = async (loaded: LoadedImage[], meta: Workshee
   let y = drawWorksheetHeader(doc, meta, logoDataUrl);
 
   const imageWidth = CONTENT_WIDTH - NUMBER_COL;
+  const unavailableQuestions: number[] = [];
 
   const addContinuationPage = () => {
     doc.addPage();
@@ -340,7 +360,9 @@ export const generateWorksheetPdf = async (loaded: LoadedImage[], meta: Workshee
   };
 
   loaded.forEach((entry, index) => {
-    const renderHeight = (entry.height / entry.width) * imageWidth;
+    const validDimensions = Number.isFinite(entry.width) && entry.width > 0 &&
+      Number.isFinite(entry.height) && entry.height > 0;
+    const renderHeight = validDimensions ? (entry.height / entry.width) * imageWidth : 18;
     // A whole question image never spans two pages.
     if (index > 0 && y + renderHeight > CONTENT_BOTTOM) {
       y = addContinuationPage();
@@ -361,7 +383,21 @@ export const generateWorksheetPdf = async (loaded: LoadedImage[], meta: Workshee
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10.5);
     doc.text(`${entry.item.worksheet_number}.`, MARGIN.left, y + 4);
-    doc.addImage(entry.dataUrl, "JPEG", MARGIN.left + NUMBER_COL, y, w, h, undefined, "FAST");
+    try {
+      if (!validDimensions) throw new Error("Invalid question image dimensions");
+      doc.addImage(entry.dataUrl, "JPEG", MARGIN.left + NUMBER_COL, y, w, h, undefined, "FAST");
+    } catch {
+      unavailableQuestions.push(entry.item.worksheet_number);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setDrawColor(175);
+      doc.rect(MARGIN.left + NUMBER_COL, y, w, h);
+      const message = doc.splitTextToSize(
+        `Question image unavailable. Rebuild before using this worksheet. Source: ${entry.item.paper_code}, Q${entry.item.question_number}.`,
+        Math.max(w - 6, 15),
+      );
+      doc.text(message, MARGIN.left + NUMBER_COL + 3, y + 5);
+    }
     y += h + GAP_AFTER_QUESTION;
   });
 
@@ -377,6 +413,7 @@ export const generateWorksheetPdf = async (loaded: LoadedImage[], meta: Workshee
   }
 
   openPdfInNewTab(doc, `${meta.fileBase}_Worksheet.pdf`);
+  return { unavailableQuestions };
 };
 
 export const generateAnswerKeyPdf = async (

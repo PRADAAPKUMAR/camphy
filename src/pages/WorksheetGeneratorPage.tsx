@@ -235,11 +235,16 @@ const WorksheetGeneratorPage = () => {
     if (!loaded?.length) return;
     setBusy(true);
     try {
-      if (kind === "worksheet") await generateWorksheetPdf(loaded, meta);
-      else await generateAnswerKeyPdf(loaded, meta, includeSources);
+      if (kind === "worksheet") {
+        const result = await generateWorksheetPdf(loaded, meta);
+        if (result.unavailableQuestions.length) {
+          toast.warning(`PDF opened, but question images ${result.unavailableQuestions.join(", ")} could not be printed. Rebuild before using it.`);
+        }
+      } else await generateAnswerKeyPdf(loaded, meta, includeSources);
     } catch (error) {
       console.error("Worksheet PDF generation failed", error);
-      toast.error("PDF generation failed");
+      const detail = error instanceof Error ? error.message : "Unknown browser error";
+      toast.error(`PDF generation failed: ${detail}`);
     } finally {
       setBusy(false);
     }
