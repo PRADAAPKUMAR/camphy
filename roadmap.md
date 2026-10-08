@@ -62,4 +62,4 @@
 - [x] Validate the logo response and keep decorative image failures nonfatal
 - [x] Guard PDF opening with link/save fallbacks and isolate question image failures
 - [x] Show actionable PDF errors and warn about incomplete question images
-- [ ] Verify regression tests and both PDF actions for IGCSE and AS
+- [x] Verify regression tests and both PDF actions for IGCSE and AS
