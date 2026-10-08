@@ -33,6 +33,10 @@
 
 # Theory topical PDF preparation
 
+- [x] Retain selected questions across topic changes and additive select-all
+- [x] Add main-topic list and mapped subtopic dropdown, with questions on the right
+- [x] Position and rename PDF creation action and verify selection flow
+
 - [x] Store reviewed question page ranges and multiple syllabus topics per question
 - [x] Add admin mapping and review controls for every theory paper
 - [x] Add topic-based theory question selection across papers
