@@ -63,6 +63,7 @@
 
 # MCQ PDF reliability
 
+- [x] Make PDF branding transparent, restore the bolt, match header text size, and visually verify both PDFs
 - [x] Match worksheet and answer-key wordmarks to the homepage and verify PDF generation
 
 - [x] Validate the logo response and keep decorative image failures nonfatal
