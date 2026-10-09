@@ -6,4 +6,4 @@
 - Theory PDF question browsing scrolls inside a clipped, height-constrained region below the ordered basket; separate scroll areas prevent questions from crossing the PDF controls.
 - Optional accounts use one profile row for identity and aggregates, separate detailed activity rows, and a separate protected role row; this preserves anonymous access without weakening authorization.
 - App startup uses default Vite chunking plus root-level loading and error fallbacks; this prevents preview-only failures from becoming an unexplained blank screen.
-- MCQ PDFs use a MIME-verified public brand image, isolated question-image rendering with visible failure warnings, and guarded open/save fallbacks; optional assets and popup restrictions must not discard the document.
+- MCQ PDFs rasterize the homepage wordmark with browser fonts and semantic theme colours, with a built-in-font fallback, isolated question-image rendering and guarded open/save fallbacks; web fonts never enter the PDF engine and branding failures must not discard the document.

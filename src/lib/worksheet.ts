@@ -175,37 +175,45 @@ const CONTINUATION_HEADER_HEIGHT = 10;
 
 let logoDataUrlPromise: Promise<string | null> | null = null;
 
-const blobToDataUrl = (blob: Blob) =>
-  new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error("Could not read brand asset"));
-    reader.onload = () => resolve(String(reader.result ?? ""));
-    reader.readAsDataURL(blob);
-  });
-
-const fetchAssetDataUrl = (url: string) =>
-  fetch(url)
-    .then((response) => {
-      if (!response.ok || !response.headers.get("content-type")?.toLowerCase().startsWith("image/")) {
-        throw new Error("Brand image unavailable");
-      }
-      return response.blob();
-    })
-    .then(blobToDataUrl)
-    .catch(() => null);
-
-const loadLogoDataUrl = () => {
-  logoDataUrlPromise ??= fetchAssetDataUrl(`${import.meta.env.BASE_URL}favicon.png`);
-  return logoDataUrlPromise;
+/** Render browser typography to an image, never hand web fonts to the PDF engine. */
+const renderWordmark = async (): Promise<string | null> => {
+  try {
+    if (document.fonts) {
+      await Promise.race([
+        document.fonts.load('800 160px Inter'),
+        new Promise((resolve) => setTimeout(resolve, 2000)),
+      ]);
+    }
+    const styles = getComputedStyle(document.documentElement);
+    const colour = (token: string) => `hsl(${styles.getPropertyValue(token).trim()})`;
+    const canvas = document.createElement("canvas");
+    canvas.width = 1000;
+    canvas.height = 240;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.fillStyle = colour("--background");
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = '800 160px Inter, sans-serif';
+    ctx.textBaseline = "middle";
+    const physicsWidth = ctx.measureText("Physics").width;
+    const hqWidth = ctx.measureText("HQ").width;
+    const x = (canvas.width - physicsWidth - hqWidth) / 2;
+    ctx.fillStyle = colour("--foreground");
+    ctx.fillText("Physics", x, 126);
+    const gradient = ctx.createLinearGradient(x + physicsWidth, 0, x + physicsWidth + hqWidth, 0);
+    gradient.addColorStop(0, colour("--primary"));
+    gradient.addColorStop(1, colour("--accent"));
+    ctx.fillStyle = gradient;
+    ctx.fillText("HQ", x + physicsWidth, 126);
+    return canvas.toDataURL("image/png");
+  } catch {
+    return null;
+  }
 };
 
-const drawLogo = (doc: any, logoDataUrl: string | null, x: number, y: number, size: number) => {
-  if (!logoDataUrl || !logoDataUrl.startsWith("data:image/")) return;
-  try {
-    doc.addImage(logoDataUrl, x, y, size, size, undefined, "FAST");
-  } catch {
-    /* logo is decorative; never block the worksheet */
-  }
+const loadLogoDataUrl = () => {
+  logoDataUrlPromise ??= renderWordmark();
+  return logoDataUrlPromise;
 };
 
 const drawBrand = (
@@ -214,12 +222,20 @@ const drawBrand = (
   y: number,
   compact = false,
 ) => {
-  const logoSize = compact ? 5.5 : 12;
-  drawLogo(doc, logoDataUrl, MARGIN.left, y, logoSize);
+  const width = compact ? 25 : 55;
+  if (logoDataUrl?.startsWith("data:image/")) {
+    try {
+      doc.addImage(logoDataUrl, "PNG", MARGIN.left, y, width, width * 0.24, undefined, "FAST");
+      doc.setTextColor(0);
+      return;
+    } catch {
+      // Branding must never prevent the worksheet from opening.
+    }
+  }
   doc.setFont("helvetica", "bold");
   doc.setFontSize(compact ? 8.5 : 14.5);
   doc.setTextColor(15, 39, 78);
-  doc.text("PHYSICSHQ.IN", MARGIN.left + logoSize + (compact ? 2 : 3), y + logoSize * 0.7);
+  doc.text("PhysicsHQ", MARGIN.left, y + (compact ? 3.8 : 9));
   doc.setTextColor(0);
 };
 
