@@ -46,9 +46,11 @@ describe("worksheet PDF safeguards", () => {
     vi.unstubAllGlobals();
   });
 
-  it("ignores an HTML logo response and opens the worksheet", async () => {
+  it("uses the PhysicsHQ fallback if browser branding is unavailable and opens the worksheet", async () => {
     expect(await generateWorksheetPdf(questions, meta)).toEqual({ unavailableQuestions: [] });
-    expect(fetch).toHaveBeenCalledWith("/favicon.png");
+    expect(fetch).not.toHaveBeenCalled();
+    expect(pdf.text).toHaveBeenCalledWith("PhysicsHQ", expect.any(Number), expect.any(Number));
+    expect(pdf.text.mock.calls.some(([text]) => String(text).includes("PHYSICSHQ.IN"))).toBe(false);
     expect(pdf.addImage).toHaveBeenCalledTimes(2);
     expect(window.open).toHaveBeenCalledWith("blob:test", "_blank");
   });
@@ -56,6 +58,7 @@ describe("worksheet PDF safeguards", () => {
   it("opens the answer key independently of question image rendering", async () => {
     await generateAnswerKeyPdf(questions, meta);
     expect(pdf.addImage).not.toHaveBeenCalled();
+    expect(pdf.text).toHaveBeenCalledWith("PhysicsHQ", expect.any(Number), expect.any(Number));
     expect(pdf.text).toHaveBeenCalledWith("1 — A", expect.any(Number), expect.any(Number));
     expect(window.open).toHaveBeenCalled();
   });
