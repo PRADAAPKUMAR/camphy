@@ -63,7 +63,7 @@
 
 # MCQ PDF reliability
 
-- [ ] Match worksheet and answer-key wordmarks to the homepage and verify PDF generation
+- [x] Match worksheet and answer-key wordmarks to the homepage and verify PDF generation
 
 - [x] Validate the logo response and keep decorative image failures nonfatal
 - [x] Guard PDF opening with link/save fallbacks and isolate question image failures
