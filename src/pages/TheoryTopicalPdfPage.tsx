@@ -101,8 +101,8 @@ const TheoryTopicalPdfPage = () => {
           </div>}
           </div>)}</div>}
       </section>
-      <div className="min-w-0 space-y-6">
-        <section aria-label="Selected questions" className="sticky top-16 z-10 border-y border-border bg-background py-4">
+      <div className="grid h-[calc(100dvh-6rem)] min-h-[24rem] min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-6 overflow-hidden md:sticky md:top-20">
+        <section aria-label="Selected questions" className="min-w-0 border-y border-border bg-background py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="flex items-center gap-2 font-semibold">Your PDF <Badge>{selected.length} selected</Badge></h2>
             <Button className="w-full gap-2 sm:w-auto" onClick={generate} disabled={!selected.length || generating}>
@@ -110,7 +110,7 @@ const TheoryTopicalPdfPage = () => {
               {generating ? "Creating PDF…" : "Create theory PDF"}
             </Button>
           </div>
-          {selected.length > 0 && <div className="mt-3 max-h-48 space-y-1 overflow-y-auto" aria-label="PDF question order">{selected.map((question, index) => <div key={question.mapping_id} className="flex items-center gap-2 border-b border-border/40 py-2 text-xs">
+          {selected.length > 0 && <div className="mt-3 max-h-[min(12rem,25dvh)] space-y-1 overflow-y-auto overscroll-contain" aria-label="PDF question order">{selected.map((question, index) => <div key={question.mapping_id} className="flex items-center gap-2 border-b border-border/40 py-2 text-xs">
             <span className="w-5 shrink-0 font-bold text-primary">{index + 1}</span>
             <span className="min-w-0 flex-1 break-words">{question.paper_code} · {question.session} {question.year} · Q{question.question_number}</span>
             <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" title="Move question up" aria-label={`Move question ${index + 1} up`} onClick={() => move(index, -1)} disabled={index === 0}><ArrowUp className="h-3.5 w-3.5" /></Button>
@@ -119,7 +119,7 @@ const TheoryTopicalPdfPage = () => {
           </div>)}</div>}
           {selected.some((question) => question.shared_page_warning) && <p className="mt-3 flex items-start gap-2 text-xs text-warning"><TriangleAlert className="h-4 w-4 shrink-0" />Some selected questions share pages; the PDF will include their complete mapped pages.</p>}
         </section>
-        <section aria-label="Available questions">
+        <section aria-label="Available questions" tabIndex={0} className="min-h-0 overflow-y-auto overscroll-contain pb-3 pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <h2 className="font-semibold">{activeGroup?.topic.topic_name ?? "Questions"}{activeGroup && <span className="ml-2 text-sm font-normal text-muted-foreground">({matching.length})</span>}</h2>
             {matching.length > 0 && <Button variant="outline" size="sm" onClick={() => setSelectedIds((current) => addTheoryQuestionIds(current, matching.map((question) => question.mapping_id)))}>Select all {matching.length}</Button>}
