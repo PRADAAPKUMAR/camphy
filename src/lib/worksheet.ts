@@ -188,23 +188,31 @@ const renderWordmark = async (): Promise<string | null> => {
     const colour = (token: string) => `hsl(${styles.getPropertyValue(token).trim()})`;
     const canvas = document.createElement("canvas");
     canvas.width = 1000;
-    canvas.height = 240;
+    canvas.height = 200;
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
-    ctx.fillStyle = colour("--background");
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.font = '800 160px Inter, sans-serif';
+    // Leave the canvas clear so the PDF's white page remains visible.
+    const bolt = await new Promise<HTMLImageElement | null>((resolve) => {
+      const image = new Image();
+      const timer = setTimeout(() => resolve(null), 2000);
+      image.onload = () => { clearTimeout(timer); resolve(image); };
+      image.onerror = () => { clearTimeout(timer); resolve(null); };
+      image.src = `${import.meta.env.BASE_URL}favicon.png`;
+    });
+    if (bolt) ctx.drawImage(bolt, 0, 20, 160, 160);
+    ctx.font = '800 140px Inter, sans-serif';
     ctx.textBaseline = "middle";
     const physicsWidth = ctx.measureText("Physics").width;
     const hqWidth = ctx.measureText("HQ").width;
-    const x = (canvas.width - physicsWidth - hqWidth) / 2;
-    ctx.fillStyle = colour("--foreground");
-    ctx.fillText("Physics", x, 126);
+    const x = 184;
+    // Homepage light lettering disappears on transparent white paper.
+    ctx.fillStyle = colour("--primary-foreground");
+    ctx.fillText("Physics", x, 106);
     const gradient = ctx.createLinearGradient(x + physicsWidth, 0, x + physicsWidth + hqWidth, 0);
     gradient.addColorStop(0, colour("--primary"));
     gradient.addColorStop(1, colour("--accent"));
     ctx.fillStyle = gradient;
-    ctx.fillText("HQ", x + physicsWidth, 126);
+    ctx.fillText("HQ", x + physicsWidth, 106);
     return canvas.toDataURL("image/png");
   } catch {
     return null;
@@ -222,10 +230,11 @@ const drawBrand = (
   y: number,
   compact = false,
 ) => {
-  const width = compact ? 25 : 55;
+  const fontSize = compact ? 8.5 : 10.5;
+  const width = (1000 / 140) * fontSize * (25.4 / 72);
   if (logoDataUrl?.startsWith("data:image/")) {
     try {
-      doc.addImage(logoDataUrl, "PNG", MARGIN.left, y, width, width * 0.24, undefined, "FAST");
+      doc.addImage(logoDataUrl, "PNG", MARGIN.left, y + (compact ? 0 : 3), width, width * 0.2, undefined, "FAST");
       doc.setTextColor(0);
       return;
     } catch {
@@ -233,9 +242,9 @@ const drawBrand = (
     }
   }
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(compact ? 8.5 : 14.5);
+  doc.setFontSize(fontSize);
   doc.setTextColor(15, 39, 78);
-  doc.text("PhysicsHQ", MARGIN.left, y + (compact ? 3.8 : 9));
+  doc.text("PhysicsHQ", MARGIN.left, y + (compact ? 3.8 : 7.5));
   doc.setTextColor(0);
 };
 

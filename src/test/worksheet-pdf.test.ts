@@ -50,6 +50,8 @@ describe("worksheet PDF safeguards", () => {
     expect(await generateWorksheetPdf(questions, meta)).toEqual({ unavailableQuestions: [] });
     expect(fetch).not.toHaveBeenCalled();
     expect(pdf.text).toHaveBeenCalledWith("PhysicsHQ", expect.any(Number), expect.any(Number));
+    expect(pdf.setFontSize).toHaveBeenCalledWith(10.5);
+    expect(pdf.setFontSize).not.toHaveBeenCalledWith(14.5);
     expect(pdf.text.mock.calls.some(([text]) => String(text).includes("PHYSICSHQ.IN"))).toBe(false);
     expect(pdf.addImage).toHaveBeenCalledTimes(2);
     expect(window.open).toHaveBeenCalledWith("blob:test", "_blank");
