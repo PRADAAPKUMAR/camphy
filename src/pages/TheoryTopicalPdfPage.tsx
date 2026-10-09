@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDown, ArrowLeft, ArrowUp, FileStack, Loader2, TriangleAlert, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, ChevronDown, FileStack, Loader2, TriangleAlert, X } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createTheoryTopicalPdf, type TheoryTopicalQuestion } from "@/lib/theory-topical-pdf";
 import { addTheoryQuestionIds, groupTheoryTopics } from "@/lib/theory-topic-selection";
 import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
@@ -85,20 +84,22 @@ const TheoryTopicalPdfPage = () => {
         {isLoading || loadingHierarchy ? <div className="space-y-2">{[1, 2, 3, 4].map((item) => <Skeleton key={item} className="h-12" />)}</div>
           : isError ? <div className="space-y-3"><p className="text-sm text-destructive">Questions could not be loaded.</p><Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button></div>
           : !groups.length ? <p className="text-sm text-muted-foreground">No reviewed topic mappings are available for this level yet.</p>
-          : <div className="space-y-1" role="group" aria-label="Main topics">{groups.map(({ topic }) => <Button
-            key={topic.id} variant={activeTopicId === topic.id ? "secondary" : "ghost"}
-            aria-pressed={activeTopicId === topic.id}
+          : <div className="space-y-1" role="group" aria-label="Main topics">{groups.map(({ topic, subtopics }) => <div key={topic.id}><Button
+            variant={activeTopicId === topic.id ? "secondary" : "ghost"}
+            aria-expanded={activeTopicId === topic.id}
+            aria-controls={`subtopics-${topic.id}`}
             className="h-auto min-h-11 w-full justify-start gap-3 whitespace-normal px-3 py-3 text-left"
-            onClick={() => { setActiveTopicId(topic.id); setSubtopicId("all"); }}>
-            <span className="shrink-0 font-mono text-primary">{topic.topic_code}</span><span>{topic.topic_name}</span>
-          </Button>)}</div>}
-        {activeGroup && <div className="mt-5 space-y-2 border-t border-border/40 pt-4">
-          <label id="theory-subtopic-label" className="text-sm font-semibold">Subtopic</label>
-          <Select value={subtopicId} onValueChange={setSubtopicId} disabled={!activeGroup.subtopics.length}>
-            <SelectTrigger aria-labelledby="theory-subtopic-label"><SelectValue /></SelectTrigger>
-            <SelectContent><SelectItem value="all">All questions in this topic</SelectItem>{activeGroup.subtopics.map((topic) => <SelectItem key={topic.id} value={topic.id}>{topic.topic_code} · {topic.topic_name}</SelectItem>)}</SelectContent>
-          </Select>
-        </div>}
+            onClick={() => { setActiveTopicId(activeTopicId === topic.id ? "" : topic.id); setSubtopicId("all"); }}>
+            <span className="shrink-0 font-mono text-primary">{topic.topic_code}</span><span className="min-w-0 flex-1 break-words">{topic.topic_name}</span>
+            <ChevronDown aria-hidden="true" className={`h-4 w-4 shrink-0 transition-transform motion-reduce:transition-none ${activeTopicId === topic.id ? "rotate-180" : ""}`} />
+          </Button>
+          {activeTopicId === topic.id && <div id={`subtopics-${topic.id}`} role="group" aria-label={`${topic.topic_name} subtopics`} className="my-2 ml-5 space-y-1 border-l border-border/40 pl-3">
+            <Button variant={subtopicId === "all" ? "secondary" : "ghost"} aria-pressed={subtopicId === "all"} className="h-auto min-h-9 w-full justify-start whitespace-normal py-2 text-left text-xs" onClick={() => setSubtopicId("all")}>All questions in this topic</Button>
+            {subtopics.map((subtopic) => <Button key={subtopic.id} variant={subtopicId === subtopic.id ? "secondary" : "ghost"} aria-pressed={subtopicId === subtopic.id} className="h-auto min-h-9 w-full justify-start gap-2 whitespace-normal py-2 text-left text-xs" onClick={() => setSubtopicId(subtopic.id)}>
+              <span className="shrink-0 font-mono text-primary">{subtopic.topic_code}</span><span className="min-w-0 break-words">{subtopic.topic_name}</span>
+            </Button>)}
+          </div>}
+          </div>)}</div>}
       </section>
       <div className="min-w-0 space-y-6">
         <section aria-label="Selected questions" className="sticky top-16 z-10 border-y border-border bg-background py-4">
