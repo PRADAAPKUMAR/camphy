@@ -1,5 +1,8 @@
 # Architecture rules
 
+- Public search metadata and sitemap share an explicit indexable-page catalog; account, admin, redirect and exam-session URLs default to noindex to avoid accidental indexing.
+- Page-specific head tags use one root Helmet provider while static HTML provides branded fallback metadata; JavaScript-free crawlers still receive the sitewide fallback until prerendering or SSR is introduced.
+
 - Theory topical PDFs keep original vector PDF pages and use reviewed page/topic mappings; this preserves exam quality and avoids runtime AI dependence.
 - Theory question topics use a normalized many-to-many table linked to the existing syllabus topics; one question can be discovered under multiple topics without duplication.
 - Theory PDF browsing filters are separate from the ordered question basket, and topic groups resolve mapped syllabus ancestors; switching topics preserves selections across syllabus versions.
