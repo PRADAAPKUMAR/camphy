@@ -1,5 +1,11 @@
 # Grade-first navigation
 
+# Search visibility, safety tests and accessibility
+- [ ] Set physicshq.in metadata, canonical public pages and generated sitemap
+- [ ] Add automated authorization, answer-key and scoring regression checks
+- [ ] Check browser flows, mobile accessibility, performance and deep-link refresh
+- [ ] Verify live domain and explain external indexing/deployment limitations
+
 - [x] Rename every user-facing A2 label to A Level while preserving existing content links
 - [x] Match the home-page atom motion shown in the supplied recording
 - [x] Restore AS Level MCQ past papers using the available content label
