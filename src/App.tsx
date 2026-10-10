@@ -10,6 +10,8 @@ import ProgressMergePrompt from "@/components/ProgressMergePrompt";
 import { useAuth } from "@/contexts/AuthContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AppErrorBoundary from "@/components/AppErrorBoundary";
+import { HelmetProvider } from "react-helmet-async";
+import PageMetadata from "@/components/PageMetadata";
 
 const SpeedInsights = lazy(() => import("@vercel/speed-insights/react").then(m => ({ default: m.SpeedInsights })));
 const Analytics = lazy(() => import("@vercel/analytics/react").then(m => ({ default: m.Analytics })));
@@ -95,8 +97,11 @@ const RouterContent = () => {
 
   return (
     <>
+    <PageMetadata />
+    <a href="#page-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-3 focus:text-primary-foreground">Skip to content</a>
     {user && profile && !profile.setup_completed && pathname !== "/profile" && !pathname.startsWith("/auth") && <Navigate to="/profile" replace />}
     {!navExcluded && <SiteNav />}
+    <div id="page-content" tabIndex={-1}>
     <Suspense fallback={
       <div className="min-h-screen bg-background">
         <div className="border-b border-border/40">
@@ -162,6 +167,7 @@ const RouterContent = () => {
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
+    </div>
       <RunningTimerBar />
     </>
   );
@@ -169,6 +175,7 @@ const RouterContent = () => {
 
 const App = () => (
   <AppErrorBoundary>
+    <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <DeferredShell />
@@ -182,6 +189,7 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
+    </HelmetProvider>
   </AppErrorBoundary>
 );
 
