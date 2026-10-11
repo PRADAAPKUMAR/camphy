@@ -35,7 +35,7 @@ function loadFunction(name: string): Handler {
     const module = { exports: {} };
     const code = ts.transpileModule(readFileSync(file, "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
     const context = createContext({
-      module, exports: module.exports, Request, Response, Headers, console,
+      module, exports: module.exports, Request, Response, Headers, Error, console,
       fetch: vi.fn(() => { throw new Error("Unexpected network access in isolated test"); }),
       Deno: { env: { get: () => "test-only" }, serve: (fn: Handler) => { handler = fn; } },
       require: (specifier: string) => {
