@@ -4,6 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "prebuild": "node scripts/generate-sitemap.mjs",
+    "prebuild:dev": "node scripts/generate-sitemap.mjs",
+    "test:browser": "python3 scripts/browser-smoke.py",
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
