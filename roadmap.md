@@ -1,10 +1,13 @@
 # Grade-first navigation
 
 # Search visibility, safety tests and accessibility
-- [ ] Set physicshq.in metadata, canonical public pages and generated sitemap
-- [ ] Add automated authorization, answer-key and scoring regression checks
-- [ ] Check browser flows, mobile accessibility, performance and deep-link refresh
-- [ ] Verify live domain and explain external indexing/deployment limitations
+- [x] Set physicshq.in metadata, canonical public pages and generated sitemap
+- [x] Add isolated actual-handler authorization, answer-key and scoring regression checks
+- [x] Check eight pages for accessibility and deep-link refresh; verify mobile overflow and intercepted login/recovery/exam flows
+- [x] Measure current published mobile performance separately from the development preview
+- [ ] Deploy changes to Vercel and confirm old-host redirects/Search Console indexing (requires external hosting/account access)
+- [ ] Verify real signed-in/recovery-email flows, database policy isolation and field Core Web Vitals (requires approved test identities, email access and live measurements)
+- [ ] Consider public-page prerendering/SSR if JavaScript-free per-page content is required (requires migration decision)
 
 - [x] Rename every user-facing A2 label to A Level while preserving existing content links
 - [x] Match the home-page atom motion shown in the supplied recording

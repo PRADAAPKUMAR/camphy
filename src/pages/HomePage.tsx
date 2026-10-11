@@ -65,7 +65,7 @@ const HomePage = () => {
             { label: "Levels", value: levelsCount || 3 },
           ].map((stat) => (
             <span key={stat.label} className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-card/40 px-3 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur-sm sm:text-sm">
-              <span className="font-bold text-primary sm:text-base">{stat.value ?? "—"}</span>
+              <span className="inline-block min-w-[4ch] text-right font-bold tabular-nums text-primary sm:text-base">{stat.value ?? "—"}</span>
               <span>{stat.label}</span>
             </span>
           ))}
