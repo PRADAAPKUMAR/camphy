@@ -35,7 +35,7 @@ function loadFunction(name: string): Handler {
     const module = { exports: {} };
     const code = ts.transpileModule(readFileSync(file, "utf8"), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
     const context = createContext({
-      module, exports: module.exports, Request, Response, Headers, console,
+      module, exports: module.exports, Request, Response, Headers, Error, console,
       fetch: vi.fn(() => { throw new Error("Unexpected network access in isolated test"); }),
       Deno: { env: { get: () => "test-only" }, serve: (fn: Handler) => { handler = fn; } },
       require: (specifier: string) => {
@@ -76,6 +76,13 @@ describe("actual admin authorization handlers", () => {
     identity = { id: "admin-user" }; role = "admin"; dbError = true;
     const response = await loadFunction("admin-table-editor")(request({ action: "tables" }, true));
     expect(response.status).toBe(403); await response.text();
+  });
+  it.each(["rows", "save", "delete", "export"])("denies direct non-admin %s requests", async (action) => {
+    identity = { id: "normal-user" };
+    const response = await loadFunction("admin-table-editor")(request({ action, table: "user_roles", rows: [{ role: "admin" }], ids: ["other-user"] }, true));
+    expect(response.status).toBe(403); await response.text();
+    expect(queries.map((entry) => entry.table)).toEqual(["user_roles"]);
+    expect(inserted).toBeUndefined();
   });
   it("allows a verified admin through the role boundary", async () => {
     identity = { id: "admin-user" }; role = "admin";
