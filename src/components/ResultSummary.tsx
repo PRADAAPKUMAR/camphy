@@ -15,11 +15,11 @@ interface ResultSummaryProps {
 }
 
 const ResultRow = memo(({ q, userAnswer, correct, onExplain }: { q: number; userAnswer: string | undefined; correct: string | undefined; onExplain?: (question: number) => void }) => {
-  const isCorrect = userAnswer === correct;
+  const isCorrect = Boolean(userAnswer && correct && userAnswer === correct);
 
   return (
     <div
-      className={`flex items-center gap-3 rounded-lg px-3 py-2 ${
+      className={`flex items-center gap-1 rounded-lg px-2 py-2 ${
         isCorrect
           ? "bg-success/5"
           : userAnswer
@@ -30,7 +30,7 @@ const ResultRow = memo(({ q, userAnswer, correct, onExplain }: { q: number; user
       <span className="w-7 text-right text-xs font-bold tabular-nums text-muted-foreground">
         {q}
       </span>
-      <div className="flex gap-1.5">
+      <div className="flex gap-1">
         {OPTIONS.map((opt) => {
           const isCorrectOpt = opt === correct;
           const isUserWrong = opt === userAnswer && !isCorrect;
@@ -38,7 +38,7 @@ const ResultRow = memo(({ q, userAnswer, correct, onExplain }: { q: number; user
           return (
             <div
               key={opt}
-              className={`flex h-8 w-9 items-center justify-center rounded-md text-xs font-semibold border transition-all ${
+              className={`flex h-8 w-8 items-center justify-center rounded-md text-xs font-semibold border transition-all ${
                 isCorrectOpt
                   ? "bg-success text-success-foreground border-success shadow-sm"
                   : isUserWrong
@@ -60,7 +60,7 @@ const ResultRow = memo(({ q, userAnswer, correct, onExplain }: { q: number; user
           <span className="text-xs text-muted-foreground">—</span>
         )}
         {onExplain && (
-          <button
+          <Button variant="ghost"
             type="button"
             onClick={() => onExplain(q)}
             title={`Explanation for question ${q}`}
@@ -68,7 +68,7 @@ const ResultRow = memo(({ q, userAnswer, correct, onExplain }: { q: number; user
             className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors hover:bg-primary/25"
           >
             <Lightbulb className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         )}
       </span>
     </div>

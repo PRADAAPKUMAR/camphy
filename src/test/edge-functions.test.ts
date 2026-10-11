@@ -77,6 +77,13 @@ describe("actual admin authorization handlers", () => {
     const response = await loadFunction("admin-table-editor")(request({ action: "tables" }, true));
     expect(response.status).toBe(403); await response.text();
   });
+  it.each(["rows", "save", "delete", "export"])("denies direct non-admin %s requests", async (action) => {
+    identity = { id: "normal-user" };
+    const response = await loadFunction("admin-table-editor")(request({ action, table: "user_roles", rows: [{ role: "admin" }], ids: ["other-user"] }, true));
+    expect(response.status).toBe(403); await response.text();
+    expect(queries.map((entry) => entry.table)).toEqual(["user_roles"]);
+    expect(inserted).toBeUndefined();
+  });
   it("allows a verified admin through the role boundary", async () => {
     identity = { id: "admin-user" }; role = "admin";
     const response = await loadFunction("admin-table-editor")(request({ action: "tables" }, true));
