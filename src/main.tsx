@@ -1,4 +1,6 @@
 import { createRoot } from "react-dom/client";
+import "@fontsource-variable/plus-jakarta-sans/wght-italic.css";
+import "@fontsource-variable/jetbrains-mono/wght.css";
 import "./index.css";
 
 const rootElement = document.getElementById("root");
