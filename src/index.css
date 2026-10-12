@@ -106,6 +106,40 @@
     transform: translateY(-2px);
   }
 
+  .level-card-igcse { --level-accent: var(--primary); }
+  .level-card-as { --level-accent: var(--study-3); }
+  .level-card-a2 { --level-accent: var(--success); }
+
+  .level-card {
+    border-color: hsl(var(--level-accent) / 0.3);
+    box-shadow: 0 8px 32px -8px hsl(var(--level-accent) / 0.1), inset 0 1px 0 hsl(var(--foreground) / 0.05);
+  }
+
+  .level-card:hover {
+    border-color: hsl(var(--level-accent) / 0.6);
+    box-shadow: 0 12px 40px -8px hsl(var(--level-accent) / 0.2), inset 0 1px 0 hsl(var(--foreground) / 0.08);
+  }
+
+  .level-card:focus-visible {
+    outline-color: hsl(var(--level-accent));
+    --tw-ring-color: hsl(var(--level-accent));
+  }
+
+  .level-card-accent,
+  .level-card-icon {
+    color: hsl(var(--level-accent));
+  }
+
+  .level-card-icon {
+    border-color: hsl(var(--level-accent) / 0.25);
+    background: hsl(var(--level-accent) / 0.1);
+  }
+
+  .level-card:hover .level-card-icon {
+    background: hsl(var(--level-accent) / 0.2);
+    border-color: hsl(var(--level-accent) / 0.5);
+  }
+
   .gradient-text {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
   }
