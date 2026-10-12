@@ -1,4 +1,4 @@
-/* Website fonts are bundled through main.tsx, independent of device fonts. */
+/* Fonts loaded asynchronously via index.html */
 
 @tailwind base;
 @tailwind components;
@@ -48,8 +48,8 @@
     --sidebar-border: 222 25% 22%;
     --sidebar-ring: 217 91% 60%;
 
-    --font-sans: 'Plus Jakarta Sans Variable', system-ui, -apple-system, sans-serif;
-    --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
     /* Colourful study palette (timetable / timers) */
     --study-1: 217 91% 60%;
@@ -69,11 +69,6 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
-    font-style: italic;
-  }
-
-  .font-mono {
-    font-style: normal;
   }
 
   h1, h2, h3, h4, h5, h6 {
