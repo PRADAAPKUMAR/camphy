@@ -2,7 +2,7 @@
    without adding browser-synthesized slant or bold. */
 @font-face {
   font-family: 'Avalon Demi Oblique';
-  src: url('/__l5e/assets-v1/d75495c9-f6a3-4814-843a-acb37ed934e0/avalon-demi-oblique.woff') format('woff');
+  src: url('https://physicshq.lovable.app/__l5e/assets-v1/d75495c9-f6a3-4814-843a-acb37ed934e0/avalon-demi-oblique.woff') format('woff');
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
