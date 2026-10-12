@@ -178,13 +178,14 @@ let logoDataUrlPromise: Promise<string | null> | null = null;
 /** Render browser typography to an image, never hand web fonts to the PDF engine. */
 const renderWordmark = async (): Promise<string | null> => {
   try {
+    const styles = getComputedStyle(document.documentElement);
+    const fontFamily = styles.getPropertyValue("--font-sans").trim() || '"Avalon Demi Oblique", sans-serif';
     if (document.fonts) {
       await Promise.race([
-        document.fonts.load('800 160px Inter'),
+        document.fonts.load(`600 140px ${fontFamily}`),
         new Promise((resolve) => setTimeout(resolve, 2000)),
       ]);
     }
-    const styles = getComputedStyle(document.documentElement);
     const colour = (token: string) => `hsl(${styles.getPropertyValue(token).trim()})`;
     const canvas = document.createElement("canvas");
     canvas.width = 1000;
@@ -200,7 +201,7 @@ const renderWordmark = async (): Promise<string | null> => {
       image.src = `${import.meta.env.BASE_URL}favicon.png`;
     });
     if (bolt) ctx.drawImage(bolt, 0, 20, 160, 160);
-    ctx.font = '800 140px Inter, sans-serif';
+    ctx.font = `600 140px ${fontFamily}`;
     ctx.textBaseline = "middle";
     const physicsWidth = ctx.measureText("Physics").width;
     const hqWidth = ctx.measureText("HQ").width;
