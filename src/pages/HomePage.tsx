@@ -10,6 +10,7 @@ import { useTileTransition } from "@/hooks/use-tile-transition";
 
 const PhysicsBackground = lazy(() => import("@/components/PhysicsBackground"));
 const gradeIcons = { igcse: Microscope, as: FlaskConical, a2: Atom };
+const gradeColours = { igcse: "level-card-igcse", as: "level-card-as", a2: "level-card-a2" };
 const getSupabase = () => import("@/integrations/supabase/client").then((module) => module.supabase);
 
 const HomePage = () => {
@@ -79,7 +80,7 @@ const HomePage = () => {
       <div className="mx-auto grid max-w-5xl gap-5 sm:grid-cols-3">
         {GRADE_KEYS.map((key) => {
           const grade = GRADES[key]; const Icon = gradeIcons[key]; const to = gradePath(key);
-          return <Button variant="ghost" key={key} type="button" {...tileProps(to)} className={`glass-card-hover level-card level-card-${key} group flex h-auto min-h-60 items-start whitespace-normal flex-col rounded-xl p-6 text-left`}>
+          return <Button variant="ghost" key={key} type="button" {...tileProps(to)} className={`glass-card-hover level-card ${gradeColours[key]} group flex h-auto min-h-60 items-start whitespace-normal flex-col rounded-xl p-6 text-left`}>
             <div className="level-card-icon mb-5 flex h-12 w-12 items-center justify-center rounded-xl border transition-all"><Icon className="h-6 w-6" /></div>
             <p className="level-card-accent font-mono text-xs">{grade.syllabus}</p>
             <h2 className="mt-1 text-2xl font-extrabold">{grade.label}</h2>
