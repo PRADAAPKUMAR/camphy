@@ -102,6 +102,8 @@ const ClassroomQuizPage = () => {
   const [answeredQuestionCount, setAnsweredQuestionCount] = useState(0);
   const [loadingGame, setLoadingGame] = useState(false);
   const revealGuard = useRef(false);
+  const [history, setHistory] = useState<Record<number, Record<string, TeamAnswer>>>({});
+  const [viewIndex, setViewIndex] = useState<number | null>(null);
 
   const { data: topicGroups, isLoading: topicsLoading } = useQuery({
     queryKey: ["classroom-quiz-topics", level],
@@ -112,36 +114,53 @@ const ClassroomQuizPage = () => {
 
   const selectedSet = useMemo(() => new Set(selectedTopicIds), [selectedTopicIds]);
   const currentQuestion = questions[current];
+  const reviewing = viewIndex !== null;
+  const shownIndex = viewIndex ?? current;
+  const shownQuestion = questions[shownIndex];
   const explanationSource = useMemo(
-    () => currentQuestion?.paper_id ? { paper_id: currentQuestion.paper_id } : null,
-    [currentQuestion?.paper_id],
+    () => shownQuestion?.paper_id ? { paper_id: shownQuestion.paper_id } : null,
+    [shownQuestion?.paper_id],
   );
   const explanation = useExplanation(explanationSource);
   const ranked = useMemo(() => rankTeams(teams), [teams]);
   const allAnswered = teams.length > 0 && teams.every((team) => answers[team.id]);
+
+  // Preload every question image so "Next" is instant.
+  useEffect(() => {
+    questions.forEach((q) => {
+      if (!q.image_url) return;
+      const img = new Image();
+      img.decoding = "async";
+      img.src = q.image_url;
+    });
+  }, [questions]);
 
   const reveal = useCallback(() => {
     if (revealGuard.current || phase !== "question" || !currentQuestion) return;
     revealGuard.current = true;
     const correct = currentQuestion.correct_answer?.toUpperCase();
     const scored = { ...answers };
+    teams.forEach((team) => {
+      const answer = answers[team.id];
+      if (answer && answer.option === correct) {
+        scored[team.id] = { ...answer, points: 1000 + Math.round((answer.secondsLeft / duration) * 500) };
+      }
+    });
     setTeams((previous) =>
       previous.map((team) => {
-        const answer = answers[team.id];
-        if (!answer || answer.option !== correct) return team;
-        const speedPoints = Math.round((answer.secondsLeft / duration) * 500);
-        const points = 1000 + speedPoints;
-        scored[team.id] = { ...answer, points };
-        return { ...team, score: team.score + points, correct: team.correct + 1 };
+        const answer = scored[team.id];
+        if (!answer?.points) return team;
+        return { ...team, score: team.score + answer.points, correct: team.correct + 1 };
       }),
     );
     setAnswers(scored);
+    setHistory((h) => ({ ...h, [current]: scored }));
     setAnsweredQuestionCount((count) => count + 1);
     setPhase("reveal");
-  }, [answers, currentQuestion, duration, phase]);
+  }, [answers, current, currentQuestion, duration, phase, teams]);
 
   useEffect(() => {
-    if (phase !== "question") return;
+    if (phase !== "question" || viewIndex !== null) return;
     if (allAnswered) {
       reveal();
       return;
@@ -152,7 +171,7 @@ const ClassroomQuizPage = () => {
     }
     const timer = window.setTimeout(() => setSecondsLeft((value) => Math.max(0, value - 1)), 1000);
     return () => window.clearTimeout(timer);
-  }, [allAnswered, phase, reveal, secondsLeft]);
+  }, [allAnswered, phase, reveal, secondsLeft, viewIndex]);
 
   if (!grade || !level) return <Navigate to={validGrade ? `/grade/${validGrade}` : "/"} replace />;
 
@@ -200,6 +219,8 @@ const ClassroomQuizPage = () => {
       setCurrent(0);
       setAnsweredQuestionCount(0);
       setAnswers({});
+      setHistory({});
+      setViewIndex(null);
       setSecondsLeft(duration);
       revealGuard.current = false;
       setPhase("question");
