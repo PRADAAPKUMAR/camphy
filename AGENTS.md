@@ -1,5 +1,7 @@
 # Architecture rules
 
+- Grade presentation uses route-scoped semantic grade tokens separate from primary and scoring-state tokens; this keeps academic identity consistent without recolouring correctness feedback or global pages.
+
 - Public search metadata and sitemap share an explicit indexable-page catalog; account, admin, redirect and exam-session URLs default to noindex to avoid accidental indexing.
 - Page-specific head tags use one root Helmet provider while static HTML provides branded fallback metadata; JavaScript-free crawlers still receive the sitewide fallback until prerendering or SSR is introduced.
 - Isolated Edge Function regression tests execute the actual Deno handlers with TypeScript transpilation and an in-memory client; they must never contact the shared live backend or use real credentials.

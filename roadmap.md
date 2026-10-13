@@ -1,5 +1,10 @@
 # Grade-first navigation
 
+# Professional grade identity
+- [ ] Refine homepage level cards and grade home action tiles
+- [ ] Carry semantic grade colours into papers, practice and materials
+- [ ] Verify grade navigation and desktop/mobile layouts
+
 # Search visibility, safety tests and accessibility
 - [x] Set physicshq.in metadata, canonical public pages and generated sitemap
 - [x] Add isolated actual-handler authorization, answer-key and scoring regression checks
