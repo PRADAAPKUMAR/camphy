@@ -12,6 +12,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import AppErrorBoundary from "@/components/AppErrorBoundary";
 import { HelmetProvider } from "react-helmet-async";
 import PageMetadata from "@/components/PageMetadata";
+import { gradeFromLevel, isGradeKey } from "@/lib/grades";
+import { useSelectedGrade } from "@/contexts/GradeContext";
 
 const SpeedInsights = lazy(() => import("@vercel/speed-insights/react").then(m => ({ default: m.SpeedInsights })));
 const Analytics = lazy(() => import("@vercel/analytics/react").then(m => ({ default: m.Analytics })));
@@ -88,6 +90,13 @@ const RouterContent = () => {
   usePageTransition();
   const { pathname } = useLocation();
   const { user, profile } = useAuth();
+  const { grade: selectedGrade } = useSelectedGrade();
+  const [section, level] = pathname.split("/").filter(Boolean);
+  const pageGrade = ["grade", "worksheet-generator", "performance", "classroom-quiz"].includes(section ?? "") && isGradeKey(level)
+    ? level.toLowerCase()
+    : ["papers", "theory-papers", "theory-topical", "materials", "topic-practice", "topical-mcq"].includes(section ?? "")
+      ? gradeFromLevel(level)
+      : ["theory-paper", "exam", "question-mode", "topic-exam", "topic-theory", "view-drive"].includes(section ?? "") ? selectedGrade : null;
   const navExcluded =
     /^\/(exam|question-mode|topic-exam)\//.test(pathname) ||
     /^\/topical-mcq\/[^/]+\/[^/]+\/?$/.test(pathname) ||
@@ -101,7 +110,7 @@ const RouterContent = () => {
     <a href="#page-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-3 focus:text-primary-foreground">Skip to content</a>
     {user && profile && !profile.setup_completed && pathname !== "/profile" && !pathname.startsWith("/auth") && <Navigate to="/profile" replace />}
     {!navExcluded && <SiteNav />}
-    <div id="page-content" tabIndex={-1}>
+    <div id="page-content" tabIndex={-1} data-grade={pageGrade ?? undefined}>
     <Suspense fallback={
       <div className="min-h-screen bg-background">
         <div className="border-b border-border/40">

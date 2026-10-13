@@ -39,6 +39,7 @@
     --destructive-foreground: 0 0% 100%;
 
     --success: 152 60% 42%;
+    --grade-green: 160 84% 39%;
     --success-foreground: 0 0% 100%;
 
     --border: 222 25% 24%;
@@ -62,10 +63,15 @@
     /* Colourful study palette (timetable / timers) */
     --study-1: 217 91% 60%;
     --study-2: 152 60% 45%;
-    --study-3: 32 95% 58%;
+    --study-3: 25 95% 53%;
     --study-4: 280 70% 65%;
     --study-5: 340 80% 62%;
     --study-6: 190 85% 52%;
+    --grade-accent: var(--primary);
+    --grade-accent-subtle: var(--grade-accent) / 0.1;
+    --grade-accent-border: var(--grade-accent) / 0.25;
+    --grade-foreground: var(--background);
+    --grade-glow: 0 8px 28px -12px hsl(var(--grade-accent) / 0.3);
   }
 }
 
@@ -81,7 +87,15 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight;
+    letter-spacing: 0;
+  }
+  [data-grade="igcse"] { --grade-accent: var(--primary); }
+  [data-grade="as"] { --grade-accent: var(--study-3); }
+  [data-grade="a2"] { --grade-accent: var(--grade-green); }
+  [data-grade] {
+    --grade-accent-subtle: var(--grade-accent) / 0.1;
+    --grade-accent-border: var(--grade-accent) / 0.25;
+    --grade-glow: 0 8px 28px -12px hsl(var(--grade-accent) / 0.3);
   }
 }
 
@@ -113,6 +127,35 @@
   .level-card {
     border-color: hsl(var(--level-accent) / 0.3);
     box-shadow: 0 8px 32px -8px hsl(var(--level-accent) / 0.1), inset 0 1px 0 hsl(var(--foreground) / 0.05);
+  }
+
+  .grade-tile {
+    background: hsl(var(--card) / 0.65);
+    border: 1px solid hsl(var(--grade-accent-border));
+    box-shadow: var(--grade-glow);
+    transition: border-color 200ms, background 200ms, transform 200ms;
+  }
+  .grade-tile:hover {
+    border-color: hsl(var(--grade-accent) / 0.6);
+    background: hsl(var(--card) / 0.9);
+    transform: translateY(-2px);
+  }
+  .grade-crest {
+    color: hsl(var(--grade-accent));
+    background: hsl(var(--grade-accent-subtle));
+    border: 1px solid hsl(var(--grade-accent-border));
+    box-shadow: var(--grade-glow);
+  }
+  [data-grade] .glass-card-hover {
+    border-color: hsl(var(--grade-accent-border));
+  }
+  [data-grade] .glass-card-hover:hover {
+    border-color: hsl(var(--grade-accent) / 0.55);
+    box-shadow: var(--grade-glow);
+  }
+  [data-grade] [aria-current="page"] { color: hsl(var(--grade-accent)); }
+  @media (prefers-reduced-motion: reduce) {
+    .grade-tile:hover { transform: none; }
   }
 
   .level-card:hover {

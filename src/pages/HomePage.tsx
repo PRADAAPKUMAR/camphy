@@ -10,7 +10,6 @@ import { useTileTransition } from "@/hooks/use-tile-transition";
 
 const PhysicsBackground = lazy(() => import("@/components/PhysicsBackground"));
 const gradeIcons = { igcse: Microscope, as: FlaskConical, a2: Atom };
-const gradeColours = { igcse: "level-card-igcse", as: "level-card-as", a2: "level-card-a2" };
 const getSupabase = () => import("@/integrations/supabase/client").then((module) => module.supabase);
 
 const HomePage = () => {
@@ -80,12 +79,14 @@ const HomePage = () => {
       <div className="mx-auto grid max-w-5xl gap-5 sm:grid-cols-3">
         {GRADE_KEYS.map((key) => {
           const grade = GRADES[key]; const Icon = gradeIcons[key]; const to = gradePath(key);
-          return <Button variant="ghost" key={key} type="button" {...tileProps(to)} className={`glass-card-hover level-card ${gradeColours[key]} group flex h-auto min-h-60 items-start whitespace-normal flex-col rounded-xl p-6 text-left`}>
-            <div className="level-card-icon mb-5 flex h-12 w-12 items-center justify-center rounded-xl border transition-all"><Icon className="h-6 w-6" /></div>
-            <p className="level-card-accent font-mono text-xs">{grade.syllabus}</p>
-            <h2 className="mt-1 text-2xl font-extrabold">{grade.label}</h2>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{grade.description}</p>
-            <span className="level-card-accent mt-auto inline-flex items-center gap-1.5 pt-6 text-sm font-semibold">Choose grade <ArrowRight className="h-4 w-4" /></span>
+           return <Button variant="ghost" key={key} data-grade={key} type="button" {...tileProps(to)} className="grade-tile group flex h-auto min-h-[270px] flex-col items-stretch whitespace-normal rounded-lg p-7 text-left focus-visible:ring-grade">
+             <div className="mb-6 flex items-center justify-between gap-3">
+               <span className="grade-crest flex h-12 w-12 shrink-0 items-center justify-center rounded-lg"><Icon className="!h-6 !w-6" /></span>
+               <span className="rounded-md border border-border/60 bg-background/40 px-2.5 py-2 font-mono text-[10px] text-muted-foreground">Cambridge {grade.syllabus}</span>
+             </div>
+             <h2 className="text-3xl font-extrabold text-foreground">{grade.label}</h2>
+             <p className="mb-6 mt-3 min-h-10 text-sm leading-relaxed text-muted-foreground">{grade.description}</p>
+             <span className="mt-auto flex items-center justify-between border-t border-grade/20 pt-4 text-sm font-semibold text-grade">Explore {grade.label}<ArrowRight className="motion-safe:transition-transform motion-safe:group-hover:translate-x-1" /></span>
           </Button>;
         })}
       </div>
