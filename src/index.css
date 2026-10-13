@@ -38,7 +38,8 @@
     --destructive: 0 72% 56%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 160 84% 39%;
+    --success: 152 60% 42%;
+    --grade-green: 160 84% 39%;
     --success-foreground: 0 0% 100%;
 
     --border: 222 25% 24%;
@@ -90,7 +91,12 @@
   }
   [data-grade="igcse"] { --grade-accent: var(--primary); }
   [data-grade="as"] { --grade-accent: var(--study-3); }
-  [data-grade="a2"] { --grade-accent: var(--success); }
+  [data-grade="a2"] { --grade-accent: var(--grade-green); }
+  [data-grade] {
+    --grade-accent-subtle: var(--grade-accent) / 0.1;
+    --grade-accent-border: var(--grade-accent) / 0.25;
+    --grade-glow: 0 8px 28px -12px hsl(var(--grade-accent) / 0.3);
+  }
 }
 
 @layer utilities {
