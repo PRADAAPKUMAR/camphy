@@ -5,6 +5,7 @@ const getSupabase = () => import("@/integrations/supabase/client").then(m => m.s
 import { FlaskConical, ScrollText } from "lucide-react";
 import PhysicsBackground from "@/components/PhysicsBackground";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -119,8 +120,8 @@ const SubjectPage = () => {
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
-              <FlaskConical className="h-5 w-5 text-primary" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-grade/10 border border-grade/20">
+              <FlaskConical className="h-5 w-5 text-grade" />
             </div>
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">Physics — {normalizeGradeLabel(decodedLevel)}</h1>
@@ -145,7 +146,7 @@ const SubjectPage = () => {
                 <TabsTrigger
                   key={y}
                   value={String(y)}
-                  className="px-4 py-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md"
+                  className="px-4 py-2 text-sm font-semibold data-[state=active]:bg-grade data-[state=active]:text-grade-foreground rounded-md"
                 >
                   {y}
                 </TabsTrigger>
@@ -173,7 +174,7 @@ const SubjectPage = () => {
                           onClick={() => navigate(`/exam/${paper.id}`)}
                         >
                           <div className="flex items-center gap-3 mb-3">
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-grade/10 border border-grade/20 text-grade transition-all group-hover:bg-grade group-hover:text-grade-foreground">
                               <ScrollText className="h-4 w-4" />
                             </div>
                             <div>
@@ -181,19 +182,19 @@ const SubjectPage = () => {
                             </div>
                           </div>
                           <div className="flex flex-wrap items-center gap-2">
-                            <Badge variant="secondary" className="font-medium text-xs bg-secondary/60">
+                            <Badge variant="secondary" className="font-medium text-xs bg-grade/10 text-grade border-grade/20">
                               {paper.session}
                             </Badge>
-                            <button
+                            <Button variant="ghost" size="sm"
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 navigate(`/question-mode/${paper.id}`);
                               }}
-                              className="ml-auto rounded-lg border border-primary/30 bg-primary/10 px-2 py-1 text-[11px] font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                              className="ml-auto rounded-lg border border-grade/30 bg-grade/10 px-2 py-1 text-[11px] font-semibold text-grade transition-colors hover:bg-grade hover:text-grade-foreground"
                             >
                               Question mode
-                            </button>
+                            </Button>
                           </div>
                         </div>
 

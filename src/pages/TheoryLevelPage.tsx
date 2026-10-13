@@ -76,7 +76,7 @@ const TheoryLevelPage = () => {
         {isLoading ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Skeleton key={i} className="h-32 rounded-2xl" />
+              <Skeleton key={i} className="h-32 rounded-lg" />
             ))}
           </div>
         ) : years.length === 0 ? (
@@ -90,7 +90,7 @@ const TheoryLevelPage = () => {
                 <TabsTrigger
                   key={year}
                   value={String(year)}
-                  className="rounded-md px-4 py-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                  className="rounded-md px-4 py-2 text-sm font-semibold data-[state=active]:bg-grade data-[state=active]:text-grade-foreground"
                 >
                   {year}
                 </TabsTrigger>
@@ -118,10 +118,10 @@ const TheoryLevelPage = () => {
                             <Link
                               key={paper.id}
                               to={`/theory-paper/${paper.id}`}
-                              className="glass-card-hover group flex flex-col gap-3 rounded-2xl p-5"
+                              className="glass-card-hover group flex flex-col gap-3 rounded-lg p-5"
                             >
                               <div className="flex items-center gap-2">
-                                <FileText className="h-5 w-5 text-primary" />
+                                <FileText className="h-5 w-5 text-grade" />
                                 <span className="font-mono text-sm font-bold">{paper.paper_code}</span>
                               </div>
                               <p className="text-sm text-muted-foreground">{paper.session} {paper.year}</p>

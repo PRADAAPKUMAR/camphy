@@ -137,7 +137,7 @@ const TopicLevelPage = () => {
             className="glass-card-hover mb-6 flex items-center justify-between gap-4 rounded-xl p-5"
           >
             <span className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary"><LayoutGrid className="h-5 w-5" /></span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-grade/20 bg-grade/10 text-grade"><LayoutGrid className="h-5 w-5" /></span>
               <span><span className="block font-bold">Mapped Past-Paper Topical MCQ</span><span className="block text-xs text-muted-foreground">Practice individual questions grouped by syllabus topic and subtopic.</span></span>
             </span>
             <ChevronRight className="h-5 w-5 text-muted-foreground" />
@@ -152,12 +152,12 @@ const TopicLevelPage = () => {
           <Tabs defaultValue={defaultTab} className="w-full">
             <TabsList className="mb-6 bg-muted/50 p-1.5 rounded-lg">
               {hasMCQ && (
-                <TabsTrigger value="mcq" className="px-6 py-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md">
+                <TabsTrigger value="mcq" className="px-6 py-2 text-sm font-semibold data-[state=active]:bg-grade data-[state=active]:text-grade-foreground rounded-md">
                   MCQ Practice
                 </TabsTrigger>
               )}
               {hasTheory && (
-                <TabsTrigger value="theory" className="px-6 py-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md">
+                <TabsTrigger value="theory" className="px-6 py-2 text-sm font-semibold data-[state=active]:bg-grade data-[state=active]:text-grade-foreground rounded-md">
                   Theory Questions
                 </TabsTrigger>
               )}
@@ -173,7 +173,7 @@ const TopicLevelPage = () => {
                       onClick={() => navigate(`/topic-exam/${paper.id}`)}
                     >
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-grade/10 border border-grade/20 text-grade transition-all group-hover:bg-grade group-hover:text-grade-foreground">
                           <ScrollText className="h-4 w-4" />
                         </div>
                         <h3 className="text-base font-semibold">{paper.topic}</h3>
@@ -202,7 +202,7 @@ const TopicLevelPage = () => {
                       onClick={() => navigate(`/topic-theory/${q.id}`)}
                     >
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 border border-accent/20 text-accent transition-all group-hover:bg-accent group-hover:text-accent-foreground">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-grade/10 border border-grade/20 text-grade transition-all group-hover:bg-grade group-hover:text-grade-foreground">
                           <FileText className="h-4 w-4" />
                         </div>
                         <h3 className="text-base font-semibold">{q.topic}</h3>
