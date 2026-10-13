@@ -360,29 +360,58 @@ const ClassroomQuizPage = () => {
     </header>
     <main className="mx-auto grid max-w-[1500px] gap-4 p-3 lg:grid-cols-[minmax(0,1fr)_390px] lg:p-5">
       <section className="space-y-4">
-        <QuestionCard question={current + 1} imageUrl={currentQuestion?.image_url ?? undefined} />
-        {phase === "reveal" && <div className="flex items-center justify-center gap-3 rounded-xl border border-success/40 bg-success/10 p-4 text-lg font-bold text-success"><Check className="h-6 w-6" /> Correct answer: {currentQuestion?.correct_answer}</div>}
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{teams.map((team, index) => {
-          const answer = answers[team.id];
-          return <div key={team.id} className="rounded-xl border bg-card/70 p-3" style={teamTone(index)}>
-            <div className="mb-3 flex items-center justify-between gap-2"><p className="truncate font-bold">{team.name}</p>{answer ? <Badge variant="secondary">Locked {answer.option}</Badge> : <span className="text-xs text-muted-foreground">Choose answer</span>}</div>
-            <div className="grid grid-cols-4 gap-2">{OPTIONS.map((option) => {
-              const selected = answer?.option === option;
-              const correct = phase === "reveal" && currentQuestion?.correct_answer === option;
-              const wrong = phase === "reveal" && selected && !correct;
-              return <Button key={option} variant={correct ? "default" : wrong ? "destructive" : selected ? "secondary" : "outline"} className={`h-12 px-0 text-lg font-black ${correct ? "bg-success text-success-foreground" : ""}`} disabled={phase !== "question" || !!answer} onClick={() => recordAnswer(team.id, option)}>{option}</Button>;
-            })}</div>
-            {phase === "reveal" && <p className={`mt-2 text-right text-sm font-bold ${answer?.points ? "text-success" : "text-muted-foreground"}`}>{answer?.points ? `+${answer.points.toLocaleString()} points` : "No points"}</p>}
-          </div>;
-        })}</div>
-        {phase === "reveal" && <div className="grid gap-3 sm:grid-cols-2">
-          <Button size="lg" variant="outline" className="gap-2" onClick={() => explanation.openExplanation(currentQuestion.question_number)}><Lightbulb className="h-5 w-5" /> View explanation</Button>
-          <Button size="lg" className="gap-2" onClick={nextQuestion}>{current >= questions.length - 1 ? "Show final results" : "Next question"}<ChevronRight className="h-5 w-5" /></Button>
+        {reviewing && <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/40 bg-primary/10 p-3 text-sm">
+          <span className="font-semibold">Reviewing question {shownIndex + 1} — timer paused</span>
+          <Button size="sm" onClick={() => setViewIndex(null)}>Back to live question {current + 1}</Button>
         </div>}
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border/50 bg-card/60 px-4 py-3">
+          <Badge className="font-mono text-sm">{shownQuestion?.paper_code ?? "—"}</Badge>
+          {(shownQuestion?.session || shownQuestion?.year) && <span className="text-sm text-muted-foreground">{[shownQuestion?.session, shownQuestion?.year].filter(Boolean).join(" ")}</span>}
+          <Badge variant="secondary" className="text-sm">Question {shownQuestion?.question_number}</Badge>
+          {shownQuestion?.topic_name && <Badge variant="outline" className="text-sm">{shownQuestion.topic_name}</Badge>}
+          <span className="ml-auto font-mono text-xs text-muted-foreground">Quiz Q{shownIndex + 1} of {questions.length}</span>
+        </div>
+        <QuestionCard question={shownIndex + 1} imageUrl={shownQuestion?.image_url ?? undefined} />
+        {(() => {
+          const shownPhase = reviewing ? "reveal" : phase;
+          const shownAnswers = reviewing ? history[shownIndex] ?? {} : answers;
+          return <>
+            {shownPhase === "reveal" && <div className="flex items-center justify-center gap-3 rounded-xl border border-success/40 bg-success/10 p-4 text-lg font-bold text-success"><Check className="h-6 w-6" /> Correct answer: {shownQuestion?.correct_answer}</div>}
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{teams.map((team, index) => {
+              const answer = shownAnswers[team.id];
+              return <div key={team.id} className="rounded-xl border bg-card/70 p-3" style={teamTone(index)}>
+                <div className="mb-3 flex items-center justify-between gap-2"><p className="truncate font-bold">{team.name}</p>{answer ? <Badge variant="secondary">Locked {answer.option}</Badge> : <span className="text-xs text-muted-foreground">{shownPhase === "reveal" ? "No answer" : "Choose answer"}</span>}</div>
+                <div className="grid grid-cols-4 gap-2">{OPTIONS.map((option) => {
+                  const selected = answer?.option === option;
+                  const correct = shownPhase === "reveal" && shownQuestion?.correct_answer === option;
+                  const wrong = shownPhase === "reveal" && selected && !correct;
+                  return <Button key={option} variant={correct ? "default" : wrong ? "destructive" : selected ? "secondary" : "outline"} className={`h-12 px-0 text-lg font-black ${correct ? "bg-success text-success-foreground" : ""}`} disabled={shownPhase !== "question" || !!answer} onClick={() => recordAnswer(team.id, option)}>{option}</Button>;
+                })}</div>
+                {shownPhase === "reveal" && <p className={`mt-2 text-right text-sm font-bold ${answer?.points ? "text-success" : "text-muted-foreground"}`}>{answer?.points ? `+${answer.points.toLocaleString()} points` : "No points"}</p>}
+              </div>;
+            })}</div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <Button size="lg" variant="outline" className="gap-2" disabled={shownIndex === 0} onClick={() => setViewIndex(shownIndex - 1)}><ArrowLeft className="h-5 w-5" /> Previous</Button>
+              {shownPhase === "reveal" ? <Button size="lg" variant="outline" className="gap-2" onClick={() => shownQuestion && explanation.openExplanation(shownQuestion.question_number)}><Lightbulb className="h-5 w-5" /> View explanation</Button> : <div />}
+              {reviewing
+                ? <Button size="lg" className="gap-2" onClick={() => setViewIndex(shownIndex + 1 >= current ? null : shownIndex + 1)}>{shownIndex + 1 >= current ? "Back to live" : "Next reviewed"}<ChevronRight className="h-5 w-5" /></Button>
+                : phase === "reveal" ? <Button size="lg" className="gap-2" onClick={nextQuestion}>{current >= questions.length - 1 ? "Show final results" : "Next question"}<ChevronRight className="h-5 w-5" /></Button> : <div />}
+            </div>
+          </>;
+        })()}
       </section>
       <aside className="space-y-4">
         <div className="glass-card rounded-xl p-4"><div className="mb-3 flex items-center gap-2"><Medal className="h-5 w-5 text-primary" /><h2 className="font-bold">Live leaderboard</h2></div><div className="space-y-2">{ranked.map((team) => <div key={team.id} className="flex items-center gap-3 rounded-lg bg-muted/20 p-3"><span className="w-6 text-center font-black text-muted-foreground">{team.rank}</span><span className="min-w-0 flex-1 truncate font-semibold">{team.name}</span><strong className="tabular-nums">{team.score.toLocaleString()}</strong></div>)}</div></div>
-        {phase === "question" && <Button variant="outline" className="w-full" onClick={reveal}>End answering now</Button>}
+        <div className="glass-card rounded-xl p-4">
+          <h2 className="mb-3 font-bold">Questions</h2>
+          <div className="grid grid-cols-5 gap-1.5">{questions.map((_, i) => {
+            const done = i < current || (i === current && phase === "reveal");
+            const reachable = i <= current;
+            return <button key={i} type="button" disabled={!reachable} onClick={() => setViewIndex(i === current ? null : i)} aria-label={`Go to question ${i + 1}`}
+              className={`h-8 rounded-lg border text-xs font-semibold tabular-nums ${i === shownIndex ? "ring-2 ring-primary" : ""} ${done ? "border-primary/40 bg-primary/20 text-foreground" : i === current ? "border-primary/60 text-primary" : "border-border/40 bg-muted/20 text-muted-foreground opacity-50"}`}>{i + 1}</button>;
+          })}</div>
+        </div>
+        {phase === "question" && !reviewing && <Button variant="outline" className="w-full" onClick={reveal}>End answering now</Button>}
       </aside>
     </main>
     <ExplanationDialog open={explanation.open} onOpenChange={explanation.setOpen} question={explanation.question} isLoading={explanation.isLoading} data={explanation.data} />
