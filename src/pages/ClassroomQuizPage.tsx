@@ -372,7 +372,7 @@ const ClassroomQuizPage = () => {
           {shownQuestion?.topic_name && <Badge variant="outline" className="text-sm">{shownQuestion.topic_name}</Badge>}
           <span className="ml-auto font-mono text-xs text-muted-foreground">Quiz Q{shownIndex + 1} of {questions.length}</span>
         </div>
-        <QuestionCard question={shownIndex + 1} imageUrl={shownQuestion?.image_url ?? undefined} />
+        <QuestionCard question={shownQuestion?.question_number ?? shownIndex + 1} imageUrl={shownQuestion?.image_url ?? undefined} />
         {(() => {
           const shownPhase = reviewing ? "reveal" : phase;
           const shownAnswers = reviewing ? history[shownIndex] ?? {} : answers;
