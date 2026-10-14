@@ -242,6 +242,7 @@ const ClassroomQuizPage = () => {
       setPhase("results");
       return;
     }
+    setViewIndex(null);
     setCurrent((value) => value + 1);
     setAnswers({});
     setSecondsLeft(duration);
