@@ -6,7 +6,9 @@ const corsHeaders = {
 };
 
 const BUCKET = "question-images";
-const TTL_SECONDS = 60 * 30;
+// Classroom quizzes often run longer than a single lesson block; keep signed
+// image URLs valid for 6 hours so mid-quiz expiry never blanks a question.
+const TTL_SECONDS = 60 * 60 * 6;
 const MAX_COUNT = 40;
 
 const json = (body: unknown, status = 200) =>
