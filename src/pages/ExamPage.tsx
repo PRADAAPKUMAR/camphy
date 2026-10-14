@@ -65,17 +65,19 @@ const ExamPage = () => {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [score, setScore] = useState(0);
+  const [resultReady, setResultReady] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState<Record<number, string>>({});
   const explanation = useExplanation(paperId ? { paper_id: paperId } : null);
 
   const { data: paper, isLoading: paperLoading } = useQuery({
     queryKey: ["paper", paperId],
     queryFn: async () => {
+      if (!paperId) throw new Error("Paper ID is required");
       const supabase = await getSupabase();
       const { data, error } = await supabase
         .from("papers")
         .select("*")
-        .eq("id", paperId!)
+        .eq("id", paperId)
         .single();
       if (error) throw error;
       return data;
@@ -175,6 +177,7 @@ const ExamPage = () => {
       }
       setCorrectAnswers(mapped);
       setScore(data.score);
+      setResultReady(true);
       recordPerformance(data.score, mapped);
       toast.success(`Score: ${data.score}/${TOTAL_QUESTIONS}`);
     } catch {
@@ -185,6 +188,7 @@ const ExamPage = () => {
         }
         setCorrectAnswers(answerKeyMap);
         setScore(s);
+        setResultReady(true);
         recordPerformance(s, answerKeyMap);
         toast.success(`Score: ${s}/${TOTAL_QUESTIONS}`);
       } else {
@@ -271,6 +275,7 @@ const ExamPage = () => {
       answers={answers}
       correctAnswers={correctAnswers}
       onExplain={explanation.openExplanation}
+      paper={resultReady && Array.from({ length: TOTAL_QUESTIONS }, (_, i) => i + 1).every((q) => ["A", "B", "C", "D"].includes(correctAnswers[q])) ? paper : undefined}
     />
   ) : null;
 
