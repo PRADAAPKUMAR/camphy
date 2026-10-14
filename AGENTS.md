@@ -1,5 +1,7 @@
 # Architecture rules
 
+- Past-paper grade estimates use a source-cited, reviewed static component-threshold catalog matched by syllabus, year, canonical series and exact component; missing data and partial/retry sets never receive inferred grades or qualification-level A* predictions.
+
 - Grade presentation uses route-scoped semantic grade tokens separate from primary and scoring-state tokens; this keeps academic identity consistent without recolouring correctness feedback or global pages.
 
 - Public search metadata and sitemap share an explicit indexable-page catalog; account, admin, redirect and exam-session URLs default to noindex to avoid accidental indexing.

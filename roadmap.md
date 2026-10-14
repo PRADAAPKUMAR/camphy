@@ -1,5 +1,10 @@
 # Grade-first navigation
 
+# Cambridge component grade predictor
+- [ ] Curate verified official Physics MCQ component thresholds with source links
+- [ ] Integrate component estimates, threshold scale and next-grade marks into full past-paper results
+- [ ] Verify exact matching, boundaries, missing-data and retry-set safeguards, plus real completed-paper flow
+
 # Professional grade identity
 - [x] Refine homepage level cards and grade home action tiles
 - [x] Carry semantic grade colours into papers, practice and materials

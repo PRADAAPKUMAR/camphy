@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CircleCheck, CircleX, Undo2, Award, Lightbulb } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import GradeBoundaryEstimate from "@/components/GradeBoundaryEstimate";
+import type { BoundaryPaper } from "@/lib/grade-boundaries";
 
 const OPTIONS = ["A", "B", "C", "D"] as const;
 
@@ -12,6 +14,7 @@ interface ResultSummaryProps {
   answers: Record<number, string>;
   correctAnswers: Record<number, string>;
   onExplain?: (question: number) => void;
+  paper?: BoundaryPaper;
 }
 
 const ResultRow = memo(({ q, userAnswer, correct, onExplain }: { q: number; userAnswer: string | undefined; correct: string | undefined; onExplain?: (question: number) => void }) => {
@@ -83,6 +86,7 @@ const ResultSummary = memo(({
   answers,
   correctAnswers,
   onExplain,
+  paper,
 }: ResultSummaryProps) => {
   const navigate = useNavigate();
   const percentage = Math.round((score / totalQuestions) * 100);
@@ -115,7 +119,8 @@ const ResultSummary = memo(({
       </div>
 
       {/* Answer review */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="min-h-0 flex-1">
+        {paper && <GradeBoundaryEstimate paper={paper} score={score} totalQuestions={totalQuestions} />}
         <div className="space-y-0.5 p-4">
           {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((q) => (
             <ResultRow

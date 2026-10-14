@@ -53,8 +53,9 @@ const QuestionModePage = () => {
   const { data: paper, isLoading: paperLoading } = useQuery({
     queryKey: ["paper", paperId],
     queryFn: async () => {
+      if (!paperId) throw new Error("Paper ID is required");
       const supabase = await getSupabase();
-      const { data, error } = await supabase.from("papers").select("*").eq("id", paperId!).single();
+      const { data, error } = await supabase.from("papers").select("*").eq("id", paperId).single();
       if (error) throw error;
       return data;
     },
@@ -259,6 +260,7 @@ const QuestionModePage = () => {
                   answers={answers}
                   correctAnswers={correctAnswers}
                   onExplain={explanation.openExplanation}
+                  paper={!isRetrySet && questions.length === TOTAL_QUESTIONS && Array.from({ length: TOTAL_QUESTIONS }, (_, i) => i + 1).every((q) => questions.includes(q) && ["A", "B", "C", "D"].includes(correctAnswers[q])) ? paper : undefined}
                 />
               </div>
             </div>
