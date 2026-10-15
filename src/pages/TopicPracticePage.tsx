@@ -1,6 +1,7 @@
+import { useTileTransition } from "@/hooks/use-tile-transition";
 import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { FlaskConical, Target, FileText, ArrowLeft } from "lucide-react";
+import { FlaskConical, Target, FileText, ArrowLeft, LayoutGrid } from "lucide-react";
 import PhysicsBackground from "@/components/PhysicsBackground";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -12,19 +13,21 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
+import { normalizeGradeLabel } from "@/lib/grades";
 
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 
-const levelOrder = ["IGCSE", "AS Level", "A2 Level"];
+const levelOrder = ["IGCSE", "AS Level", "A Level"];
 
 const levelIcons: Record<string, React.ReactNode> = {
   IGCSE: <FlaskConical className="h-5 w-5" />,
   "AS Level": <Target className="h-5 w-5" />,
-  "A2 Level": <FileText className="h-5 w-5" />,
+  "A Level": <FileText className="h-5 w-5" />,
 };
 
 const TopicPracticePage = () => {
   const navigate = useNavigate();
+  const { tileProps } = useTileTransition();
 
   const { data: mcqLevels, isLoading: mcqLoading } = useQuery({
     queryKey: ["topicwise_mcq_levels"],
@@ -61,7 +64,7 @@ const TopicPracticePage = () => {
       ...Object.keys(mcqLevels || {}),
       ...Object.keys(theoryLevels || {}),
     ])
-  ).sort((a, b) => levelOrder.indexOf(a) - levelOrder.indexOf(b));
+  ).sort((a, b) => levelOrder.indexOf(normalizeGradeLabel(a)) - levelOrder.indexOf(normalizeGradeLabel(b)));
 
   if (isLoading) {
     return (
@@ -126,16 +129,28 @@ const TopicPracticePage = () => {
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-4xl mx-auto">
+            <div
+              className="glass-card-hover group cursor-pointer rounded-2xl p-7"
+              {...tileProps("/topical-mcq")}
+            >
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-accent/10 border border-accent/20 text-accent mb-4 transition-all group-hover:bg-accent group-hover:text-accent-foreground group-hover:glow-sm">
+                <LayoutGrid className="h-5 w-5" />
+              </div>
+              <h3 className="text-xl font-bold mb-1">Topical MCQ</h3>
+              <p className="text-sm text-muted-foreground">
+                One question at a time with instant marking
+              </p>
+            </div>
             {levels.map((lvl) => (
               <div
                 key={lvl}
                 className="glass-card-hover group cursor-pointer rounded-2xl p-7"
-                onClick={() => navigate(`/topic-practice/${encodeURIComponent(lvl)}`)}
+                {...tileProps(`/topic-practice/${encodeURIComponent(lvl)}`)}
               >
                 <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary mb-4 transition-all group-hover:bg-primary group-hover:text-primary-foreground group-hover:glow-sm">
-                  {levelIcons[lvl] || <Target className="h-5 w-5" />}
+                  {levelIcons[normalizeGradeLabel(lvl)] || <Target className="h-5 w-5" />}
                 </div>
-                <h3 className="text-xl font-bold mb-1">{lvl}</h3>
+                <h3 className="text-xl font-bold mb-1">{normalizeGradeLabel(lvl)}</h3>
                 <p className="text-sm text-muted-foreground">
                   {mcqLevels?.[lvl] ?? 0} MCQ · {theoryLevels?.[lvl] ?? 0} Theory
                 </p>

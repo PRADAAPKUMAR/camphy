@@ -16,10 +16,15 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { gradeFromLevel, gradePath, GRADES } from "@/lib/grades";
+import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const MaterialsLevelPage = () => {
   const { level } = useParams<{ level: string }>();
   const decodedLevel = decodeURIComponent(level || "");
+  const grade = gradeFromLevel(decodedLevel);
+  const contentLevel = grade ? GRADES[grade].materialsLevel : decodedLevel;
+  useSyncGrade(decodedLevel);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState("");
@@ -45,18 +50,18 @@ const MaterialsLevelPage = () => {
   };
 
   const { data: materials, isLoading } = useQuery({
-    queryKey: ["study_materials", decodedLevel],
+    queryKey: ["study_materials", contentLevel],
     queryFn: async () => {
       const supabase = await getSupabase();
       const { data, error } = await supabase
         .from("study_materials")
         .select("*")
-        .eq("level", decodedLevel)
+        .eq("level", contentLevel)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
-    enabled: !!decodedLevel,
+    enabled: !!contentLevel,
   });
 
   // Parse folder_path into segments array
@@ -185,22 +190,22 @@ const MaterialsLevelPage = () => {
           <Breadcrumb className="mb-5">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/">Home</Link></BreadcrumbLink>
+                <BreadcrumbLink asChild><Link to={grade ? gradePath(grade) : "/"}>Grade Home</Link></BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/materials">Materials</Link></BreadcrumbLink>
+                <BreadcrumbPage>Study Materials</BreadcrumbPage>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               {currentPath.length === 0 ? (
                 <BreadcrumbItem>
-                  <BreadcrumbPage>{decodedLevel}</BreadcrumbPage>
+                     <BreadcrumbPage>{grade ? GRADES[grade].label : decodedLevel}</BreadcrumbPage>
                 </BreadcrumbItem>
               ) : (
                 <>
                   <BreadcrumbItem>
-                    <BreadcrumbLink className="cursor-pointer" onClick={navigateToRoot}>
-                      {decodedLevel}
+                    <BreadcrumbLink className="cursor-pointer hover:text-grade" onClick={navigateToRoot}>
+                       {grade ? GRADES[grade].label : decodedLevel}
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                   {currentPath.map((seg, i) => (
@@ -211,7 +216,7 @@ const MaterialsLevelPage = () => {
                           <BreadcrumbPage>{seg}</BreadcrumbPage>
                         ) : (
                           <BreadcrumbLink
-                            className="cursor-pointer"
+                            className="cursor-pointer hover:text-grade"
                             onClick={() => navigateToPathIndex(i)}
                           >
                             {seg}
@@ -225,14 +230,14 @@ const MaterialsLevelPage = () => {
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 border border-accent/20">
-              <BookMarked className="h-5 w-5 text-accent" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-grade/10 border border-grade/20">
+              <BookMarked className="h-5 w-5 text-grade" />
             </div>
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">
                 {currentPath.length > 0
                   ? currentPath[currentPath.length - 1]
-                  : `Materials — ${decodedLevel}`}
+                   : `Materials — ${grade ? GRADES[grade].label : decodedLevel}`}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {subfolders.length > 0 && `${subfolders.length} folder${subfolders.length !== 1 ? "s" : ""}`}
@@ -247,7 +252,7 @@ const MaterialsLevelPage = () => {
 
       <main className="container relative py-8">
         {/* Search */}
-        <div className="mb-8 glass-card rounded-xl p-4">
+        <div className="mb-8">
           <div className="flex items-center gap-3">
             <div className="relative flex-1 min-w-[220px]">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -272,19 +277,19 @@ const MaterialsLevelPage = () => {
             <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Folders</h2>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {subfolders.map((folder) => (
-                <button
+                <Button variant="ghost"
                   key={folder}
                   onClick={() => navigateToFolder(folder)}
-                  className="glass-card-hover group rounded-xl p-5 flex items-center gap-4 text-left w-full transition-all"
+                  className="glass-card-hover group rounded-xl p-5 flex h-auto items-center gap-4 text-left w-full whitespace-normal transition-all"
                 >
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-grade/10 border border-grade/20 text-grade transition-all group-hover:bg-grade group-hover:text-grade-foreground">
                     <Folder className="h-5 w-5" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="text-sm font-semibold truncate">{folder}</h3>
                   </div>
                   <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -315,7 +320,7 @@ const MaterialsLevelPage = () => {
                     className="glass-card-hover group rounded-xl p-5 block cursor-pointer no-underline text-inherit"
                   >
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 border border-accent/20 text-accent">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-grade/10 border border-grade/20 text-grade">
                         <FileText className="h-4 w-4" />
                       </div>
                       <div className="min-w-0">
@@ -326,7 +331,7 @@ const MaterialsLevelPage = () => {
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary" className="font-medium text-xs bg-secondary/60">{mat.subject}</Badge>
+                      <Badge variant="secondary" className="font-medium text-xs bg-grade/10 text-grade border-grade/20">{mat.subject}</Badge>
                       <Badge variant="outline" className="text-xs uppercase border-border/40">{mat.file_type}</Badge>
                     </div>
                   </a>
@@ -343,12 +348,12 @@ const MaterialsLevelPage = () => {
               {search ? "No materials match your search." : "No materials found here."}
             </p>
             {search && (
-              <Button variant="link" onClick={() => setSearch("")} className="mt-2 text-primary">
+              <Button variant="link" onClick={() => setSearch("")} className="mt-2 text-grade">
                 Clear search
               </Button>
             )}
             {!search && currentPath.length > 0 && (
-              <Button variant="link" onClick={navigateToRoot} className="mt-2 text-primary">
+              <Button variant="link" onClick={navigateToRoot} className="mt-2 text-grade">
                 Back to root
               </Button>
             )}

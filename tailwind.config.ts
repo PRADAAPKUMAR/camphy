@@ -18,6 +18,12 @@ export default {
         mono: ['var(--font-mono)'],
       },
       colors: {
+        grade: {
+          DEFAULT: "hsl(var(--grade-accent))",
+          foreground: "hsl(var(--grade-foreground))",
+          subtle: "hsl(var(--grade-accent-subtle))",
+          border: "hsl(var(--grade-accent-border))",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

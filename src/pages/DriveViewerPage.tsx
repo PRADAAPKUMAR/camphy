@@ -7,8 +7,10 @@ const DriveViewerPage = () => {
   const url = params.get("url") || "";
   const title = params.get("title") || "Document";
 
-  // Convert Google Drive file link to embeddable preview
-  const embedUrl = url.replace(/\/file\/d\/([^/]+).*/, "/file/d/$1/preview");
+  // Only allow Google Drive file links — never frame arbitrary URLs.
+  const DRIVE_FILE_RE = /^https:\/\/(?:drive|docs)\.google\.com\/file\/d\/([A-Za-z0-9_-]+)(?:[/?#].*)?$/;
+  const match = DRIVE_FILE_RE.exec(url);
+  const embedUrl = match ? `https://drive.google.com/file/d/${match[1]}/preview` : null;
 
   return (
     <div className="flex h-screen flex-col bg-background">
@@ -21,14 +23,22 @@ const DriveViewerPage = () => {
         <span className="text-base font-bold text-foreground truncate">{title}</span>
       </header>
       <div className="flex-1 w-full overflow-auto">
-        <iframe
-          src={embedUrl}
-          className="h-full w-full border-0"
-          title="Google Drive Viewer"
-          allow="autoplay"
-          sandbox="allow-scripts allow-same-origin allow-popups"
-          style={{ minHeight: "100%", minWidth: "100%" }}
-        />
+        {embedUrl ? (
+          <iframe
+            src={embedUrl}
+            className="h-full w-full border-0"
+            title="Google Drive Viewer"
+            allow="autoplay"
+            sandbox="allow-scripts allow-same-origin allow-popups"
+            style={{ minHeight: "100%", minWidth: "100%" }}
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center p-6 text-center">
+            <p className="text-sm text-muted-foreground">
+              This document link isn't a valid Google Drive file and can't be displayed.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

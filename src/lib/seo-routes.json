@@ -1,0 +1,21 @@
+[
+  {"path":"/","title":"Physics HQ | Cambridge IGCSE, AS & A Level Physics","description":"Practise Cambridge IGCSE 0625 and AS & A Level 9702 Physics with past papers, topical questions, worked explanations, worksheets and study resources."},
+  {"path":"/about","title":"About Physics HQ | Cambridge Physics","description":"Learn about Physics HQ, a Cambridge IGCSE, AS and A Level Physics practice and revision platform."},
+  {"path":"/study-tools","title":"Physics Study Tools | Physics HQ","description":"Plan Cambridge Physics revision with study timers, focus sessions and a printable timetable."},
+  {"path":"/grade/igcse","title":"Cambridge IGCSE Physics 0625 | Physics HQ","description":"Explore IGCSE Physics 0625 past papers, topical practice, worksheets and revision materials."},
+  {"path":"/grade/as","title":"Cambridge AS Level Physics 9702 | Physics HQ","description":"Explore AS Level Physics 9702 past papers, topical questions, worksheets and revision resources."},
+  {"path":"/grade/a2","title":"Cambridge A Level Physics 9702 | Physics HQ","description":"Explore A Level Physics 9702 theory past papers, topic practice and revision materials."},
+  {"path":"/papers/IGCSE","title":"IGCSE Physics MCQ Past Papers | Physics HQ","description":"Browse Cambridge IGCSE Physics multiple-choice past papers by year and series."},
+  {"path":"/papers/AS%20LEVEL","title":"AS Level Physics MCQ Past Papers | Physics HQ","description":"Browse Cambridge AS Level Physics 9702 multiple-choice past papers by year and series."},
+  {"path":"/theory-papers/IGCSE","title":"IGCSE Physics Theory Past Papers | Physics HQ","description":"Browse Cambridge IGCSE Physics theory papers by year and series with available mark schemes."},
+  {"path":"/theory-papers/AS%20LEVEL","title":"AS Level Physics Theory Past Papers | Physics HQ","description":"Browse Cambridge AS Level Physics theory past papers by year and series."},
+  {"path":"/theory-papers/A2%20Level","title":"A Level Physics Theory Past Papers | Physics HQ","description":"Browse Cambridge A Level Physics theory past papers by year and series."},
+  {"path":"/topic-practice/IGCSE","title":"IGCSE Physics Topic Practice | Physics HQ","description":"Find Cambridge IGCSE Physics topic-wise MCQ and theory practice."},
+  {"path":"/topic-practice/AS%20LEVEL","title":"AS Level Physics Topic Practice | Physics HQ","description":"Find Cambridge AS Level Physics topic-wise MCQ and theory practice."},
+  {"path":"/topic-practice/A%20LEVEL","title":"A Level Physics Topic Practice | Physics HQ","description":"Find Cambridge A Level Physics topic-wise theory practice."},
+  {"path":"/materials/IGCSE","title":"IGCSE Physics Study Materials | Physics HQ","description":"Browse study materials and revision resources for Cambridge IGCSE Physics."},
+  {"path":"/materials/AS%20LEVEL","title":"AS Level Physics Study Materials | Physics HQ","description":"Browse study materials and revision resources for Cambridge AS Level Physics."},
+  {"path":"/materials/A%20LEVEL","title":"A Level Physics Study Materials | Physics HQ","description":"Browse study materials and revision resources for Cambridge A Level Physics."},
+  {"path":"/topical-mcq/IGCSE","title":"IGCSE Physics Topical MCQ Bank | Physics HQ","description":"Browse mapped IGCSE Physics multiple-choice questions by syllabus topic."},
+  {"path":"/topical-mcq/AS%20LEVEL","title":"AS Level Physics Topical MCQ Bank | Physics HQ","description":"Browse mapped AS Level Physics multiple-choice questions by syllabus topic."}
+]

@@ -27,6 +27,14 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Require real answers so this endpoint can't be used to dump the key.
+    if (Object.keys(answers).length === 0) {
+      return new Response(JSON.stringify({ error: "No answers submitted" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
@@ -66,11 +74,10 @@ Deno.serve(async (req) => {
     for (let q = 1; q <= totalQuestions; q++) {
       const key = `q${q}`;
       const correctValue = answerKey[key];
-      if (typeof correctValue === "string") {
+      const userValue = answers[String(q)];
+      if (typeof correctValue === "string" && typeof userValue === "string") {
         correctAnswers[String(q)] = correctValue;
-        if (answers[String(q)] === correctValue) {
-          score++;
-        }
+        if (userValue === correctValue) score++;
       }
     }
 
@@ -78,7 +85,11 @@ Deno.serve(async (req) => {
       JSON.stringify({ score, total_questions: totalQuestions, correct_answers: correctAnswers }),
       {
         status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+        },
       }
     );
   } catch {

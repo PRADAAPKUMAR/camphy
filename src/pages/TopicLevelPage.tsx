@@ -1,12 +1,14 @@
 import { useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Target, ScrollText, FileText, ArrowLeft } from "lucide-react";
+import { Target, ScrollText, FileText, ArrowLeft, LayoutGrid, ChevronRight } from "lucide-react";
 import PhysicsBackground from "@/components/PhysicsBackground";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { gradeFromLevel, gradePath, GRADES } from "@/lib/grades";
+import { useSyncGrade } from "@/hooks/use-sync-grade";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -22,35 +24,38 @@ const TopicLevelPage = () => {
   const { level } = useParams<{ level: string }>();
   const navigate = useNavigate();
   const decodedLevel = decodeURIComponent(level || "");
+  const grade = gradeFromLevel(decodedLevel);
+  const contentLevel = grade ? GRADES[grade].practiceLevel : decodedLevel;
+  useSyncGrade(decodedLevel);
 
   const { data: mcqPapers, isLoading: mcqLoading } = useQuery({
-    queryKey: ["topicwise_mcq", decodedLevel],
+    queryKey: ["topicwise_mcq", contentLevel],
     queryFn: async () => {
       const supabase = await getSupabase();
       const { data, error } = await supabase
         .from("topicwise_mcq_papers")
         .select("*")
-        .eq("level", decodedLevel)
+        .eq("level", contentLevel)
         .order("topic");
       if (error) throw error;
       return data;
     },
-    enabled: !!decodedLevel,
+    enabled: !!contentLevel,
   });
 
   const { data: theoryQuestions, isLoading: theoryLoading } = useQuery({
-    queryKey: ["topicwise_theory", decodedLevel],
+    queryKey: ["topicwise_theory", contentLevel],
     queryFn: async () => {
       const supabase = await getSupabase();
       const { data, error } = await supabase
         .from("topicwise_theory_questions")
         .select("*")
-        .eq("level", decodedLevel)
+        .eq("level", contentLevel)
         .order("topic");
       if (error) throw error;
       return data;
     },
-    enabled: !!decodedLevel,
+    enabled: !!contentLevel,
   });
 
   const isLoading = mcqLoading || theoryLoading;
@@ -103,24 +108,20 @@ const TopicLevelPage = () => {
           <Breadcrumb className="mb-5">
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/">Home</Link></BreadcrumbLink>
+                <BreadcrumbLink asChild><Link to={grade ? gradePath(grade) : "/"}>Grade Home</Link></BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/topic-practice">Topic Practice</Link></BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{decodedLevel}</BreadcrumbPage>
+                <BreadcrumbPage>Practice</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/topic-practice")}>
+            <Button variant="ghost" size="icon" onClick={() => navigate(grade ? gradePath(grade) : "/")}> 
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight">{decodedLevel} — Topic Practice</h1>
+              <h1 className="text-3xl font-extrabold tracking-tight">{grade ? GRADES[grade].label : decodedLevel} — Topic Practice</h1>
               <p className="text-sm text-muted-foreground">
                 {mcqTopics.length} MCQ topics · {theoryTopics.length} Theory topics
               </p>
@@ -130,6 +131,18 @@ const TopicLevelPage = () => {
       </header>
 
       <main className="container relative py-8">
+        {grade && GRADES[grade].mappedTopicalLevel && (
+          <Link
+            to={`/topical-mcq/${encodeURIComponent(GRADES[grade].mappedTopicalLevel ?? "")}`}
+            className="glass-card-hover mb-6 flex items-center justify-between gap-4 rounded-xl p-5"
+          >
+            <span className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-grade/20 bg-grade/10 text-grade"><LayoutGrid className="h-5 w-5" /></span>
+              <span><span className="block font-bold">Mapped Past-Paper Topical MCQ</span><span className="block text-xs text-muted-foreground">Practice individual questions grouped by syllabus topic and subtopic.</span></span>
+            </span>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </Link>
+        )}
         {!hasMCQ && !hasTheory ? (
           <div className="flex flex-col items-center justify-center py-20">
             <Target className="h-12 w-12 text-muted-foreground/40 mb-4" />
@@ -139,12 +152,12 @@ const TopicLevelPage = () => {
           <Tabs defaultValue={defaultTab} className="w-full">
             <TabsList className="mb-6 bg-muted/50 p-1.5 rounded-lg">
               {hasMCQ && (
-                <TabsTrigger value="mcq" className="px-6 py-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md">
+                <TabsTrigger value="mcq" className="px-6 py-2 text-sm font-semibold data-[state=active]:bg-grade data-[state=active]:text-grade-foreground rounded-md">
                   MCQ Practice
                 </TabsTrigger>
               )}
               {hasTheory && (
-                <TabsTrigger value="theory" className="px-6 py-2 text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-md">
+                <TabsTrigger value="theory" className="px-6 py-2 text-sm font-semibold data-[state=active]:bg-grade data-[state=active]:text-grade-foreground rounded-md">
                   Theory Questions
                 </TabsTrigger>
               )}
@@ -160,7 +173,7 @@ const TopicLevelPage = () => {
                       onClick={() => navigate(`/topic-exam/${paper.id}`)}
                     >
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-grade/10 border border-grade/20 text-grade transition-all group-hover:bg-grade group-hover:text-grade-foreground">
                           <ScrollText className="h-4 w-4" />
                         </div>
                         <h3 className="text-base font-semibold">{paper.topic}</h3>
@@ -189,7 +202,7 @@ const TopicLevelPage = () => {
                       onClick={() => navigate(`/topic-theory/${q.id}`)}
                     >
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 border border-accent/20 text-accent transition-all group-hover:bg-accent group-hover:text-accent-foreground">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-grade/10 border border-grade/20 text-grade transition-all group-hover:bg-grade group-hover:text-grade-foreground">
                           <FileText className="h-4 w-4" />
                         </div>
                         <h3 className="text-base font-semibold">{q.topic}</h3>

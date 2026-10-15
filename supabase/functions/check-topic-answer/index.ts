@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { paper_id, question } = await req.json();
+    const { paper_id, question, answer } = await req.json();
 
     if (!paper_id || typeof paper_id !== "string") {
       return new Response(JSON.stringify({ error: "Invalid paper_id" }), {
@@ -23,6 +23,15 @@ Deno.serve(async (req) => {
     const q = Number(question);
     if (!q || q < 1 || q > 100) {
       return new Response(JSON.stringify({ error: "Invalid question number" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // The correct answer is only revealed once the user has actually committed
+    // an answer for this specific question — no raw answer-key lookups.
+    if (typeof answer !== "string" || !["A", "B", "C", "D"].includes(answer)) {
+      return new Response(JSON.stringify({ error: "Invalid answer" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -49,7 +58,7 @@ Deno.serve(async (req) => {
     const correct = answerKey[colName];
 
     return new Response(
-      JSON.stringify({ question: q, correct_answer: correct }),
+      JSON.stringify({ question: q, submitted: answer, is_correct: answer === correct, correct_answer: correct }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

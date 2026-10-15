@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
+import { useTileTransition } from "@/hooks/use-tile-transition";
 import { useNavigate, Link } from "react-router-dom";
 import { BookMarked, Zap, Microscope, FlaskConical, Atom } from "lucide-react";
 import PhysicsBackground from "@/components/PhysicsBackground";
@@ -14,21 +15,23 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { normalizeGradeLabel } from "@/lib/grades";
 
 const levelIcons: Record<string, React.ReactNode> = {
   IGCSE: <Microscope className="h-6 w-6" />,
   "AS Level": <FlaskConical className="h-6 w-6" />,
-  "A2 Level": <Atom className="h-6 w-6" />,
+  "A Level": <Atom className="h-6 w-6" />,
 };
 
 const levelDescriptions: Record<string, string> = {
   IGCSE: "International General Certificate of Secondary Education",
   "AS Level": "Advanced Subsidiary Level",
-  "A2 Level": "Advanced Level (Year 2)",
+  "A Level": "Advanced Level",
 };
 
 const MaterialsPage = () => {
   const navigate = useNavigate();
+  const { tileProps } = useTileTransition();
 
   const { data: materials, isLoading } = useQuery({
     queryKey: ["study_materials"],
@@ -54,11 +57,11 @@ const MaterialsPage = () => {
         map.set(m.level, { level: m.level, count: 1 });
       }
     });
-    const order = ["IGCSE", "AS Level", "A2 Level"];
+    const order = ["IGCSE", "AS Level", "A Level"];
     return Array.from(map.values()).sort(
       (a, b) =>
-        (order.indexOf(a.level) === -1 ? 99 : order.indexOf(a.level)) -
-        (order.indexOf(b.level) === -1 ? 99 : order.indexOf(b.level))
+        (order.indexOf(normalizeGradeLabel(a.level)) === -1 ? 99 : order.indexOf(normalizeGradeLabel(a.level))) -
+        (order.indexOf(normalizeGradeLabel(b.level)) === -1 ? 99 : order.indexOf(normalizeGradeLabel(b.level)))
     );
   }, [materials]);
 
@@ -137,15 +140,15 @@ const MaterialsPage = () => {
               <div
                 key={l.level}
                 className="glass-card-hover group cursor-pointer rounded-2xl p-7 flex flex-col gap-4"
-                onClick={() => navigate(`/materials/${encodeURIComponent(l.level)}`)}
+                {...tileProps(`/materials/${encodeURIComponent(l.level)}`)}
               >
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-accent/10 border border-accent/20 text-accent transition-all group-hover:bg-accent group-hover:text-accent-foreground">
-                  {levelIcons[l.level] || <Zap className="h-6 w-6" />}
+                  {levelIcons[normalizeGradeLabel(l.level)] || <Zap className="h-6 w-6" />}
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold mb-1">{l.level}</h3>
+                  <h3 className="text-xl font-bold mb-1">{normalizeGradeLabel(l.level)}</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    {levelDescriptions[l.level] || l.level}
+                    {levelDescriptions[normalizeGradeLabel(l.level)] || normalizeGradeLabel(l.level)}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-auto">

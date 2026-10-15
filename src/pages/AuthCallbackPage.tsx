@@ -1,0 +1,3 @@
+import { useEffect } from "react"; import { useNavigate, useSearchParams } from "react-router-dom"; import { Loader2 } from "lucide-react"; import { supabase } from "@/integrations/supabase/client";
+const safe = (value: string | null) => value?.startsWith("/") && !value.startsWith("//") ? value : "/";
+export default function AuthCallbackPage(){ const navigate=useNavigate(); const [params]=useSearchParams(); useEffect(()=>{supabase.auth.getSession().then(({data})=>navigate(data.session?safe(params.get("returnTo")):"/auth",{replace:true}))},[navigate,params]); return <div className="flex min-h-screen items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-primary" aria-label="Completing sign in"/></div> }

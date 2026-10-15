@@ -41,6 +41,10 @@ const PhysicsBackground = memo(() => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    // Respect reduced-motion: skip the canvas animation entirely.
+    if (typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
@@ -63,9 +67,18 @@ const PhysicsBackground = memo(() => {
     }
 
     let frameCount = 0;
+    // Throttle to ~30fps — halves CPU vs. requestAnimationFrame at 60fps,
+    // visually indistinguishable for slow drifting particles.
+    const FRAME_INTERVAL = 1000 / 30;
+    let lastFrame = 0;
 
-    const draw = () => {
+    const draw = (ts: number) => {
       if (!visible) return;
+      if (ts - lastFrame < FRAME_INTERVAL) {
+        raf = requestAnimationFrame(draw);
+        return;
+      }
+      lastFrame = ts;
       const w = canvas.width;
       const h = canvas.height;
       ctx.clearRect(0, 0, w, h);

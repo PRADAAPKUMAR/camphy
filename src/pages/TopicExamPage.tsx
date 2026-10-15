@@ -6,6 +6,8 @@ const getSupabase = () => import("@/integrations/supabase/client").then(m => m.s
 import MCQPanel from "@/components/MCQPanel";
 import ResultSummary from "@/components/ResultSummary";
 import Timer from "@/components/Timer";
+import ExplanationDialog from "@/components/ExplanationDialog";
+import { useExplanation } from "@/hooks/use-explanation";
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -22,14 +24,49 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsMobile } from "@/hooks/use-mobile";
+import MobileExamShell from "@/components/MobileExamShell";
+import { savePerformanceRecord } from "@/lib/performance-history";
+import { syllabusVersionForLevel } from "@/lib/syllabus";
+import { useTopicPracticeMap } from "@/hooks/use-syllabus";
+import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
+import { useSyncGrade } from "@/hooks/use-sync-grade";
+
+const CACHE_TTL = 30 * 60 * 1000;
+const cacheKey = (paperId: string) => `physicshq:topic-answer-key:${paperId}`;
+
+const readCachedKey = (paperId?: string): Record<number, string> | undefined => {
+  if (!paperId) return undefined;
+  try {
+    const raw = sessionStorage.getItem(cacheKey(paperId));
+    if (!raw) return undefined;
+    const parsed = JSON.parse(raw) as { timestamp: number; answers: Record<string, string> };
+    if (!parsed?.timestamp || Date.now() - parsed.timestamp > CACHE_TTL) return undefined;
+    const map: Record<number, string> = {};
+    for (const [k, v] of Object.entries(parsed.answers ?? {})) map[Number(k)] = v;
+    return Object.keys(map).length ? map : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const writeCachedKey = (paperId: string, answers: Record<number, string>) => {
+  try {
+    sessionStorage.setItem(cacheKey(paperId), JSON.stringify({ timestamp: Date.now(), answers }));
+  } catch {
+    // ignore quota / privacy-mode failures
+  }
+};
 
 const TopicExamPage = () => {
   const { paperId } = useParams<{ paperId: string }>();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState<Record<number, string>>({});
+  const explanation = useExplanation(paperId ? { topic_paper_id: paperId } : null);
 
   const { data: paper, isLoading: paperLoading } = useQuery({
     queryKey: ["topicwise_mcq_paper", paperId],
@@ -45,51 +82,120 @@ const TopicExamPage = () => {
     },
     enabled: !!paperId,
   });
+  useSyncGrade(paper?.level);
 
-  // Pre-fetch all answer keys on mount for instant feedback
+  const totalQuestions = paper?.total_questions ?? 40;
+
+  const { data: topicMap } = useTopicPracticeMap();
+
+  const recordAttempt = useCallback(
+    (finalScore: number, total: number) => {
+      if (!paperId || !paper) return;
+      savePerformanceRecord({
+        paperId,
+        paperCode: paper.topic ?? "Topic Practice",
+        level: paper.level ?? "",
+        year: null,
+        session: null,
+        score: finalScore,
+        totalQuestions: total,
+        percentage: total ? Math.round((finalScore / total) * 100) : 0,
+        completedAt: new Date().toISOString(),
+        practiceType: "topic",
+        topic: paper.topic ?? null,
+        syllabusVersion: syllabusVersionForLevel(paper.level),
+        primaryTopicId:
+          topicMap?.find((m) => m.topic === paper.topic && m.level === paper.level)
+            ?.syllabus_topic_id ?? null,
+      });
+    },
+    [paperId, paper, topicMap],
+  );
+
+  // Prefetch full key once so feedback is instant on selection.
   const { data: answerKeyMap } = useQuery({
-    queryKey: ["topicwise_answer_key", paperId],
+    queryKey: ["topic-answer-key", paperId],
     queryFn: async () => {
       const supabase = await getSupabase();
-      const { data, error } = await supabase.functions.invoke("submit-topic-exam", {
-        body: { paper_id: paperId, answers: {} },
+      const { data, error } = await supabase.functions.invoke("get-answer-key", {
+        body: { paper_id: paperId, kind: "topic" },
       });
       if (error) throw error;
-      const mapped: Record<number, string> = {};
-      for (const [k, v] of Object.entries(data.correct_answers as Record<string, string>)) {
-        mapped[Number(k)] = v;
+      const map: Record<number, string> = {};
+      for (const [k, v] of Object.entries((data?.correct_answers ?? {}) as Record<string, string>)) {
+        map[Number(k)] = v;
       }
-      return mapped;
+      if (paperId) writeCachedKey(paperId, map);
+      return map;
     },
     enabled: !!paperId,
     staleTime: Infinity,
+    initialData: () => readCachedKey(paperId),
   });
-
-  const totalQuestions = paper?.total_questions ?? 40;
 
   const handleSelectAnswer = useCallback((question: number, option: string) => {
     if (isSubmitted || answers[question]) return;
     setAnswers((prev) => ({ ...prev, [question]: option }));
-    // Instant feedback from pre-fetched answer key
-    if (answerKeyMap?.[question]) {
-      setCorrectAnswers((prev) => ({ ...prev, [question]: answerKeyMap[question] }));
+    const known = answerKeyMap?.[question];
+    if (known) {
+      setCorrectAnswers((prev) => ({ ...prev, [question]: known }));
+      return;
     }
-  }, [isSubmitted, answers, answerKeyMap]);
+    (async () => {
+      try {
+        const supabase = await getSupabase();
+        const { data, error } = await supabase.functions.invoke("check-topic-answer", {
+          body: { paper_id: paperId, question, answer: option },
+        });
+        if (error) throw error;
+        if (data?.correct_answer) {
+          setCorrectAnswers((prev) => ({ ...prev, [question]: data.correct_answer }));
+        }
+      } catch {
+        toast.error("Could not check that answer");
+      }
+    })();
+  }, [isSubmitted, answers, paperId, answerKeyMap]);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     if (isSubmitted) return;
     setIsSubmitted(true);
 
-    if (answerKeyMap) {
-      let s = 0;
-      for (const [q, userAns] of Object.entries(answers)) {
-        if (answerKeyMap[Number(q)] === userAns) s++;
-      }
-      setScore(s);
-      setCorrectAnswers(answerKeyMap);
-      toast.success(`Score: ${s}/${totalQuestions}`);
+    if (Object.keys(answers).length === 0) {
+      setScore(0);
+      toast.info("No answers submitted");
+      return;
     }
-  }, [isSubmitted, answers, answerKeyMap, totalQuestions]);
+
+    try {
+      const supabase = await getSupabase();
+      const { data, error } = await supabase.functions.invoke("submit-topic-exam", {
+        body: { paper_id: paperId, answers },
+      });
+      if (error) throw error;
+      const mapped: Record<number, string> = {};
+      for (const [k, v] of Object.entries((data.correct_answers ?? {}) as Record<string, string>)) {
+        mapped[Number(k)] = v;
+      }
+      setCorrectAnswers(mapped);
+      setScore(data.score);
+      recordAttempt(data.score, data.total_questions ?? totalQuestions);
+      toast.success(`Score: ${data.score}/${data.total_questions ?? totalQuestions}`);
+    } catch {
+      if (answerKeyMap) {
+        let s = 0;
+        for (const [q, a] of Object.entries(answers)) {
+          if (answerKeyMap[Number(q)] === a) s++;
+        }
+        setCorrectAnswers(answerKeyMap);
+        setScore(s);
+        recordAttempt(s, totalQuestions);
+        toast.success(`Score: ${s}/${totalQuestions}`);
+      } else {
+        toast.error("Could not submit your answers");
+      }
+    }
+  }, [isSubmitted, answers, paperId, totalQuestions, answerKeyMap, recordAttempt]);
 
   if (paperLoading) {
     return (
@@ -123,26 +229,23 @@ const TopicExamPage = () => {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">
         <p className="text-destructive font-medium">Paper not found</p>
-        <Button variant="outline" onClick={() => navigate("/topic-practice")}>
+        <Button variant="outline" onClick={() => navigate("/")}> 
           Back to Topics
         </Button>
       </div>
     );
   }
 
-  return (
-    <div className="flex h-screen flex-col bg-background">
-      <div className="flex items-center justify-between border-b bg-card px-5 py-3 shadow-sm">
-        <div className="flex items-center gap-4">
-          <Breadcrumb>
+  const breadcrumb = (
+    <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/topic-practice">Topics</Link></BreadcrumbLink>
+                <BreadcrumbLink asChild><Link to={gradeFromLevel(paper.level) ? gradePath(gradeFromLevel(paper.level) as "igcse" | "as" | "a2") : "/"}>Grade Home</Link></BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link to={`/topic-practice/${encodeURIComponent(paper.level)}`}>{paper.level}</Link>
+                  <Link to={`/topic-practice/${encodeURIComponent(paper.level)}`}>{normalizeGradeLabel(paper.level)}</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -150,37 +253,85 @@ const TopicExamPage = () => {
                 <BreadcrumbPage>{paper.topic}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-        <Timer
-          durationMinutes={paper.timer_minutes}
-          onTimeUp={handleSubmit}
-          isRunning={!isSubmitted}
+    </Breadcrumb>
+  );
+
+  const timerEl = (
+    <Timer
+      durationMinutes={paper.timer_minutes}
+      onTimeUp={handleSubmit}
+      isRunning={!isSubmitted}
+    />
+  );
+
+  const pdfEl = (
+    <div className="flex h-full flex-col bg-muted/30">
+      <iframe
+        src={paper.pdf_url.replace(/\/file\/d\/([^/]+).*/, "/file/d/$1/preview")}
+        className="h-full w-full border-0"
+        title="Google Drive Viewer"
+        allow="autoplay"
+        sandbox="allow-scripts allow-same-origin allow-popups"
+      />
+    </div>
+  );
+
+  const resultPanel = isSubmitted && Object.keys(correctAnswers).length > 0 ? (
+    <ResultSummary
+      score={score}
+      totalQuestions={totalQuestions}
+      answers={answers}
+      correctAnswers={correctAnswers}
+      onExplain={explanation.openExplanation}
+    />
+  ) : null;
+
+  const explanationDialog = (
+    <ExplanationDialog
+      open={explanation.open}
+      onOpenChange={explanation.setOpen}
+      question={explanation.question}
+      userAnswer={explanation.question ? answers[explanation.question] : undefined}
+      isLoading={explanation.isLoading}
+      data={explanation.data}
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        <MobileExamShell
+          breadcrumb={breadcrumb}
+          timer={timerEl}
+          pdf={pdfEl}
+          totalQuestions={totalQuestions}
+          answers={answers}
+          correctAnswers={correctAnswers}
+          onSelectAnswer={handleSelectAnswer}
+          onSubmit={handleSubmit}
+          isSubmitted={isSubmitted}
+          onExplain={explanation.openExplanation}
+          resultPanel={resultPanel ?? undefined}
         />
+        {explanationDialog}
+      </>
+    );
+  }
+
+  return (
+    <div className="flex h-screen flex-col bg-background">
+      <div className="flex items-center justify-between border-b bg-card px-5 py-3 shadow-sm">
+        <div className="flex items-center gap-4">{breadcrumb}</div>
+        {timerEl}
       </div>
 
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         <ResizablePanel defaultSize={78} minSize={40}>
-          <div className="flex h-full flex-col bg-muted/30">
-            <iframe
-              src={paper.pdf_url.replace(/\/file\/d\/([^/]+).*/, "/file/d/$1/preview")}
-              className="h-full w-full border-0"
-              title="Google Drive Viewer"
-              allow="autoplay"
-              sandbox="allow-scripts allow-same-origin allow-popups"
-            />
-          </div>
+          {pdfEl}
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={22} minSize={18}>
-          {isSubmitted && Object.keys(correctAnswers).length > 0 ? (
-            <ResultSummary
-              score={score}
-              totalQuestions={totalQuestions}
-              answers={answers}
-              correctAnswers={correctAnswers}
-            />
-          ) : (
+          {resultPanel ?? (
             <MCQPanel
               totalQuestions={totalQuestions}
               answers={answers}
@@ -188,10 +339,13 @@ const TopicExamPage = () => {
               onSelectAnswer={handleSelectAnswer}
               onSubmit={handleSubmit}
               isSubmitted={isSubmitted}
+              onExplain={explanation.openExplanation}
             />
           )}
         </ResizablePanel>
       </ResizablePanelGroup>
+
+      {explanationDialog}
     </div>
   );
 };

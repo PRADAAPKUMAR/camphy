@@ -1,0 +1,50 @@
+<svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" style="font-family: var(--font-sans)">
+  <style>
+    text { fill: hsl(var(--foreground)); font-size: 14px; font-weight: 480 }
+    .n { fill: hsl(var(--muted-foreground)); font-size: 12px; font-weight: 400 }
+    .b { fill: none; stroke: hsl(var(--muted-foreground)); stroke-width: 1 }
+    .z { fill: none; stroke: hsl(var(--border)); stroke-width: 1; stroke-dasharray: 4 3 }
+    .w { stroke: hsl(var(--muted-foreground)); stroke-width: 1; fill: none }
+    .m { font-family: var(--font-mono); font-size: 11px; fill: hsl(var(--muted-foreground)) }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 0 L10 5 L0 10" fill="none" stroke="hsl(var(--muted-foreground))" stroke-width="1.2"/>
+    </marker>
+  </defs>
+
+  <rect class="z" x="8" y="8" width="200" height="132" rx="8"/>
+  <text class="n" x="20" y="26">admin (you)</text>
+  <rect class="b" x="24" y="38" width="168" height="40" rx="8"/>
+  <text x="40" y="63">Upload JPGs</text>
+  <rect class="b" x="24" y="90" width="168" height="36" rx="8"/>
+  <text class="m" x="40" y="112">question_images + storage</text>
+
+  <line class="w" x1="108" y1="78" x2="108" y2="88" marker-end="url(#a)"/>
+  <line class="w" x1="192" y1="108" x2="248" y2="108" marker-end="url(#a)"/>
+
+  <rect x="248" y="34" width="180" height="150" rx="8" fill="hsl(var(--muted))" stroke="hsl(var(--accent))"/>
+  <text x="264" y="58">Question mode</text>
+  <rect class="b" x="264" y="70" width="148" height="52" rx="8"/>
+  <text class="n" x="280" y="100">one question image</text>
+  <rect x="264" y="132" width="32" height="30" rx="8" fill="hsl(var(--accent))"/>
+  <text x="276" y="152" style="fill:hsl(var(--accent-foreground))">A</text>
+  <rect class="b" x="302" y="132" width="32" height="30" rx="8"/><text x="314" y="152">B</text>
+  <rect class="b" x="340" y="132" width="32" height="30" rx="8"/><text x="352" y="152">C</text>
+  <rect class="b" x="378" y="132" width="32" height="30" rx="8"/><text x="390" y="152">D</text>
+
+  <line class="w" x1="428" y1="108" x2="484" y2="108" marker-end="url(#a)"/>
+  <text class="m" x="432" y="100">mark + explain</text>
+
+  <rect class="b" x="484" y="34" width="148" height="46" rx="8"/>
+  <text x="500" y="62">Explanation</text>
+  <rect class="b" x="484" y="94" width="148" height="46" rx="8"/>
+  <text x="500" y="122">Result summary</text>
+  <rect class="b" x="484" y="154" width="148" height="60" rx="8"/>
+  <text x="500" y="180">Performance</text>
+  <text class="n" x="500" y="198">topic / subtopic</text>
+
+  <line class="w" x1="558" y1="140" x2="558" y2="152" marker-end="url(#a)"/>
+  <path class="w" d="M484 200 C 420 250, 330 250, 336 190" marker-end="url(#a)"/>
+  <text class="m" x="368" y="256">retry wrong questions</text>
+</svg>

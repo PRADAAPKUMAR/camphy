@@ -28,6 +28,15 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Never act as an answer-key oracle: at least one real answer is required,
+    // and only questions the user answered get their correct answer returned.
+    if (Object.keys(answers).length === 0) {
+      return new Response(JSON.stringify({ error: "No answers submitted" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceRoleKey);
@@ -54,11 +63,10 @@ Deno.serve(async (req) => {
     for (let q = 1; q <= TOTAL_QUESTIONS; q++) {
       const key = `q${q}`;
       const correctValue = answerKey[key];
-      if (typeof correctValue === "string") {
+      const userValue = answers[String(q)];
+      if (typeof correctValue === "string" && typeof userValue === "string") {
         correctAnswers[String(q)] = correctValue;
-        if (answers[String(q)] === correctValue) {
-          score++;
-        }
+        if (userValue === correctValue) score++;
       }
     }
 
@@ -81,7 +89,11 @@ Deno.serve(async (req) => {
       JSON.stringify({ score, total_questions: TOTAL_QUESTIONS, correct_answers: correctAnswers }),
       {
         status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+        },
       }
     );
   } catch (err) {

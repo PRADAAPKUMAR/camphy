@@ -200,6 +200,9 @@ export type Database = {
           paper_code: string
           pdf_url: string
           session: string
+          source_pdf_url: string | null
+          storage_bucket: string | null
+          storage_path: string | null
           subject: string
           year: number
         }
@@ -210,6 +213,9 @@ export type Database = {
           paper_code: string
           pdf_url: string
           session: string
+          source_pdf_url?: string | null
+          storage_bucket?: string | null
+          storage_path?: string | null
           subject: string
           year: number
         }
@@ -220,8 +226,253 @@ export type Database = {
           paper_code?: string
           pdf_url?: string
           session?: string
+          source_pdf_url?: string | null
+          storage_bucket?: string | null
+          storage_path?: string | null
           subject?: string
           year?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          account_type: Database["public"]["Enums"]["account_type"]
+          avatar_url: string | null
+          country: string | null
+          created_at: string
+          display_name: string
+          full_name: string
+          grade: Database["public"]["Enums"]["profile_grade"] | null
+          id: string
+          preferences: Json
+          school: string | null
+          setup_completed: boolean
+          updated_at: string
+          usage_summary: Json
+        }
+        Insert: {
+          account_type?: Database["public"]["Enums"]["account_type"]
+          avatar_url?: string | null
+          country?: string | null
+          created_at?: string
+          display_name?: string
+          full_name?: string
+          grade?: Database["public"]["Enums"]["profile_grade"] | null
+          id: string
+          preferences?: Json
+          school?: string | null
+          setup_completed?: boolean
+          updated_at?: string
+          usage_summary?: Json
+        }
+        Update: {
+          account_type?: Database["public"]["Enums"]["account_type"]
+          avatar_url?: string | null
+          country?: string | null
+          created_at?: string
+          display_name?: string
+          full_name?: string
+          grade?: Database["public"]["Enums"]["profile_grade"] | null
+          id?: string
+          preferences?: Json
+          school?: string | null
+          setup_completed?: boolean
+          updated_at?: string
+          usage_summary?: Json
+        }
+        Relationships: []
+      }
+      question_explanations: {
+        Row: {
+          correct_option: string | null
+          created_at: string
+          explanation: string | null
+          id: string
+          option_a: string | null
+          option_b: string | null
+          option_c: string | null
+          option_d: string | null
+          paper_id: string | null
+          question_number: number
+          topic_paper_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          correct_option?: string | null
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          paper_id?: string | null
+          question_number: number
+          topic_paper_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          correct_option?: string | null
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          option_a?: string | null
+          option_b?: string | null
+          option_c?: string | null
+          option_d?: string | null
+          paper_id?: string | null
+          question_number?: number
+          topic_paper_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_explanations_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "papers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_explanations_topic_paper_id_fkey"
+            columns: ["topic_paper_id"]
+            isOneToOne: false
+            referencedRelation: "topicwise_mcq_papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      question_images: {
+        Row: {
+          created_at: string
+          height: number | null
+          id: string
+          paper_id: string
+          question_number: number
+          storage_path: string
+          width: number | null
+        }
+        Insert: {
+          created_at?: string
+          height?: number | null
+          id?: string
+          paper_id: string
+          question_number: number
+          storage_path: string
+          width?: number | null
+        }
+        Update: {
+          created_at?: string
+          height?: number | null
+          id?: string
+          paper_id?: string
+          question_number?: number
+          storage_path?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_images_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      question_topic_mapping: {
+        Row: {
+          created_at: string
+          id: string
+          mapping_type: string
+          paper_id: string
+          question_number: number
+          syllabus_topic_id: string
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mapping_type?: string
+          paper_id: string
+          question_number: number
+          syllabus_topic_id: string
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mapping_type?: string
+          paper_id?: string
+          question_number?: number
+          syllabus_topic_id?: string
+          verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_topic_mapping_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "papers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_topic_mapping_syllabus_topic_id_fkey"
+            columns: ["syllabus_topic_id"]
+            isOneToOne: false
+            referencedRelation: "syllabus_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      question_topic_mapping_audit: {
+        Row: {
+          audited_at: string | null
+          audited_topic_code: string | null
+          audited_topic_id: string | null
+          audited_topic_name: string | null
+          confidence: string | null
+          evidence: string | null
+          existing_topic_code: string | null
+          existing_topic_name: string | null
+          id: string
+          mapping_id: string
+          paper_id: string
+          question_number: number
+          status: string
+          syllabus_topic_id: string
+        }
+        Insert: {
+          audited_at?: string | null
+          audited_topic_code?: string | null
+          audited_topic_id?: string | null
+          audited_topic_name?: string | null
+          confidence?: string | null
+          evidence?: string | null
+          existing_topic_code?: string | null
+          existing_topic_name?: string | null
+          id?: string
+          mapping_id: string
+          paper_id: string
+          question_number: number
+          status?: string
+          syllabus_topic_id: string
+        }
+        Update: {
+          audited_at?: string | null
+          audited_topic_code?: string | null
+          audited_topic_id?: string | null
+          audited_topic_name?: string | null
+          confidence?: string | null
+          evidence?: string | null
+          existing_topic_code?: string | null
+          existing_topic_name?: string | null
+          id?: string
+          mapping_id?: string
+          paper_id?: string
+          question_number?: number
+          status?: string
+          syllabus_topic_id?: string
         }
         Relationships: []
       }
@@ -260,6 +511,291 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      syllabus_topics: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          id: string
+          is_active: boolean
+          level: string | null
+          parent_topic_id: string | null
+          syllabus_version_id: string
+          topic_code: string
+          topic_name: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean
+          level?: string | null
+          parent_topic_id?: string | null
+          syllabus_version_id: string
+          topic_code: string
+          topic_name: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean
+          level?: string | null
+          parent_topic_id?: string | null
+          syllabus_version_id?: string
+          topic_code?: string
+          topic_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syllabus_topics_parent_topic_id_fkey"
+            columns: ["parent_topic_id"]
+            isOneToOne: false
+            referencedRelation: "syllabus_topics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_topics_syllabus_version_id_fkey"
+            columns: ["syllabus_version_id"]
+            isOneToOne: false
+            referencedRelation: "syllabus_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      syllabus_versions: {
+        Row: {
+          created_at: string
+          id: string
+          is_current: boolean
+          level: string | null
+          official_source_url: string | null
+          qualification: string | null
+          syllabus_code: string
+          syllabus_version: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_current?: boolean
+          level?: string | null
+          official_source_url?: string | null
+          qualification?: string | null
+          syllabus_code: string
+          syllabus_version: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_current?: boolean
+          level?: string | null
+          official_source_url?: string | null
+          qualification?: string | null
+          syllabus_code?: string
+          syllabus_version?: string
+        }
+        Relationships: []
+      }
+      theory_explanations: {
+        Row: {
+          created_at: string
+          explanation: string | null
+          id: string
+          image_path: string | null
+          order_index: number
+          part_label: string
+          question_number: number
+          theory_paper_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          image_path?: string | null
+          order_index?: number
+          part_label?: string
+          question_number: number
+          theory_paper_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          image_path?: string | null
+          order_index?: number
+          part_label?: string
+          question_number?: number
+          theory_paper_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "theory_explanations_theory_paper_id_fkey"
+            columns: ["theory_paper_id"]
+            isOneToOne: false
+            referencedRelation: "theory_papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      theory_papers: {
+        Row: {
+          answer_storage_path: string | null
+          component: string
+          created_at: string
+          id: string
+          level: string
+          paper_code: string
+          question_storage_path: string | null
+          session: string
+          syllabus_code: string
+          total_questions: number
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          answer_storage_path?: string | null
+          component: string
+          created_at?: string
+          id?: string
+          level: string
+          paper_code: string
+          question_storage_path?: string | null
+          session: string
+          syllabus_code: string
+          total_questions?: number
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          answer_storage_path?: string | null
+          component?: string
+          created_at?: string
+          id?: string
+          level?: string
+          paper_code?: string
+          question_storage_path?: string | null
+          session?: string
+          syllabus_code?: string
+          total_questions?: number
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      theory_question_mappings: {
+        Row: {
+          created_at: string
+          end_page: number
+          id: string
+          question_number: number
+          shared_page_warning: boolean
+          start_page: number
+          theory_paper_id: string
+          updated_at: string
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          end_page: number
+          id?: string
+          question_number: number
+          shared_page_warning?: boolean
+          start_page: number
+          theory_paper_id: string
+          updated_at?: string
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          end_page?: number
+          id?: string
+          question_number?: number
+          shared_page_warning?: boolean
+          start_page?: number
+          theory_paper_id?: string
+          updated_at?: string
+          verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "theory_question_mappings_theory_paper_id_fkey"
+            columns: ["theory_paper_id"]
+            isOneToOne: false
+            referencedRelation: "theory_papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      theory_question_topics: {
+        Row: {
+          created_at: string
+          id: string
+          mapping_id: string
+          syllabus_topic_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mapping_id: string
+          syllabus_topic_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mapping_id?: string
+          syllabus_topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "theory_question_topics_mapping_id_fkey"
+            columns: ["mapping_id"]
+            isOneToOne: false
+            referencedRelation: "theory_question_mappings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "theory_question_topics_syllabus_topic_id_fkey"
+            columns: ["syllabus_topic_id"]
+            isOneToOne: false
+            referencedRelation: "syllabus_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      topic_practice_syllabus_map: {
+        Row: {
+          created_at: string
+          id: string
+          level: string
+          syllabus_topic_id: string
+          topic: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          level: string
+          syllabus_topic_id: string
+          topic: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          level?: string
+          syllabus_topic_id?: string
+          topic?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topic_practice_syllabus_map_syllabus_topic_id_fkey"
+            columns: ["syllabus_topic_id"]
+            isOneToOne: false
+            referencedRelation: "syllabus_topics"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       topicwise_mcq_answer_keys: {
         Row: {
@@ -641,15 +1177,75 @@ export type Database = {
         }
         Relationships: []
       }
+      user_activity: {
+        Row: {
+          activity_type: string
+          created_at: string
+          event_key: string
+          id: string
+          occurred_at: string
+          payload: Json
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          event_key: string
+          id?: string
+          occurred_at?: string
+          payload?: Json
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          event_key?: string
+          id?: string
+          occurred_at?: string
+          payload?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_explanation_counts: { Args: never; Returns: Json }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      account_type: "student" | "teacher"
+      app_role: "user" | "admin"
+      profile_grade: "igcse" | "as" | "a2"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -665,12 +1261,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -694,11 +1290,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -719,11 +1315,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -744,11 +1340,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -761,11 +1357,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -776,6 +1372,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      account_type: ["student", "teacher"],
+      app_role: ["user", "admin"],
+      profile_grade: ["igcse", "as", "a2"],
+    },
   },
 } as const

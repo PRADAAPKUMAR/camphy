@@ -1,11 +1,13 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, lazy, Suspense } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
-import PDFViewer from "@/components/PDFViewer";
+const PDFViewer = lazy(() => import("@/components/PDFViewer"));
 import MCQPanel from "@/components/MCQPanel";
 import ResultSummary from "@/components/ResultSummary";
 import Timer from "@/components/Timer";
+import ExplanationDialog from "@/components/ExplanationDialog";
+import { useExplanation } from "@/hooks/use-explanation";
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -22,73 +24,178 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useIsMobile } from "@/hooks/use-mobile";
+import MobileExamShell from "@/components/MobileExamShell";
+import { savePerformanceRecord } from "@/lib/performance-history";
+import { syllabusVersionForLevel } from "@/lib/syllabus";
+import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
+import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const TOTAL_QUESTIONS = 40;
+const CACHE_TTL = 30 * 60 * 1000;
+const cacheKey = (paperId: string) => `physicshq:answer-key:${paperId}`;
+
+const readCachedKey = (paperId?: string): Record<number, string> | undefined => {
+  if (!paperId) return undefined;
+  try {
+    const raw = sessionStorage.getItem(cacheKey(paperId));
+    if (!raw) return undefined;
+    const parsed = JSON.parse(raw) as { timestamp: number; answers: Record<string, string> };
+    if (!parsed?.timestamp || Date.now() - parsed.timestamp > CACHE_TTL) return undefined;
+    const map: Record<number, string> = {};
+    for (const [k, v] of Object.entries(parsed.answers ?? {})) map[Number(k)] = v;
+    return Object.keys(map).length ? map : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const writeCachedKey = (paperId: string, answers: Record<number, string>) => {
+  try {
+    sessionStorage.setItem(cacheKey(paperId), JSON.stringify({ timestamp: Date.now(), answers }));
+  } catch {
+    // ignore quota / privacy-mode failures
+  }
+};
 
 const ExamPage = () => {
   const { paperId } = useParams<{ paperId: string }>();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [score, setScore] = useState(0);
+  const [resultReady, setResultReady] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState<Record<number, string>>({});
+  const explanation = useExplanation(paperId ? { paper_id: paperId } : null);
 
   const { data: paper, isLoading: paperLoading } = useQuery({
     queryKey: ["paper", paperId],
     queryFn: async () => {
+      if (!paperId) throw new Error("Paper ID is required");
       const supabase = await getSupabase();
       const { data, error } = await supabase
         .from("papers")
         .select("*")
-        .eq("id", paperId!)
+        .eq("id", paperId)
         .single();
       if (error) throw error;
       return data;
     },
     enabled: !!paperId,
   });
+  useSyncGrade(paper?.level);
 
-  // Pre-fetch all answer keys for instant feedback
+  // Prefetch the whole key once so feedback on selection is instant.
   const { data: answerKeyMap } = useQuery({
-    queryKey: ["exam_answer_key", paperId],
+    queryKey: ["answer-key", paperId],
     queryFn: async () => {
       const supabase = await getSupabase();
-      const { data, error } = await supabase.functions.invoke("submit-exam", {
-        body: { paper_id: paperId, answers: {} },
+      const { data, error } = await supabase.functions.invoke("get-answer-key", {
+        body: { paper_id: paperId, kind: "paper" },
       });
       if (error) throw error;
-      const mapped: Record<number, string> = {};
-      for (const [k, v] of Object.entries(data.correct_answers as Record<string, string>)) {
-        mapped[Number(k)] = v;
+      const map: Record<number, string> = {};
+      for (const [k, v] of Object.entries((data?.correct_answers ?? {}) as Record<string, string>)) {
+        map[Number(k)] = v;
       }
-      return mapped;
+      if (paperId) writeCachedKey(paperId, map);
+      return map;
     },
     enabled: !!paperId,
     staleTime: Infinity,
+    initialData: () => readCachedKey(paperId),
   });
+
+  // The correct answer for a question is only revealed after the user commits
+  // an answer for that question.
+  const recordPerformance = useCallback((finalScore: number, key?: Record<number, string>) => {
+    if (!paperId || !paper) return;
+    savePerformanceRecord({
+      paperId,
+      paperCode: paper.paper_code ?? "Paper",
+      level: paper.level ?? "",
+      year: paper.year ?? null,
+      session: paper.session ?? null,
+      score: finalScore,
+      totalQuestions: TOTAL_QUESTIONS,
+      percentage: Math.round((finalScore / TOTAL_QUESTIONS) * 100),
+      completedAt: new Date().toISOString(),
+      practiceType: "paper",
+      syllabusVersion: syllabusVersionForLevel(paper.level),
+      questionResults: key
+        ? Object.fromEntries(
+            Object.entries(answers).map(([q, a]) => [Number(q), key[Number(q)] === a]),
+          )
+        : undefined,
+    });
+  }, [paperId, paper, answers]);
 
   const handleSelectAnswer = useCallback((question: number, option: string) => {
     if (isSubmitted || answers[question]) return;
     setAnswers((prev) => ({ ...prev, [question]: option }));
-    if (answerKeyMap?.[question]) {
-      setCorrectAnswers((prev) => ({ ...prev, [question]: answerKeyMap[question] }));
+    const known = answerKeyMap?.[question];
+    if (known) {
+      setCorrectAnswers((prev) => ({ ...prev, [question]: known }));
+      return;
     }
-  }, [isSubmitted, answers, answerKeyMap]);
+    (async () => {
+      try {
+        const supabase = await getSupabase();
+        const { data, error } = await supabase.functions.invoke("check-answer", {
+          body: { paper_id: paperId, question, answer: option },
+        });
+        if (error) throw error;
+        if (data?.correct_answer) {
+          setCorrectAnswers((prev) => ({ ...prev, [question]: data.correct_answer }));
+        }
+      } catch {
+        toast.error("Could not check that answer");
+      }
+    })();
+  }, [isSubmitted, answers, paperId, answerKeyMap]);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     if (isSubmitted) return;
     setIsSubmitted(true);
 
-    if (answerKeyMap) {
-      let s = 0;
-      for (const [q, userAns] of Object.entries(answers)) {
-        if (answerKeyMap[Number(q)] === userAns) s++;
-      }
-      setScore(s);
-      setCorrectAnswers(answerKeyMap);
-      toast.success(`Score: ${s}/${TOTAL_QUESTIONS}`);
+    if (Object.keys(answers).length === 0) {
+      setScore(0);
+      toast.info("No answers submitted");
+      return;
     }
-  }, [isSubmitted, answers, answerKeyMap]);
+
+    try {
+      const supabase = await getSupabase();
+      const { data, error } = await supabase.functions.invoke("submit-exam", {
+        body: { paper_id: paperId, answers },
+      });
+      if (error) throw error;
+      const mapped: Record<number, string> = {};
+      for (const [k, v] of Object.entries((data.correct_answers ?? {}) as Record<string, string>)) {
+        mapped[Number(k)] = v;
+      }
+      setCorrectAnswers(mapped);
+      setScore(data.score);
+      setResultReady(true);
+      recordPerformance(data.score, mapped);
+      toast.success(`Score: ${data.score}/${TOTAL_QUESTIONS}`);
+    } catch {
+      if (answerKeyMap) {
+        let s = 0;
+        for (const [q, a] of Object.entries(answers)) {
+          if (answerKeyMap[Number(q)] === a) s++;
+        }
+        setCorrectAnswers(answerKeyMap);
+        setScore(s);
+        setResultReady(true);
+        recordPerformance(s, answerKeyMap);
+        toast.success(`Score: ${s}/${TOTAL_QUESTIONS}`);
+      } else {
+        toast.error("Could not submit your answers");
+      }
+    }
+  }, [isSubmitted, answers, paperId, answerKeyMap, recordPerformance]);
 
   if (paperLoading) {
     return (
@@ -122,10 +229,85 @@ const ExamPage = () => {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">
         <p className="text-destructive font-medium">Paper not found</p>
-        <Button variant="outline" onClick={() => navigate("/papers")}>
+        <Button variant="outline" onClick={() => navigate("/")}> 
           Back to Papers
         </Button>
       </div>
+    );
+  }
+
+  const breadcrumb = (
+    <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild><Link to={gradeFromLevel(paper.level) ? gradePath(gradeFromLevel(paper.level) as "igcse" | "as" | "a2") : "/"}>Grade Home</Link></BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild><Link to={`/papers/${encodeURIComponent(paper.level)}`}>{normalizeGradeLabel(paper.level)}</Link></BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{paper.paper_code} — {paper.session} {paper.year}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+    </Breadcrumb>
+  );
+
+  const timerEl = (
+    <Timer
+      durationMinutes={paper.level.toUpperCase() === "AS LEVEL" ? 75 : 45}
+      onTimeUp={handleSubmit}
+      isRunning={!isSubmitted}
+    />
+  );
+
+  const pdfEl = (
+    <Suspense fallback={<Skeleton className="h-full w-full" />}>
+      <PDFViewer url={paper.pdf_url} />
+    </Suspense>
+  );
+
+  const resultPanel = isSubmitted && Object.keys(correctAnswers).length > 0 ? (
+    <ResultSummary
+      score={score}
+      totalQuestions={TOTAL_QUESTIONS}
+      answers={answers}
+      correctAnswers={correctAnswers}
+      onExplain={explanation.openExplanation}
+      paper={resultReady && Array.from({ length: TOTAL_QUESTIONS }, (_, i) => i + 1).every((q) => ["A", "B", "C", "D"].includes(correctAnswers[q])) ? paper : undefined}
+    />
+  ) : null;
+
+  const explanationDialog = (
+    <ExplanationDialog
+      open={explanation.open}
+      onOpenChange={explanation.setOpen}
+      question={explanation.question}
+      userAnswer={explanation.question ? answers[explanation.question] : undefined}
+      isLoading={explanation.isLoading}
+      data={explanation.data}
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        <MobileExamShell
+          breadcrumb={breadcrumb}
+          timer={timerEl}
+          pdf={pdfEl}
+          totalQuestions={TOTAL_QUESTIONS}
+          answers={answers}
+          correctAnswers={correctAnswers}
+          onSelectAnswer={handleSelectAnswer}
+          onSubmit={handleSubmit}
+          isSubmitted={isSubmitted}
+          onExplain={explanation.openExplanation}
+          resultPanel={resultPanel ?? undefined}
+        />
+        {explanationDialog}
+      </>
     );
   }
 
@@ -133,45 +315,18 @@ const ExamPage = () => {
     <div className="flex h-screen flex-col bg-background">
       {/* Top bar */}
       <div className="flex items-center justify-between border-b bg-card px-5 py-3 shadow-sm">
-        <div className="flex items-center gap-4">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to="/papers">Levels</Link></BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild><Link to={`/papers/${encodeURIComponent(paper.level)}`}>{paper.level}</Link></BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{paper.paper_code} — {paper.session} {paper.year}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-        <Timer
-          durationMinutes={paper.level.toUpperCase() === "AS LEVEL" ? 75 : 45}
-          onTimeUp={handleSubmit}
-          isRunning={!isSubmitted}
-        />
+        <div className="flex items-center gap-4">{breadcrumb}</div>
+        {timerEl}
       </div>
 
       {/* Split view */}
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         <ResizablePanel defaultSize={78} minSize={40}>
-          <PDFViewer url={paper.pdf_url} />
+          {pdfEl}
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={22} minSize={18}>
-          {isSubmitted && Object.keys(correctAnswers).length > 0 ? (
-            <ResultSummary
-              score={score}
-              totalQuestions={TOTAL_QUESTIONS}
-              answers={answers}
-              correctAnswers={correctAnswers}
-            />
-          ) : (
+          {resultPanel ?? (
             <MCQPanel
               totalQuestions={TOTAL_QUESTIONS}
               answers={answers}
@@ -179,10 +334,13 @@ const ExamPage = () => {
               onSelectAnswer={handleSelectAnswer}
               onSubmit={handleSubmit}
               isSubmitted={isSubmitted}
+              onExplain={explanation.openExplanation}
             />
           )}
         </ResizablePanel>
       </ResizablePanelGroup>
+
+      {explanationDialog}
     </div>
   );
 };

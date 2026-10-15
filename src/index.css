@@ -1,4 +1,12 @@
-/* Fonts loaded asynchronously via index.html */
+/* The supplied face is already oblique; expose it as the default face
+   without adding browser-synthesized slant or bold. */
+@font-face {
+  font-family: 'Avalon Demi Oblique';
+  src: url('https://physicshq.lovable.app/__l5e/assets-v1/d75495c9-f6a3-4814-843a-acb37ed934e0/avalon-demi-oblique.woff') format('woff');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;
@@ -31,6 +39,7 @@
     --destructive-foreground: 0 0% 100%;
 
     --success: 152 60% 42%;
+    --grade-green: 160 84% 39%;
     --success-foreground: 0 0% 100%;
 
     --border: 222 25% 24%;
@@ -48,8 +57,21 @@
     --sidebar-border: 222 25% 22%;
     --sidebar-ring: 217 91% 60%;
 
-    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-sans: 'Avalon Demi Oblique', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+    /* Colourful study palette (timetable / timers) */
+    --study-1: 217 91% 60%;
+    --study-2: 152 60% 45%;
+    --study-3: 25 95% 53%;
+    --study-4: 280 70% 65%;
+    --study-5: 340 80% 62%;
+    --study-6: 190 85% 52%;
+    --grade-accent: var(--primary);
+    --grade-accent-subtle: var(--grade-accent) / 0.1;
+    --grade-accent-border: var(--grade-accent) / 0.25;
+    --grade-foreground: var(--background);
+    --grade-glow: 0 8px 28px -12px hsl(var(--grade-accent) / 0.3);
   }
 }
 
@@ -61,10 +83,19 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
+    font-synthesis: none;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight;
+    letter-spacing: 0;
+  }
+  [data-grade="igcse"] { --grade-accent: var(--primary); }
+  [data-grade="as"] { --grade-accent: var(--study-3); }
+  [data-grade="a2"] { --grade-accent: var(--grade-green); }
+  [data-grade] {
+    --grade-accent-subtle: var(--grade-accent) / 0.1;
+    --grade-accent-border: var(--grade-accent) / 0.25;
+    --grade-glow: 0 8px 28px -12px hsl(var(--grade-accent) / 0.3);
   }
 }
 
@@ -87,6 +118,69 @@
     box-shadow: 0 12px 40px -8px hsl(217 91% 60% / 0.15), inset 0 1px 0 0 hsl(210 40% 96% / 0.08);
     -webkit-transform: translateY(-2px);
     transform: translateY(-2px);
+  }
+
+  .level-card-igcse { --level-accent: var(--primary); }
+  .level-card-as { --level-accent: var(--study-3); }
+  .level-card-a2 { --level-accent: var(--success); }
+
+  .level-card {
+    border-color: hsl(var(--level-accent) / 0.3);
+    box-shadow: 0 8px 32px -8px hsl(var(--level-accent) / 0.1), inset 0 1px 0 hsl(var(--foreground) / 0.05);
+  }
+
+  .grade-tile {
+    background: hsl(var(--card) / 0.65);
+    border: 1px solid hsl(var(--grade-accent-border));
+    box-shadow: var(--grade-glow);
+    transition: border-color 200ms, background 200ms, transform 200ms;
+  }
+  .grade-tile:hover {
+    border-color: hsl(var(--grade-accent) / 0.6);
+    background: hsl(var(--card) / 0.9);
+    transform: translateY(-2px);
+  }
+  .grade-crest {
+    color: hsl(var(--grade-accent));
+    background: hsl(var(--grade-accent-subtle));
+    border: 1px solid hsl(var(--grade-accent-border));
+    box-shadow: var(--grade-glow);
+  }
+  [data-grade] .glass-card-hover {
+    border-color: hsl(var(--grade-accent-border));
+  }
+  [data-grade] .glass-card-hover:hover {
+    border-color: hsl(var(--grade-accent) / 0.55);
+    box-shadow: var(--grade-glow);
+  }
+  [data-grade] [aria-current="page"] { color: hsl(var(--grade-accent)); }
+  @media (prefers-reduced-motion: reduce) {
+    .grade-tile:hover { transform: none; }
+  }
+
+  .level-card:hover {
+    border-color: hsl(var(--level-accent) / 0.6);
+    box-shadow: 0 12px 40px -8px hsl(var(--level-accent) / 0.2), inset 0 1px 0 hsl(var(--foreground) / 0.08);
+  }
+
+  .level-card:focus-visible {
+    outline-color: hsl(var(--level-accent));
+    --tw-ring-color: hsl(var(--level-accent));
+  }
+
+  .level-card-accent,
+  .level-card-icon {
+    color: hsl(var(--level-accent));
+  }
+
+  .level-card-icon {
+    border-color: hsl(var(--level-accent) / 0.25);
+    background: hsl(var(--level-accent) / 0.1);
+  }
+
+  .level-card:hover .level-card-icon {
+    background: hsl(var(--level-accent) / 0.2);
+    border-color: hsl(var(--level-accent) / 0.5);
   }
 
   .gradient-text {
@@ -115,15 +209,43 @@
   @keyframes fadeInUp {
     from {
       opacity: 0;
-      transform: translateY(8px);
+      transform: translate3d(0, 6px, 0) scale(0.985);
     }
     to {
       opacity: 1;
-      transform: translateY(0);
+      transform: translate3d(0, 0, 0) scale(1);
     }
   }
 
-  .page-transition {
-    animation: fadeInUp 0.5s ease-out;
+  /* Reverse of the tile zoom: destination shrinks back into place. */
+  @keyframes zoomOutIn {
+    from {
+      opacity: 0.7;
+      transform: translate3d(0, 0, 0) scale(1.03);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1);
+    }
   }
+
+  /* Purely visual reveal — the route is already rendering while this plays. */
+  .page-transition {
+    animation: fadeInUp 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform, opacity;
+  }
+
+  .page-transition-back {
+    animation: zoomOutIn 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform, opacity;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page-transition,
+    .page-transition-back {
+      animation: none;
+      will-change: auto;
+    }
+  }
+
 }

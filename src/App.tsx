@@ -1,9 +1,22 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
 import { usePageTransition } from "@/hooks/use-page-transition";
+import RunningTimerBar from "@/components/study/RunningTimerBar";
+import SiteNav from "@/components/SiteNav";
+import { GradeProvider } from "@/contexts/GradeContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProgressMergePrompt from "@/components/ProgressMergePrompt";
+import { useAuth } from "@/contexts/AuthContext";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import AppErrorBoundary from "@/components/AppErrorBoundary";
+import { HelmetProvider } from "react-helmet-async";
+import PageMetadata from "@/components/PageMetadata";
+import { gradeFromLevel, isGradeKey } from "@/lib/grades";
+import { useSelectedGrade } from "@/contexts/GradeContext";
 
-const TooltipProvider = lazy(() => import("@/components/ui/tooltip").then(m => ({ default: m.TooltipProvider })));
+const SpeedInsights = lazy(() => import("@vercel/speed-insights/react").then(m => ({ default: m.SpeedInsights })));
+const Analytics = lazy(() => import("@vercel/analytics/react").then(m => ({ default: m.Analytics })));
 const Toaster = lazy(() => import("@/components/ui/toaster").then(m => ({ default: m.Toaster })));
 const Sonner = lazy(() => import("@/components/ui/sonner").then(m => ({ default: m.Toaster })));
 
@@ -17,7 +30,28 @@ const DriveViewerPage = lazy(() => import("./pages/DriveViewerPage"));
 const TopicPracticePage = lazy(() => import("./pages/TopicPracticePage"));
 const TopicLevelPage = lazy(() => import("./pages/TopicLevelPage"));
 const TopicExamPage = lazy(() => import("./pages/TopicExamPage"));
+const TopicalMcqPage = lazy(() => import("./pages/TopicalMcqPage"));
+const TopicalMcqLevelPage = lazy(() => import("./pages/TopicalMcqLevelPage"));
+const TopicalMcqSessionPage = lazy(() => import("./pages/TopicalMcqSessionPage"));
 const TopicTheoryPage = lazy(() => import("./pages/TopicTheoryPage"));
+const TheoryPapersPage = lazy(() => import("./pages/TheoryPapersPage"));
+const TheoryLevelPage = lazy(() => import("./pages/TheoryLevelPage"));
+const TheoryPaperPage = lazy(() => import("./pages/TheoryPaperPage"));
+const TheoryTopicalPdfPage = lazy(() => import("./pages/TheoryTopicalPdfPage"));
+const AboutPage = lazy(() => import("./pages/AboutPage"));
+const StudyToolsPage = lazy(() => import("./pages/StudyToolsPage"));
+const PerformancePage = lazy(() => import("./pages/PerformancePage"));
+const QuestionModePage = lazy(() => import("./pages/QuestionModePage"));
+const AdminUploadPage = lazy(() => import("./pages/AdminUploadPage"));
+const WorksheetGeneratorPage = lazy(() => import("./pages/WorksheetGeneratorPage"));
+const GradeDashboardPage = lazy(() => import("./pages/GradeDashboardPage"));
+const GradeSectionRedirect = lazy(() => import("./pages/GradeSectionRedirect"));
+const ClassroomQuizPage = lazy(() => import("./pages/ClassroomQuizPage"));
+const AuthPage = lazy(() => import("./pages/AuthPage"));
+const AuthCallbackPage = lazy(() => import("./pages/AuthCallbackPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -45,6 +79,8 @@ const DeferredShell = () => {
     <Suspense fallback={null}>
       <Toaster />
       <Sonner />
+      <SpeedInsights />
+      <Analytics />
     </Suspense>
   );
 };
@@ -52,8 +88,29 @@ const DeferredShell = () => {
 /** Router wrapper to enable page transitions */
 const RouterContent = () => {
   usePageTransition();
+  const { pathname } = useLocation();
+  const { user, profile } = useAuth();
+  const { grade: selectedGrade } = useSelectedGrade();
+  const [section, level] = pathname.split("/").filter(Boolean);
+  const pageGrade = ["grade", "worksheet-generator", "performance", "classroom-quiz"].includes(section ?? "") && isGradeKey(level)
+    ? level.toLowerCase()
+    : ["papers", "theory-papers", "theory-topical", "materials", "topic-practice", "topical-mcq"].includes(section ?? "")
+      ? gradeFromLevel(level)
+      : ["theory-paper", "exam", "question-mode", "topic-exam", "topic-theory", "view-drive"].includes(section ?? "") ? selectedGrade : null;
+  const navExcluded =
+    /^\/(exam|question-mode|topic-exam)\//.test(pathname) ||
+    /^\/topical-mcq\/[^/]+\/[^/]+\/?$/.test(pathname) ||
+    pathname.startsWith("/classroom-quiz/") ||
+    pathname === "/view-drive" ||
+    pathname.startsWith("/topic-theory/");
 
   return (
+    <>
+    <PageMetadata />
+    <a href="#page-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-3 focus:text-primary-foreground">Skip to content</a>
+    {user && profile && !profile.setup_completed && pathname !== "/profile" && !pathname.startsWith("/auth") && <Navigate to="/profile" replace />}
+    {!navExcluded && <SiteNav />}
+    <div id="page-content" tabIndex={-1} data-grade={pageGrade ?? undefined}>
     <Suspense fallback={
       <div className="min-h-screen bg-background">
         <div className="border-b border-border/40">
@@ -83,33 +140,66 @@ const RouterContent = () => {
     }>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/papers" element={<Index />} />
+        <Route path="/index" element={<Navigate to="/" replace />} />
+        <Route path="/grade/:grade" element={<GradeDashboardPage />} />
+        <Route path="/papers" element={<GradeSectionRedirect section="mcq" />} />
         <Route path="/papers/:level" element={<SubjectPage />} />
         <Route path="/exam/:paperId" element={<ExamPage />} />
-        <Route path="/materials" element={<MaterialsPage />} />
+        <Route path="/question-mode/:paperId" element={<QuestionModePage />} />
+        <Route path="/admin/upload" element={<AdminUploadPage />} />
+        <Route path="/worksheet-generator" element={<GradeSectionRedirect section="worksheet" />} />
+        <Route path="/worksheet-generator/:grade" element={<WorksheetGeneratorPage />} />
+        <Route path="/classroom-quiz/:grade" element={<ClassroomQuizPage />} />
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/materials" element={<GradeSectionRedirect section="materials" />} />
         <Route path="/materials/:level" element={<MaterialsLevelPage />} />
         <Route path="/view-drive" element={<DriveViewerPage />} />
-        <Route path="/topic-practice" element={<TopicPracticePage />} />
+        <Route path="/topic-practice" element={<GradeSectionRedirect section="practice" />} />
         <Route path="/topic-practice/:level" element={<TopicLevelPage />} />
         <Route path="/topic-exam/:paperId" element={<TopicExamPage />} />
+        <Route path="/topical-mcq" element={<TopicalMcqPage />} />
+        <Route path="/topical-mcq/:level" element={<TopicalMcqLevelPage />} />
+        <Route path="/topical-mcq/:level/:topicSlug" element={<TopicalMcqSessionPage />} />
         <Route path="/topic-theory/:questionId" element={<TopicTheoryPage />} />
+        <Route path="/theory-papers" element={<GradeSectionRedirect section="theory" />} />
+        <Route path="/theory-papers/:level" element={<TheoryLevelPage />} />
+        <Route path="/theory-paper/:paperId" element={<TheoryPaperPage />} />
+        <Route path="/theory-topical/:level" element={<TheoryTopicalPdfPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/study-tools" element={<StudyToolsPage />} />
+        <Route path="/performance" element={<GradeSectionRedirect section="performance" />} />
+        <Route path="/performance/:grade" element={<PerformancePage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
+    </div>
+      <RunningTimerBar />
+    </>
   );
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <Suspense fallback={null}>
+  <AppErrorBoundary>
+    <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <DeferredShell />
         <BrowserRouter>
-          <RouterContent />
+          <AuthProvider>
+            <GradeProvider>
+              <RouterContent />
+              <ProgressMergePrompt />
+            </GradeProvider>
+          </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
-    </Suspense>
-  </QueryClientProvider>
+    </QueryClientProvider>
+    </HelmetProvider>
+  </AppErrorBoundary>
 );
 
 export default App;

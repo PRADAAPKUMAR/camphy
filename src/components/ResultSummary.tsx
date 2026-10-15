@@ -1,8 +1,10 @@
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CircleCheck, CircleX, Undo2, Award } from "lucide-react";
+import { CircleCheck, CircleX, Undo2, Award, Lightbulb } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import GradeBoundaryEstimate from "@/components/GradeBoundaryEstimate";
+import type { BoundaryPaper } from "@/lib/grade-boundaries";
 
 const OPTIONS = ["A", "B", "C", "D"] as const;
 
@@ -11,14 +13,16 @@ interface ResultSummaryProps {
   totalQuestions: number;
   answers: Record<number, string>;
   correctAnswers: Record<number, string>;
+  onExplain?: (question: number) => void;
+  paper?: BoundaryPaper;
 }
 
-const ResultRow = memo(({ q, userAnswer, correct }: { q: number; userAnswer: string | undefined; correct: string | undefined }) => {
-  const isCorrect = userAnswer === correct;
+const ResultRow = memo(({ q, userAnswer, correct, onExplain }: { q: number; userAnswer: string | undefined; correct: string | undefined; onExplain?: (question: number) => void }) => {
+  const isCorrect = Boolean(userAnswer && correct && userAnswer === correct);
 
   return (
     <div
-      className={`flex items-center gap-3 rounded-lg px-3 py-2 ${
+      className={`flex items-center gap-1 rounded-lg px-2 py-2 ${
         isCorrect
           ? "bg-success/5"
           : userAnswer
@@ -29,7 +33,7 @@ const ResultRow = memo(({ q, userAnswer, correct }: { q: number; userAnswer: str
       <span className="w-7 text-right text-xs font-bold tabular-nums text-muted-foreground">
         {q}
       </span>
-      <div className="flex gap-1.5">
+      <div className="flex gap-1">
         {OPTIONS.map((opt) => {
           const isCorrectOpt = opt === correct;
           const isUserWrong = opt === userAnswer && !isCorrect;
@@ -37,7 +41,7 @@ const ResultRow = memo(({ q, userAnswer, correct }: { q: number; userAnswer: str
           return (
             <div
               key={opt}
-              className={`flex h-8 w-9 items-center justify-center rounded-md text-xs font-semibold border transition-all ${
+              className={`flex h-8 w-8 items-center justify-center rounded-md text-xs font-semibold border transition-all ${
                 isCorrectOpt
                   ? "bg-success text-success-foreground border-success shadow-sm"
                   : isUserWrong
@@ -50,13 +54,24 @@ const ResultRow = memo(({ q, userAnswer, correct }: { q: number; userAnswer: str
           );
         })}
       </div>
-      <span className="ml-auto">
+      <span className="ml-auto flex items-center gap-1">
         {isCorrect ? (
            <CircleCheck className="h-4 w-4 text-success" />
          ) : userAnswer ? (
            <CircleX className="h-4 w-4 text-destructive" />
         ) : (
           <span className="text-xs text-muted-foreground">—</span>
+        )}
+        {onExplain && (
+          <Button variant="ghost"
+            type="button"
+            onClick={() => onExplain(q)}
+            title={`Explanation for question ${q}`}
+            aria-label={`Explanation for question ${q}`}
+            className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors hover:bg-primary/25"
+          >
+            <Lightbulb className="h-3.5 w-3.5" />
+          </Button>
         )}
       </span>
     </div>
@@ -70,6 +85,8 @@ const ResultSummary = memo(({
   totalQuestions,
   answers,
   correctAnswers,
+  onExplain,
+  paper,
 }: ResultSummaryProps) => {
   const navigate = useNavigate();
   const percentage = Math.round((score / totalQuestions) * 100);
@@ -102,7 +119,8 @@ const ResultSummary = memo(({
       </div>
 
       {/* Answer review */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="min-h-0 flex-1">
+        {paper && <GradeBoundaryEstimate paper={paper} score={score} totalQuestions={totalQuestions} />}
         <div className="space-y-0.5 p-4">
           {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((q) => (
             <ResultRow
@@ -110,6 +128,7 @@ const ResultSummary = memo(({
               q={q}
               userAnswer={answers[q]}
               correct={correctAnswers[q]}
+              onExplain={onExplain}
             />
           ))}
         </div>
