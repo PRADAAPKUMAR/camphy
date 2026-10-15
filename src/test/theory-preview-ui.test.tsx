@@ -1,0 +1,30 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import TheoryTopicalPdfPage from "@/pages/TheoryTopicalPdfPage";
+import { createTheoryTopicalPdf } from "@/lib/theory-topical-pdf";
+const question = {mapping_id:"q1",paper_id:"p1",question_number:1,start_page:2,end_page:3,shared_page_warning:true,paper_code:"9702/22",session:"May/June",year:2025,question_url:"https://example.invalid/paper.pdf",topics:[{id:"topic",topic_code:"1",topic_name:"Waves"}]};
+vi.mock("@/integrations/supabase/client",()=>({supabase:{functions:{invoke:vi.fn(async()=>({data:{questions:[question],topics:question.topics},error:null}))}}}));
+vi.mock("@/hooks/use-sync-grade",()=>({useSyncGrade:()=>undefined}));
+vi.mock("@/hooks/use-syllabus",()=>({useTopicsByIds:()=>({data:{topics:{topic:{id:"topic",topic_code:"1",topic_name:"Waves",parent_topic_id:null}}},isLoading:false})}));
+vi.mock("@/lib/theory-topical-pdf",()=>({createTheoryQuestionPreview:vi.fn(async()=>new Blob()),createTheoryTopicalPdf:vi.fn(async()=>undefined)}));
+vi.mock("@/components/theory/PdfPagePreview",()=>({default:()=> <div>Question PDF pages</div>}));
+beforeEach(()=>{cleanup();vi.clearAllMocks();vi.stubGlobal("URL",Object.assign(URL,{createObjectURL:vi.fn(()=>"blob:preview"),revokeObjectURL:vi.fn()}));});
+describe("theory browsing preview",()=>{
+  it("previews without selecting and adds the same mapping once to the generated PDF",async()=>{
+    render(<MemoryRouter initialEntries={["/theory-topical/AS%20LEVEL"]}><QueryClientProvider client={new QueryClient()}><Routes><Route path="/theory-topical/:level" element={<TheoryTopicalPdfPage/>}/></Routes></QueryClientProvider></MemoryRouter>);
+    fireEvent.click(await screen.findByRole("button",{name:/1 Waves/}));
+    fireEvent.click(screen.getByRole("button",{name:"Preview 9702/22 Q1"}));
+    await screen.findByText("Question PDF pages");
+    expect(screen.getByText("0 selected")).toBeInTheDocument();
+    expect(screen.getByText(/This question shares pages/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button",{name:"Add to your PDF"}));
+    expect(screen.getByRole("button",{name:"Already in your PDF"})).toBeDisabled();
+    fireEvent.click(screen.getByRole("button",{name:"Close"}));
+    expect(screen.getByText("1 selected")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button",{name:"Create theory PDF"}));
+    await waitFor(() => expect(createTheoryTopicalPdf).toHaveBeenCalledWith([question]));
+    await waitFor(() => expect(screen.getByRole("button", {name:"Create theory PDF"})).not.toBeDisabled());
+  });
+});

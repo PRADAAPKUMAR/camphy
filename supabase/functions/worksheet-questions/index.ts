@@ -191,6 +191,11 @@ Deno.serve(async (req) => {
           )
           .map((r: any) => ({ paper_id: r.paper_id, question_number: Number(r.question_number) }))
       : [];
+    const excludedRefs = new Set<string>(
+      (Array.isArray(body.exclude_refs) ? body.exclude_refs.slice(0, MAX_COUNT) : [])
+        .filter((ref: Ref) => ref && typeof ref.paper_id === "string" && Number.isInteger(ref.question_number))
+        .map((ref: Ref) => `${ref.paper_id}:${ref.question_number}`),
+    );
     const requested = Math.min(MAX_COUNT, Math.max(1, Number(body.count) || 20));
     const shuffle = body.shuffle === true;
 
@@ -327,7 +332,7 @@ Deno.serve(async (req) => {
     const seen = new Set<string>();
     candidates = candidates.filter((c) => {
       const k = `${c.paper_id}:${c.question_number}`;
-      if (seen.has(k)) return false;
+      if (seen.has(k) || excludedRefs.has(k)) return false;
       seen.add(k);
       return true;
     });

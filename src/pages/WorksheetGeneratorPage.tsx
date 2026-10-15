@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -11,6 +11,9 @@ import {
   Loader2,
   Shuffle,
   Sparkles,
+  Save,
+  RefreshCw,
+  Trash2,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -50,6 +53,8 @@ import {
   type WorksheetSource,
 } from "@/lib/worksheet";
 
+import { questionKey, questionRef, readSavedWorksheets, renumberWorksheet, writeSavedWorksheets, type SavedWorksheetSelection } from "@/lib/worksheet-selections";
+
 const LEVELS = [
   { value: "IGCSE", label: "IGCSE Physics 0625" },
   { value: "AS LEVEL", label: "AS Level Physics 9702" },
@@ -86,6 +91,8 @@ const WorksheetGeneratorPage = () => {
   const [worksheetName, setWorksheetName] = useState("");
   const [showTotalMarks, setShowTotalMarks] = useState(true);
 
+  const requestId = useRef(0);
+  const [savedSelections, setSavedSelections] = useState(readSavedWorksheets);
   const [selection, setSelection] = useState<WorksheetSelection | null>(null);
   const [loaded, setLoaded] = useState<LoadedImage[] | null>(null);
   const [failed, setFailed] = useState<{ paper_code: string; question_number: number }[]>([]);
@@ -93,11 +100,15 @@ const WorksheetGeneratorPage = () => {
   const [progress, setProgress] = useState<string | null>(null);
 
   useEffect(() => {
+    requestId.current += 1;
+    setBusy(false);
+    setProgress(null);
     setPicked([]);
     setExpanded({});
     setSelection(null);
     setLoaded(null);
     setFailed([]);
+    return () => { requestId.current += 1; };
   }, [level]);
 
   const { data: topicGroups, isLoading: topicsLoading } = useQuery({
@@ -184,6 +195,7 @@ const WorksheetGeneratorPage = () => {
       toast.error("No wrong questions saved yet — attempt a paper in Question mode first");
       return;
     }
+    const request = requestId.current;
     setBusy(true);
     reset();
     setProgress("Selecting questions…");
@@ -196,6 +208,7 @@ const WorksheetGeneratorPage = () => {
         count: effectiveCount,
         shuffle,
       });
+      if (request !== requestId.current) return;
       if (result.error) {
         toast.error(result.error);
         return;
@@ -215,6 +228,7 @@ const WorksheetGeneratorPage = () => {
       const { loaded: ok, failed: bad } = await loadWorksheetImages(usable, (done, total) =>
         setProgress(`Loading question images… ${done}/${total}`),
       );
+      if (request !== requestId.current) return;
       // Renumber sequentially over what actually loaded.
       const renumbered = ok.map((entry, i) => ({
         ...entry,
@@ -224,11 +238,91 @@ const WorksheetGeneratorPage = () => {
       setFailed(bad.map((b) => ({ paper_code: b.paper_code, question_number: b.question_number })));
       if (renumbered.length) toast.success(`Worksheet ready — ${renumbered.length} questions`);
     } catch {
+      if (request !== requestId.current) return;
       toast.error("Could not build the worksheet");
     } finally {
-      setBusy(false);
-      setProgress(null);
+      if (request === requestId.current) { setBusy(false); setProgress(null); }
     }
+  };
+
+  const removeQuestion = (index: number) => {
+    setLoaded((current) => current ? renumberWorksheet(current.filter((_, i) => i !== index)) : current);
+  };
+
+  const replaceQuestion = async (index: number) => {
+    if (!loaded || busy) return;
+    const request = requestId.current;
+    setBusy(true);
+    setProgress(`Replacing question ${index + 1}…`);
+    try {
+      const result = await fetchWorksheetSelection({
+        level, source, count: 1, shuffle: true,
+        topic_ids: source === "topic" ? selectedTopicIds : [],
+        refs: source === "mistakes" ? mistakeRefs : [],
+        exclude_refs: loaded.map(({ item }) => questionRef(item)),
+      });
+      if (request !== requestId.current) return;
+      if (result.error) throw new Error(result.error);
+      const existing = new Set(loaded.map(({ item }) => questionKey(item)));
+      const candidate = result.items.find((item) => !existing.has(questionKey(item)) && item.image_url && item.correct_answer);
+      if (!candidate) throw new Error("No different question is available in this selection. Try another topic or source.");
+      const replacement = await loadWorksheetImages([candidate]);
+      if (request !== requestId.current) return;
+      if (!replacement.loaded.length) throw new Error("The replacement image could not be loaded. Your original question is unchanged.");
+      setLoaded(renumberWorksheet(loaded.map((entry, i) => i === index ? replacement.loaded[0] : entry)));
+      toast.success(`Question ${index + 1} replaced`);
+    } catch (error) {
+      if (request !== requestId.current) return;
+      toast.error(error instanceof Error ? error.message : "Could not replace this question");
+    } finally { if (request === requestId.current) { setBusy(false); setProgress(null); } }
+  };
+
+  const saveSelection = () => {
+    if (!loaded?.length) return;
+    const saved: SavedWorksheetSelection = {
+      id: crypto.randomUUID(), name: resolvedWorksheetName, level, savedAt: new Date().toISOString(),
+      source, topics: picked, refs: loaded.map(({ item }) => questionRef(item)), includeSources, showTotalMarks,
+    };
+    const next = [saved, ...savedSelections].slice(0, 20);
+    try { writeSavedWorksheets(next); setSavedSelections(next); toast.success("Selection saved on this device"); }
+    catch { toast.error("Could not save on this device. Your worksheet is still available."); }
+  };
+
+  const restoreSelection = async (saved: SavedWorksheetSelection) => {
+    if (busy) return;
+    const request = requestId.current;
+    setBusy(true);
+    setProgress("Restoring saved questions…");
+    try {
+      // Re-resolve stable references to fresh signed images and current answer keys.
+      const result = await fetchWorksheetSelection({ level, source: "mistakes", refs: saved.refs, count: saved.refs.length, shuffle: false });
+      if (request !== requestId.current) return;
+      if (result.error) throw new Error(result.error);
+      const order = new Map(saved.refs.map((ref, index) => [questionKey(ref), index]));
+      const items = result.items.filter((item) => order.has(questionKey(item)))
+        .sort((a, b) => order.get(questionKey(a))! - order.get(questionKey(b))!)
+        .map((item, index) => ({ ...item, worksheet_number: index + 1 }));
+      const images = await loadWorksheetImages(items);
+      if (request !== requestId.current) return;
+      if (!images.loaded.length) throw new Error("These saved questions are currently unavailable. Your current worksheet is unchanged.");
+      setSource(saved.source); setPicked(saved.topics); setWorksheetName(saved.name);
+      setIncludeSources(saved.includeSources); setShowTotalMarks(saved.showTotalMarks);
+      setCount(saved.refs.length); setCustomCount(COUNTS.includes(saved.refs.length) ? "" : String(saved.refs.length)); setShuffle(false);
+      setSelection(result); setLoaded(renumberWorksheet(images.loaded));
+      setFailed(images.failed.map(({ paper_code, question_number }) => ({ paper_code, question_number })));
+      if (images.loaded.length < saved.refs.length) toast.warning(`Restored ${images.loaded.length} of ${saved.refs.length} questions; some are unavailable.`);
+      else toast.success("Saved selection restored");
+    } catch (error) {
+      if (request !== requestId.current) return;
+      toast.error(error instanceof Error ? error.message : "Could not restore this selection");
+    }
+    finally { if (request === requestId.current) { setBusy(false); setProgress(null); } }
+  };
+
+  const deleteSelection = (id: string) => {
+    const next = savedSelections.filter((saved) => saved.id !== id);
+    try { writeSavedWorksheets(next); setSavedSelections(next); }
+    catch { toast.error("Could not delete the saved selection"); }
   };
 
   const download = async (kind: "worksheet" | "key") => {
@@ -296,7 +390,7 @@ const WorksheetGeneratorPage = () => {
 
       <main className="container grid gap-6 py-8 lg:grid-cols-[1.1fr_1fr]">
         {/* ---------------- settings ---------------- */}
-        <section className="glass-card space-y-5 rounded-2xl p-5 sm:p-6">
+        <fieldset disabled={busy} className="glass-card min-w-0 space-y-5 rounded-2xl p-5 sm:p-6">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>Level</Label>
@@ -542,11 +636,24 @@ const WorksheetGeneratorPage = () => {
             Option order (A–D) is always preserved exactly as printed by Cambridge — original question
             images are used unmodified.
           </p>
-        </section>
+        </fieldset>
 
         {/* ---------------- preview ---------------- */}
         <section className="glass-card space-y-4 rounded-2xl p-5 sm:p-6">
-          <h2 className="text-lg font-semibold">Preview</h2>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div><h2 className="text-lg font-semibold">Worksheet preview</h2><p className="mt-1 text-xs text-muted-foreground">Review the original questions before opening your PDF.</p></div>
+            <Button variant="outline" size="sm" className="gap-2" disabled={busy || !loaded?.length} onClick={saveSelection}><Save className="h-4 w-4" />Save selection</Button>
+          </div>
+          <p role="status" className="text-sm text-muted-foreground">{busy ? progress ?? "Preparing PDF…" : loaded ? `${loaded.length} questions in your worksheet` : ""}</p>
+          {savedSelections.some((saved) => saved.level === level) && <details className="rounded-xl border border-border/40 p-3">
+            <summary className="cursor-pointer text-sm font-medium">Saved selections ({savedSelections.filter((saved) => saved.level === level).length})</summary>
+            <p className="mt-2 text-xs text-muted-foreground">Saved on this device. Loading refreshes question images and answer keys.</p>
+            <ul className="mt-3 space-y-2">{savedSelections.filter((saved) => saved.level === level).map((saved) => <li key={saved.id} className="flex flex-wrap items-center gap-2 border-t border-border/30 pt-2">
+              <span className="min-w-0 flex-1 break-words text-sm">{saved.name}<span className="block text-xs text-muted-foreground">{saved.refs.length} questions · {new Date(saved.savedAt).toLocaleDateString()}</span></span>
+              <Button variant="outline" size="sm" disabled={busy} onClick={() => restoreSelection(saved)}>Load<span className="sr-only"> {saved.name}</span></Button>
+              <Button variant="ghost" size="icon" disabled={busy} aria-label={`Delete saved selection ${saved.name}`} onClick={() => deleteSelection(saved.id)}><Trash2 className="h-4 w-4" /></Button>
+            </li>)}</ul>
+          </details>}
 
           {!selection && !loaded && (
             <p className="text-sm text-muted-foreground">
@@ -559,7 +666,7 @@ const WorksheetGeneratorPage = () => {
               <div className="flex flex-wrap gap-2">
                 <Badge variant="outline">Eligible pool: {selection.pool_size}</Badge>
                 <Badge variant="outline">
-                  Questions ready: {loaded?.length ?? 0} / {selection.items.length}
+                  Questions ready: {loaded?.length ?? 0}
                 </Badge>
               </div>
               <p className="text-muted-foreground">{sourceLabel}</p>
@@ -614,18 +721,19 @@ const WorksheetGeneratorPage = () => {
                 </div>
               )}
 
-              {!!loaded?.length && (
-                <div className="max-h-64 overflow-y-auto rounded-xl border border-border/40 p-3 text-xs text-muted-foreground">
-                  {loaded.map((l) => (
-                    <div key={`${l.item.paper_id}-${l.item.question_number}`} className="flex justify-between gap-3 py-0.5">
-                      <span>Q{l.item.worksheet_number}</span>
-                      <span className="truncate">
-                        {l.item.paper_code} {l.item.session} {l.item.year} · Q{l.item.question_number}
-                      </span>
+              {loaded !== null && !loaded.length && <p className="rounded-xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground">All questions removed. Generate a new worksheet or load a saved selection.</p>}
+              {!!loaded?.length && <div className="max-h-[75dvh] space-y-4 overflow-y-auto pr-1" aria-label="Question previews">
+                {loaded.map((entry, index) => <article key={questionKey(entry.item)} className="overflow-hidden rounded-xl border border-border/50 bg-background/40">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/40 p-3">
+                    <div className="min-w-0"><h3 className="text-sm font-semibold">Question {index + 1}</h3><p className="break-words text-xs text-muted-foreground">{entry.item.paper_code} · {entry.item.session} {entry.item.year} · Original Q{entry.item.question_number}</p>{entry.item.topic_name && <p className="text-xs text-grade">{entry.item.topic_name}</p>}</div>
+                    <div className="flex gap-1">
+                      <Button variant="outline" size="sm" disabled={busy} aria-label={`Replace question ${index + 1}`} onClick={() => replaceQuestion(index)} className="gap-1"><RefreshCw className="h-3.5 w-3.5" />Replace</Button>
+                      <Button variant="ghost" size="sm" disabled={busy} aria-label={`Remove question ${index + 1}`} onClick={() => removeQuestion(index)} className="gap-1"><X className="h-3.5 w-3.5" />Remove</Button>
                     </div>
-                  ))}
-                </div>
-              )}
+                  </div>
+                  <div className="bg-white p-3"><img src={entry.dataUrl} alt={`Worksheet question ${index + 1}, ${entry.item.paper_code}, original question ${entry.item.question_number}`} width={entry.width} height={entry.height} className="h-auto w-full" /></div>
+                </article>)}
+              </div>}
             </div>
           )}
         </section>

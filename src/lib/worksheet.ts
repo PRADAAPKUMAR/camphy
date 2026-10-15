@@ -52,6 +52,8 @@ export interface WorksheetRequest {
   refs?: { paper_id: string; question_number: number }[];
   count: number;
   shuffle: boolean;
+  /** Existing questions to exclude when replacing a preview item. */
+  exclude_refs?: { paper_id: string; question_number: number }[];
 }
 
 
