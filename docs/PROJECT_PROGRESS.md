@@ -9,7 +9,7 @@
 
 ## Scope decision (2026-10-15)
 
-**IGCSE topic-mapping verification and correction is explicitly out of scope until the user requests it again.** Do not investigate, correct, add, or re-audit IGCSE question-topic mappings. Preserve existing IGCSE database rows and verification flags. Historical IGCSE mapping counts below are context only, not actionable work items. AS/A Level mapping quality and original-paper verification remain in scope. IGCSE explanations and assets are separate workstreams, not part of this mapping decision.
+**Only one specific missing IGCSE mapping is intentionally excluded:** IGCSE June 2024, EXTENDED MCQ-V1, question 14. Do not add or repair that single mapping unless the user asks. **All other IGCSE topic-mapping verification, correction, and audits remain in scope**, alongside AS and A Level. Preserve the excluded question's current state.
 
 ## Current database status
 
@@ -34,13 +34,13 @@
 
 ## Quality risks and follow-up
 
-1. **Out of scope — IGCSE mapping:** The missing June 2024, EXTENDED MCQ-V1, Q14 mapping is documented for historical awareness only. Do not action it unless the user explicitly reopens IGCSE mapping work.
+1. **Exception — one IGCSE question only:** Ignore the missing mapping for June 2024, EXTENDED MCQ-V1, Q14. Continue normal verification and corrections for all other IGCSE questions.
 2. **High priority — Independently validate mapping audit:** The previous 364 mismatch proposals included demonstrably inappropriate topic swaps (e.g., dimensional analysis moved to equations of motion, collision to density and pressure). They were changed to MATCH on 2026-10-15; inspect original question material and maintain traceable evidence before declaring the audit independently complete.
 3. **High priority — Restore 16 AS 2026 image records/files:** Then compare mapped topics against the original questions rather than explanations alone.
 4. **Medium priority — Fill 1,680 missing IGCSE MCQ explanations:** Use Cambridge-level, question-specific reasoning, correct-option justification, and common distractor misconceptions.
 5. **Medium priority — Recheck theory source-file availability:** Earlier audit found 133 verified theory mappings whose source PDFs were absent from the expected private bucket. This specific storage count was not rechecked in the 2026-10-15 query.
-6. **Medium priority — Audit unreviewed AS/A Level mappings only:** Filter pending audit entries and missing audit records to AS/A Level; exclude all IGCSE mapping work. Treat database verified flags separately from original-paper verification.
-7. **Operational:** Check that the AS/A Level topical-bank UI correctly shows newly verified mappings and excludes nothing due to stale caches or frontend filtering.
+6. **Medium priority — Audit unreviewed mappings across IGCSE, AS and A Level:** Continue auditing pending entries and mappings without audit records, excluding only the single IGCSE June 2024 Extended V1 Q14 exception. Treat database verified flags separately from original-paper verification.
+7. **Operational:** Check that the IGCSE, AS and A Level topical-bank UI correctly shows verified mappings and excludes nothing due to stale caches or frontend filtering (apart from the explicitly ignored IGCSE question).
 
 ## Changes and provenance
 
