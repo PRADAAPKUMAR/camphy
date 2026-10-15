@@ -1,9 +1,9 @@
 # Grade-first navigation
 
 # Cambridge component grade predictor
-- [ ] Curate verified official Physics MCQ component thresholds with source links
-- [ ] Integrate component estimates, threshold scale and next-grade marks into full past-paper results
-- [ ] Verify exact matching, boundaries, missing-data and retry-set safeguards, plus real completed-paper flow
+- [x] Curate verified official Physics MCQ component thresholds with source links (2024–2025 May/June and Oct/Nov; IGCSE Extended and AS)
+- [x] Integrate component estimates, threshold scale and next-grade marks into full past-paper results
+- [x] Verify exact matching, boundaries, missing-data and retry-set safeguards, plus real completed-paper flow
 
 # Professional grade identity
 - [x] Refine homepage level cards and grade home action tiles
