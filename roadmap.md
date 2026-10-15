@@ -1,5 +1,10 @@
 # Grade-first navigation
 
+# Past-paper pacing analysis
+- [ ] Track active question visits in both MCQ modes and retain timings in progress
+- [ ] Add post-exam pace targets, fastest/slowest questions and over-two-minute highlights
+- [ ] Verify regression tests and both real past-paper result flows
+
 # Cambridge component grade predictor
 - [x] Curate verified official Physics MCQ component thresholds with source links (2024–2025 May/June and Oct/Nov; IGCSE Extended and AS)
 - [x] Integrate component estimates, threshold scale and next-grade marks into full past-paper results

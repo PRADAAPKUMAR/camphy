@@ -30,6 +30,8 @@ import { savePerformanceRecord } from "@/lib/performance-history";
 import { syllabusVersionForLevel } from "@/lib/syllabus";
 import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
+import { useQuestionPacing } from "@/hooks/use-question-pacing";
+import { paperDurationMinutes } from "@/lib/question-pacing";
 
 const TOTAL_QUESTIONS = 40;
 const CACHE_TTL = 30 * 60 * 1000;
@@ -67,6 +69,8 @@ const ExamPage = () => {
   const [score, setScore] = useState(0);
   const [resultReady, setResultReady] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState<Record<number, string>>({});
+  const [activeQuestion, setActiveQuestion] = useState(1);
+  const [questionTimes, setQuestionTimes] = useState<Record<number, number>>({});
   const explanation = useExplanation(paperId ? { paper_id: paperId } : null);
 
   const { data: paper, isLoading: paperLoading } = useQuery({
@@ -85,6 +89,7 @@ const ExamPage = () => {
     enabled: !!paperId,
   });
   useSyncGrade(paper?.level);
+  const pacing = useQuestionPacing(activeQuestion, !!paper && !paperLoading && !isSubmitted && !answers[activeQuestion] && !explanation.open);
 
   // Prefetch the whole key once so feedback on selection is instant.
   const { data: answerKeyMap } = useQuery({
@@ -109,7 +114,7 @@ const ExamPage = () => {
 
   // The correct answer for a question is only revealed after the user commits
   // an answer for that question.
-  const recordPerformance = useCallback((finalScore: number, key?: Record<number, string>) => {
+  const recordPerformance = useCallback((finalScore: number, key: Record<number, string>, finalTimes: Record<number, number>) => {
     if (!paperId || !paper) return;
     savePerformanceRecord({
       paperId,
@@ -122,6 +127,9 @@ const ExamPage = () => {
       percentage: Math.round((finalScore / TOTAL_QUESTIONS) * 100),
       completedAt: new Date().toISOString(),
       practiceType: "paper",
+      attemptMode: "sheet",
+      questionTimes: finalTimes,
+      timingMeasurement: "answer-sheet-estimate",
       syllabusVersion: syllabusVersionForLevel(paper.level),
       questionResults: key
         ? Object.fromEntries(
@@ -133,7 +141,10 @@ const ExamPage = () => {
 
   const handleSelectAnswer = useCallback((question: number, option: string) => {
     if (isSubmitted || answers[question]) return;
+    pacing.commit(question);
     setAnswers((prev) => ({ ...prev, [question]: option }));
+    const next = Array.from({ length: TOTAL_QUESTIONS }, (_, i) => i + 1).find((q) => q !== question && !answers[q]);
+    if (next) setActiveQuestion(next);
     const known = answerKeyMap?.[question];
     if (known) {
       setCorrectAnswers((prev) => ({ ...prev, [question]: known }));
@@ -153,10 +164,12 @@ const ExamPage = () => {
         toast.error("Could not check that answer");
       }
     })();
-  }, [isSubmitted, answers, paperId, answerKeyMap]);
+  }, [isSubmitted, answers, paperId, answerKeyMap, pacing.commit]);
 
   const handleSubmit = useCallback(async () => {
     if (isSubmitted) return;
+    const finalTimes = pacing.finish();
+    setQuestionTimes(finalTimes);
     setIsSubmitted(true);
 
     if (Object.keys(answers).length === 0) {
@@ -178,7 +191,7 @@ const ExamPage = () => {
       setCorrectAnswers(mapped);
       setScore(data.score);
       setResultReady(true);
-      recordPerformance(data.score, mapped);
+      recordPerformance(data.score, mapped, finalTimes);
       toast.success(`Score: ${data.score}/${TOTAL_QUESTIONS}`);
     } catch {
       if (answerKeyMap) {
@@ -189,13 +202,14 @@ const ExamPage = () => {
         setCorrectAnswers(answerKeyMap);
         setScore(s);
         setResultReady(true);
-        recordPerformance(s, answerKeyMap);
+        recordPerformance(s, answerKeyMap, finalTimes);
         toast.success(`Score: ${s}/${TOTAL_QUESTIONS}`);
       } else {
         toast.error("Could not submit your answers");
+        setIsSubmitted(false);
       }
     }
-  }, [isSubmitted, answers, paperId, answerKeyMap, recordPerformance]);
+  }, [isSubmitted, answers, paperId, answerKeyMap, recordPerformance, pacing.finish]);
 
   if (paperLoading) {
     return (
@@ -256,7 +270,7 @@ const ExamPage = () => {
 
   const timerEl = (
     <Timer
-      durationMinutes={paper.level.toUpperCase() === "AS LEVEL" ? 75 : 45}
+      durationMinutes={paperDurationMinutes(paper.level)}
       onTimeUp={handleSubmit}
       isRunning={!isSubmitted}
     />
@@ -275,6 +289,9 @@ const ExamPage = () => {
       answers={answers}
       correctAnswers={correctAnswers}
       onExplain={explanation.openExplanation}
+      questionTimes={questionTimes}
+      durationMinutes={paperDurationMinutes(paper.level)}
+      estimatedTiming
       paper={resultReady && Array.from({ length: TOTAL_QUESTIONS }, (_, i) => i + 1).every((q) => ["A", "B", "C", "D"].includes(correctAnswers[q])) ? paper : undefined}
     />
   ) : null;
@@ -305,6 +322,7 @@ const ExamPage = () => {
           isSubmitted={isSubmitted}
           onExplain={explanation.openExplanation}
           resultPanel={resultPanel ?? undefined}
+          onQuestionActivate={setActiveQuestion}
         />
         {explanationDialog}
       </>
@@ -335,6 +353,7 @@ const ExamPage = () => {
               onSubmit={handleSubmit}
               isSubmitted={isSubmitted}
               onExplain={explanation.openExplanation}
+              onQuestionActivate={setActiveQuestion}
             />
           )}
         </ResizablePanel>

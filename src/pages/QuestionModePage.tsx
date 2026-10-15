@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -25,6 +25,8 @@ import { savePerformanceRecord } from "@/lib/performance-history";
 import { syllabusVersionForLevel } from "@/lib/syllabus";
 import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
+import { useQuestionPacing } from "@/hooks/use-question-pacing";
+import { paperDurationMinutes } from "@/lib/question-pacing";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
@@ -46,7 +48,6 @@ const QuestionModePage = () => {
   const [current, setCurrent] = useState(0);
   const [finished, setFinished] = useState(false);
   const [elapsed, setElapsed] = useState(0);
-  const shownAt = useRef<number>(Date.now());
 
   const explanation = useExplanation(paperId ? { paper_id: paperId } : null);
 
@@ -98,10 +99,7 @@ const QuestionModePage = () => {
   const currentQuestion = questions[Math.min(current, questions.length - 1)] ?? 1;
   const answeredCount = Object.keys(answers).length;
   const isRetrySet = !!searchParams.get("qs");
-
-  useEffect(() => {
-    shownAt.current = Date.now();
-  }, [currentQuestion]);
+  const pacing = useQuestionPacing(currentQuestion, !!paper && !paperLoading && !imagesLoading && !finished && !answers[currentQuestion] && !explanation.open);
 
   useEffect(() => {
     if (finished) return;
@@ -121,8 +119,7 @@ const QuestionModePage = () => {
     (option: string) => {
       const q = currentQuestion;
       if (finished || answers[q]) return;
-      const spent = Math.max(1, Math.round((Date.now() - shownAt.current) / 1000));
-      setTimes((prev) => ({ ...prev, [q]: spent }));
+      pacing.commit(q);
       setAnswers((prev) => ({ ...prev, [q]: option }));
 
       const known = answerKeyMap?.[q];
@@ -145,11 +142,13 @@ const QuestionModePage = () => {
         }
       })();
     },
-    [currentQuestion, finished, answers, answerKeyMap, paperId],
+    [currentQuestion, finished, answers, answerKeyMap, paperId, pacing.commit],
   );
 
   const finish = useCallback(() => {
     if (finished) return;
+    const finalTimes = pacing.finish();
+    setTimes(finalTimes);
     setFinished(true);
     const key = { ...answerKeyMap, ...correctAnswers };
     let score = 0;
@@ -176,11 +175,12 @@ const QuestionModePage = () => {
         questionResults: Object.fromEntries(
           Object.entries(answers).map(([q, a]) => [Number(q), key[Number(q)] === a]),
         ),
-        questionTimes: times,
+        questionTimes: finalTimes,
+        timingMeasurement: "active-question",
       });
     }
     toast.success(`Score: ${score}/${questions.length}`);
-  }, [finished, answerKeyMap, correctAnswers, answers, paper, paperId, questions, times, answeredCount]);
+  }, [finished, answerKeyMap, correctAnswers, answers, paper, paperId, questions, answeredCount, pacing.finish]);
 
   if (paperLoading || imagesLoading) {
     return (
@@ -260,6 +260,9 @@ const QuestionModePage = () => {
                   answers={answers}
                   correctAnswers={correctAnswers}
                   onExplain={explanation.openExplanation}
+                  questionTimes={times}
+                  questionNumbers={questions}
+                  durationMinutes={paperDurationMinutes(paper.level)}
                   paper={!isRetrySet && questions.length === TOTAL_QUESTIONS && Array.from({ length: TOTAL_QUESTIONS }, (_, i) => i + 1).every((q) => questions.includes(q) && ["A", "B", "C", "D"].includes(correctAnswers[q])) ? paper : undefined}
                 />
               </div>

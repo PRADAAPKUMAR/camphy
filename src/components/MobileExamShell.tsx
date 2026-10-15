@@ -22,6 +22,7 @@ interface MobileExamShellProps {
   isSubmitted: boolean;
   onExplain?: (question: number) => void;
   resultPanel?: ReactNode;
+  onQuestionActivate?: (question: number) => void;
 }
 
 const MobileExamShell = ({
@@ -36,6 +37,7 @@ const MobileExamShell = ({
   isSubmitted,
   onExplain,
   resultPanel,
+  onQuestionActivate,
 }: MobileExamShellProps) => {
   const [open, setOpen] = useState(false);
   const [current, setCurrent] = useState(1);
@@ -46,6 +48,9 @@ const MobileExamShell = ({
   useEffect(() => {
     if (isSubmitted) setOpen(true);
   }, [isSubmitted]);
+  useEffect(() => {
+    if (!isSubmitted) onQuestionActivate?.(current);
+  }, [current, isSubmitted, onQuestionActivate]);
 
   const userAnswer = answers[current];
   const correct = correctAnswers[current];
@@ -131,7 +136,7 @@ const MobileExamShell = ({
                         cls += "bg-muted/60 text-foreground active:bg-primary/25";
                       }
                       return (
-                        <button
+                        <Button variant="ghost"
                           key={opt}
                           className={cls}
                           aria-label={`Question ${current} option ${opt}`}
@@ -144,7 +149,7 @@ const MobileExamShell = ({
                           }}
                         >
                           {opt}
-                        </button>
+                        </Button>
                       );
                     })}
                   </div>
@@ -160,6 +165,7 @@ const MobileExamShell = ({
                     onSubmit={onSubmit}
                     isSubmitted={isSubmitted}
                     onExplain={onExplain}
+                    onQuestionActivate={onQuestionActivate}
                   />
                 </div>
               </>

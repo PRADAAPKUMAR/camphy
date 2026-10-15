@@ -13,6 +13,7 @@ interface MCQPanelProps {
   onSubmit: () => void;
   isSubmitted: boolean;
   onExplain?: (question: number) => void;
+  onQuestionActivate?: (question: number) => void;
 }
 
 interface QuestionRowProps {
@@ -22,9 +23,10 @@ interface QuestionRowProps {
   onSelectAnswer: (question: number, option: string) => void;
   isSubmitted: boolean;
   onExplain?: (question: number) => void;
+  onQuestionActivate?: (question: number) => void;
 }
 
-const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubmitted, onExplain }: QuestionRowProps) => {
+const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubmitted, onExplain, onQuestionActivate }: QuestionRowProps) => {
   const isSelected = !!userAnswer;
   const hasResult = correctAnswer !== undefined;
   const isCorrect = isSelected && hasResult && userAnswer === correctAnswer;
@@ -34,6 +36,8 @@ const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubm
     <div
       role="group"
       aria-label={`Question ${q}`}
+      onFocus={() => onQuestionActivate?.(q)}
+      onPointerDown={() => onQuestionActivate?.(q)}
       className={`flex items-center justify-center gap-1 py-3 ${
         hasResult
           ? isCorrect
@@ -118,6 +122,7 @@ const MCQPanel = memo(({
   onSubmit,
   isSubmitted,
   onExplain,
+  onQuestionActivate,
 }: MCQPanelProps) => {
   const answeredCount = Object.keys(answers).length;
   const progress = Math.round((answeredCount / totalQuestions) * 100);
@@ -157,6 +162,7 @@ const MCQPanel = memo(({
               onSelectAnswer={handleSelectAnswer}
               isSubmitted={isSubmitted}
               onExplain={onExplain}
+              onQuestionActivate={onQuestionActivate}
             />
           ))}
         </div>
