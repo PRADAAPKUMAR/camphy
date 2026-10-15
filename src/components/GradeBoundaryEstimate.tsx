@@ -13,7 +13,7 @@ const SERIES = { s: "May/June", m: "February/March", w: "October/November" } as 
 
 export default function GradeBoundaryEstimate({ paper, score, totalQuestions }: Props) {
   const result = estimateComponentGrade(paper, score, totalQuestions);
-  if (!result.available) {
+  if (result.available === false) {
     return (
       <section aria-label="Cambridge grade estimate" className="border-b border-border px-4 py-4">
         <h2 className="text-sm font-semibold">Cambridge grade estimate</h2>
