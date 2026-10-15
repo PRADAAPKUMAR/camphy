@@ -23,6 +23,26 @@
 
 **Historical follow-up:** Batch claims could be confirmed by inspecting each batch's source PDFs and generated SQL artifacts, then associating stable paper/question IDs with topic assignments and reviewer evidence. A separate audit table/CSV should record `paper_id`, `question_number`, `source_pdf`, `pages`, `mapped_topic`, `review_outcome`, `review_date`, and `evidence`. Preserve existing verified flags and do not silently certify unsampled entries.
 
+## Independent theory topic-accuracy audit — batch 1 (2026-10-15)
+
+**Completed a source-text-based question-by-question topic review for 7 AS theory questions:** Physics 9702/22, February/March 2025. Results: **4 topic-complete (Q2, Q4, Q6, Q7), 3 missing supplementary topic links (Q1, Q3, Q5)**.
+
+| Q | Existing topic codes | Audit | Missing topic link |
+| --- | --- | --- | --- |
+| 1 | 1.3 | INCOMPLETE | **4.3** Density and pressure (the question includes calculating density of cubes) |
+| 2 | 4.1, 4.2, 4.3 | PASS | — |
+| 3 | 2.1, 3.1 | INCOMPLETE | **5.2** Gravitational potential energy and kinetic energy (explicit kinetic energy calculation) |
+| 4 | 8.1 | PASS | — |
+| 5 | 7.1 | INCOMPLETE | **7.3** Doppler effect for sound waves (moving sound source changes observed period) |
+| 6 | 9.1, 9.2, 9.3 | PASS | — |
+| 7 | 3.3, 11.1 | PASS | — |
+
+**Evidence and method:** Cross-referenced transcribed original question-paper content (archive: https://www.scribd.com/document/860514905/9702-m25-qp-22 ) and Cambridge published mark-scheme text (https://studylib.net/doc/28050761/9702-m25-ms-22) against every live `theory_question_topics` link. The original paper PDF in the project's `theory-papers` bucket is **private** and could not be visually downloaded in the current environment; **PDF page visuals and page-range accuracy remain pending**. These 7 are *independently reviewed for question-to-topic fit from source text*, **not** original-PDF-visual certified.
+
+**Structured evidence:** [docs/audits/THEORY_9702_M25_22_TOPIC_AUDIT_2026-10-15.csv](audits/THEORY_9702_M25_22_TOPIC_AUDIT_2026-10-15.csv) records paper/question/mapping IDs, current topics, omissions, supporting question features, public source URLs, and review limitations.
+
+**Production action:** None. Existing database verification flags and all current topic links remain unchanged. Add three missing syllabus topic associations only after review/approval; preserve existing links. This audit must not be conflated with the full 1,645-record `verified=true` database state.
+
 ## Current database status
 
 | Area | Latest measured state | Progress / notes |
