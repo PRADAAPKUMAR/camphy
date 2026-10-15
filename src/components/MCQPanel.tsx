@@ -48,9 +48,7 @@ const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubm
           : ""
       }`}
     >
-      <span className="w-8 text-right text-sm font-bold tabular-nums text-muted-foreground">
-        {q}
-      </span>
+      {onQuestionActivate ? <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-sm tabular-nums text-muted-foreground" aria-label={`Work on question ${q}`} title={`Work on question ${q}`} onClick={() => onQuestionActivate(q)}>{q}</Button> : <span className="w-8 text-right text-sm font-bold tabular-nums text-muted-foreground">{q}</span>}
       <div className="flex min-w-0 gap-1">
         {OPTIONS.map((opt) => {
           const isThisSelected = userAnswer === opt;
