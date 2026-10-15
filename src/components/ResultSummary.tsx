@@ -39,7 +39,6 @@ const ResultRow = memo(({ q, userAnswer, correct, onExplain, seconds }: { q: num
       <span className="w-7 text-right text-xs font-bold tabular-nums text-muted-foreground">
         {q}
       </span>
-      {seconds !== undefined && seconds > 0 && <span aria-label={`Question ${q} time${seconds > BOTTLENECK_SECONDS ? ", over 2 minutes" : ""}`} className={`w-full pl-8 font-mono text-xs ${seconds > BOTTLENECK_SECONDS ? "text-destructive" : "text-muted-foreground"}`}>{formatPacingTime(seconds)}{seconds > BOTTLENECK_SECONDS ? " · Over 2 minutes" : ""}</span>}
       <div className="flex gap-1">
         {OPTIONS.map((opt) => {
           const isCorrectOpt = opt === correct;
@@ -81,6 +80,7 @@ const ResultRow = memo(({ q, userAnswer, correct, onExplain, seconds }: { q: num
           </Button>
         )}
       </span>
+      {seconds !== undefined && seconds > 0 && <span aria-label={`Question ${q} time${seconds > BOTTLENECK_SECONDS ? ", over 2 minutes" : ""}`} className={`w-full pl-8 font-mono text-xs ${seconds > BOTTLENECK_SECONDS ? "text-destructive" : "text-muted-foreground"}`}>{formatPacingTime(seconds)}{seconds > BOTTLENECK_SECONDS ? " · Over 2 minutes" : ""}</span>}
     </div>
   );
 });
