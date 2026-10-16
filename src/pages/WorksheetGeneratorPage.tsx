@@ -348,7 +348,7 @@ const WorksheetGeneratorPage = () => {
               {!!picked.length && (
                 <div className="flex flex-wrap gap-1.5">
                   {picked.map((p) => (
-                    <Badge key={p.key} variant="secondary" className="gap-1 pr-1">
+                    <Badge key={p.key} variant="secondary" className="grade-glow-active gap-1 border pr-1">
                       {p.label}
                       <button
                         type="button"
