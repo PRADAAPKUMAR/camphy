@@ -25,6 +25,7 @@ import { displayLevel, syllabusVersionForLevel } from "@/lib/syllabus";
 import { buildTopicalSet } from "@/lib/topical-bank";
 import { gradeFromLevel, gradeSectionPath } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
+import { useMcqKeyboard } from "@/hooks/use-mcq-keyboard";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
@@ -135,6 +136,13 @@ const TopicalMcqSessionPage = () => {
     },
     [currentItem, finished, answers, keyByIndex],
   );
+
+  useMcqKeyboard({
+    enabled: !finished && items.length > 0,
+    onSelect: handleSelect,
+    onNext: () => setCurrent((c) => Math.min(items.length - 1, c + 1)),
+    onPrev: () => setCurrent((c) => Math.max(0, c - 1)),
+  });
 
   const openExplanation = useCallback(
     async (index: number) => {
