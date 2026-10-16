@@ -27,6 +27,7 @@ import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
 import { useQuestionPacing } from "@/hooks/use-question-pacing";
 import { paperDurationMinutes } from "@/lib/question-pacing";
+import { useMcqKeyboard } from "@/hooks/use-mcq-keyboard";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
@@ -181,6 +182,13 @@ const QuestionModePage = () => {
     }
     toast.success(`Score: ${score}/${questions.length}`);
   }, [finished, answerKeyMap, correctAnswers, answers, paper, paperId, questions, answeredCount, pacing.finish]);
+
+  useMcqKeyboard({
+    enabled: !finished && !!paper,
+    onSelect: handleSelect,
+    onNext: () => setCurrent((c) => Math.min(questions.length - 1, c + 1)),
+    onPrev: () => setCurrent((c) => Math.max(0, c - 1)),
+  });
 
   if (paperLoading || imagesLoading) {
     return (
