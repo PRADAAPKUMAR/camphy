@@ -14,21 +14,6 @@ export interface TheoryTopicalQuestion {
   topics: { id: string; topic_code: string; topic_name: string }[];
 }
 
-/** Preview only the reviewed page range, retaining the source PDF's vector content. */
-export const createTheoryQuestionPreview = async (question: TheoryTopicalQuestion, signal?: AbortSignal): Promise<Blob> => {
-  const { PDFDocument } = await import("pdf-lib");
-  const response = await fetch(question.question_url, { signal });
-  if (!response.ok) throw new Error("Could not load the source PDF");
-  const source = await PDFDocument.load(await response.arrayBuffer());
-  if (!Number.isInteger(question.start_page) || !Number.isInteger(question.end_page) || question.start_page < 1 || question.end_page < question.start_page || question.end_page > source.getPageCount()) {
-    throw new Error("Invalid question page range");
-  }
-  const preview = await PDFDocument.create();
-  const pages = await preview.copyPages(source, Array.from({ length: question.end_page - question.start_page + 1 }, (_, index) => question.start_page - 1 + index));
-  pages.forEach((page) => preview.addPage(page));
-  return new Blob([Uint8Array.from(await preview.save()).buffer], { type: "application/pdf" });
-};
-
 const safeFilePart = (value: string) => value.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "");
 
 export const createTheoryTopicalPdf = async (questions: TheoryTopicalQuestion[]) => {

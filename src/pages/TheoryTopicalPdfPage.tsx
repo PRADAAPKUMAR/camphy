@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDown, ArrowLeft, ArrowUp, ChevronDown, Eye, FileStack, Loader2, TriangleAlert, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, ChevronDown, FileStack, Loader2, TriangleAlert, X } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,6 @@ import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
 import { useTopicsByIds } from "@/hooks/use-syllabus";
 
-import TheoryQuestionPreview from "@/components/theory/TheoryQuestionPreview";
-
 const getSupabase = () => import("@/integrations/supabase/client").then((module) => module.supabase);
 
 const TheoryTopicalPdfPage = () => {
@@ -25,13 +23,11 @@ const TheoryTopicalPdfPage = () => {
   const [activeTopicId, setActiveTopicId] = useState("");
   const [subtopicId, setSubtopicId] = useState("all");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [previewId, setPreviewId] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   useSyncGrade(decodedLevel);
 
   // A new level has a different question bank; topic changes within it do not clear the basket.
   useEffect(() => {
-    setPreviewId(null);
     setActiveTopicId("");
     setSubtopicId("all");
     setSelectedIds([]);
@@ -128,18 +124,14 @@ const TheoryTopicalPdfPage = () => {
             <h2 className="font-semibold">{activeGroup?.topic.topic_name ?? "Questions"}{activeGroup && <span className="ml-2 text-sm font-normal text-muted-foreground">({matching.length})</span>}</h2>
             {matching.length > 0 && <Button variant="outline" size="sm" onClick={() => setSelectedIds((current) => addTheoryQuestionIds(current, matching.map((question) => question.mapping_id)))}>Select all {matching.length}</Button>}
           </div>
-          {!activeGroup ? <p className="text-sm text-muted-foreground">Select a topic to view its questions.</p> : !matching.length ? <p className="text-sm text-muted-foreground">No reviewed questions match this subtopic.</p> : <div className="space-y-2">{matching.map((question) => <div key={question.mapping_id} className="flex items-start gap-3 rounded-lg border border-border/40 p-3 hover:border-primary/40">
+          {!activeGroup ? <p className="text-sm text-muted-foreground">Select a topic to view its questions.</p> : !matching.length ? <p className="text-sm text-muted-foreground">No reviewed questions match this subtopic.</p> : <div className="space-y-2">{matching.map((question) => <label key={question.mapping_id} className="flex cursor-pointer items-start gap-3 rounded-lg border border-border/40 p-3 hover:border-primary/40">
             <Checkbox aria-label={`Select ${question.paper_code} Q${question.question_number}`} checked={selectedIds.includes(question.mapping_id)} onCheckedChange={(checked) => setSelectedIds((current) => checked === true ? addTheoryQuestionIds(current, [question.mapping_id]) : current.filter((id) => id !== question.mapping_id))} />
             <span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold">{question.paper_code} · {question.session} {question.year} · Q{question.question_number}</span><span className="mt-1 flex flex-wrap gap-1">{question.topics.map((topic) => <Badge key={topic.id} variant="outline" className="whitespace-normal text-[10px]">{topic.topic_name}</Badge>)}</span><span className="mt-2 block text-xs text-muted-foreground">Pages {question.start_page}–{question.end_page}</span></span>
-            <Button variant="outline" size="sm" className="shrink-0 gap-1" aria-label={`Preview ${question.paper_code} Q${question.question_number}`} onClick={() => setPreviewId(question.mapping_id)}><Eye className="h-3.5 w-3.5" /><span className="hidden sm:inline">Preview</span></Button>
             {question.shared_page_warning && <TriangleAlert aria-label="Shared pages" className="h-4 w-4 shrink-0 text-warning" />}
-          </div>)}</div>}
+          </label>)}</div>}
         </section>
       </div>
     </main>
-    <TheoryQuestionPreview question={data?.questions.find((question) => question.mapping_id === previewId) ?? null}
-      selected={previewId !== null && selectedIds.includes(previewId)} onClose={() => setPreviewId(null)}
-      onAdd={(id) => setSelectedIds((current) => addTheoryQuestionIds(current, [id]))} />
   </div>;
 };
 
