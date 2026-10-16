@@ -282,7 +282,7 @@ const ExamPage = () => {
     </Suspense>
   );
 
-  const resultPanel = isSubmitted && Object.keys(correctAnswers).length > 0 ? (
+  const resultPanel = resultReady ? (
     <ResultSummary
       score={score}
       totalQuestions={TOTAL_QUESTIONS}
