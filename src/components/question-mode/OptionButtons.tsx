@@ -28,7 +28,7 @@ const OptionButtons = ({
         const isWrongSel = selected && hasResult && userAnswer !== correctAnswer;
 
         let cls =
-          "relative flex h-14 items-center justify-center rounded-xl border text-lg font-bold transition-colors sm:h-16 sm:text-xl ";
+          "relative flex h-14 items-center justify-center rounded-xl border text-lg font-bold transition-[color,background-color,border-color,transform] duration-100 ease-out enabled:active:scale-[0.96] motion-reduce:active:scale-100 sm:h-16 sm:text-xl ";
         if (hasResult) {
           if (isCorrectOpt) cls += "border-success/50 bg-success text-success-foreground";
           else if (isWrongSel)
