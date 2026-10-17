@@ -49,6 +49,8 @@ import {
   type WorksheetSelection,
   type WorksheetSource,
 } from "@/lib/worksheet";
+import { usePdfProgress } from "@/hooks/use-pdf-progress";
+import { PdfGenerationProgress, PdfProgressButton } from "@/components/PdfGenerationProgress";
 
 const LEVELS = [
   { value: "IGCSE", label: "IGCSE Physics 0625" },
@@ -90,7 +92,7 @@ const WorksheetGeneratorPage = () => {
   const [loaded, setLoaded] = useState<LoadedImage[] | null>(null);
   const [failed, setFailed] = useState<{ paper_code: string; question_number: number }[]>([]);
   const [busy, setBusy] = useState(false);
-  const [progress, setProgress] = useState<string | null>(null);
+  const pdfProgress = usePdfProgress();
 
   useEffect(() => {
     setPicked([]);
@@ -120,6 +122,7 @@ const WorksheetGeneratorPage = () => {
   const effectiveCount = Math.min(40, Math.max(1, Number(customCount) || count));
 
   const reset = () => {
+    pdfProgress.reset();
     setSelection(null);
     setLoaded(null);
     setFailed([]);
@@ -186,8 +189,9 @@ const WorksheetGeneratorPage = () => {
     }
     setBusy(true);
     reset();
-    setProgress("Selecting questions…");
     try {
+      await pdfProgress.run("selection", async (report) => {
+      await report({ percent: 15, message: "Selecting questions from your question bank…" });
       const result = await fetchWorksheetSelection({
         level,
         source,
@@ -198,23 +202,24 @@ const WorksheetGeneratorPage = () => {
       });
       if (result.error) {
         toast.error(result.error);
-        return;
+        throw new Error(result.error);
       }
       setSelection(result);
       if (!result.items.length) {
         toast.error("No eligible questions found for this selection");
-        return;
+        throw new Error("No eligible questions found");
       }
       if (result.pool_size < effectiveCount) {
         toast.warning(
           `Only ${result.pool_size} eligible question${result.pool_size === 1 ? "" : "s"} available — worksheet built with ${result.items.length}.`,
         );
       }
-      setProgress("Loading question images…");
+      await report({ percent: 60, message: "Fetching question assets…" });
       const usable = result.items.filter((i) => i.image_url && i.correct_answer);
       const { loaded: ok, failed: bad } = await loadWorksheetImages(usable, (done, total) =>
-        setProgress(`Loading question images… ${done}/${total}`),
+        void report({ percent: Math.round(60 + (done / total) * 24), message: `Fetching question assets… ${done}/${total}` }),
       );
+      await report({ percent: 85, message: "Preparing worksheet preview & answer metadata…" });
       // Renumber sequentially over what actually loaded.
       const renumbered = ok.map((entry, i) => ({
         ...entry,
@@ -222,12 +227,14 @@ const WorksheetGeneratorPage = () => {
       }));
       setLoaded(renumbered);
       setFailed(bad.map((b) => ({ paper_code: b.paper_code, question_number: b.question_number })));
+      if (!renumbered.length) throw new Error("No question images could be loaded");
+      await report({ percent: 100, message: "Ready! Worksheet preview prepared." });
       if (renumbered.length) toast.success(`Worksheet ready — ${renumbered.length} questions`);
+      });
     } catch {
       toast.error("Could not build the worksheet");
     } finally {
       setBusy(false);
-      setProgress(null);
     }
   };
 
@@ -235,12 +242,14 @@ const WorksheetGeneratorPage = () => {
     if (!loaded?.length) return;
     setBusy(true);
     try {
+      await pdfProgress.run(kind, async (report) => {
       if (kind === "worksheet") {
-        const result = await generateWorksheetPdf(loaded, meta);
+        const result = await generateWorksheetPdf(loaded, meta, report);
         if (result.unavailableQuestions.length) {
           toast.warning(`PDF opened, but question images ${result.unavailableQuestions.join(", ")} could not be printed. Rebuild before using it.`);
         }
-      } else await generateAnswerKeyPdf(loaded, meta, includeSources);
+      } else await generateAnswerKeyPdf(loaded, meta, includeSources, report);
+      });
     } catch (error) {
       console.error("Worksheet PDF generation failed", error);
       const detail = error instanceof Error ? error.message : "Unknown browser error";
@@ -264,7 +273,7 @@ const WorksheetGeneratorPage = () => {
   if (!gradeDefinition.worksheetLevel) return <Navigate to={`/grade/${grade}`} replace />;
 
   return (
-    <div className="min-h-screen bg-background bg-grid">
+    <div data-grade={grade} className="min-h-screen bg-background bg-grid">
       <header className="border-b border-border/40">
         <div className="container py-8">
           <Breadcrumb className="mb-4">
@@ -533,10 +542,10 @@ const WorksheetGeneratorPage = () => {
             </div>
           </div>
 
-          <Button onClick={buildSelection} disabled={busy} className="w-full gap-2">
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            {busy ? progress ?? "Working…" : "Generate worksheet"}
-          </Button>
+          <div>
+            <PdfProgressButton state={pdfProgress.state} action="selection" label="Generate worksheet" icon={Sparkles} onClick={buildSelection} disabled={busy} />
+            {pdfProgress.state?.action === "selection" && <PdfGenerationProgress state={pdfProgress.state} />}
+          </div>
 
           <p className="text-xs text-muted-foreground">
             Option order (A–D) is always preserved exactly as printed by Cambridge — original question
@@ -599,18 +608,12 @@ const WorksheetGeneratorPage = () => {
               )}
 
               {!!loaded?.length && (
-                <div className="grid gap-2 sm:grid-cols-2">
-                  <Button onClick={() => download("worksheet")} disabled={busy} className="gap-2">
-                    <ExternalLink className="h-4 w-4" /> Open worksheet PDF
-                  </Button>
-                  <Button
-                    onClick={() => download("key")}
-                    disabled={busy}
-                    variant="outline"
-                    className="gap-2"
-                  >
-                    <ExternalLink className="h-4 w-4" /> Open answer key PDF
-                  </Button>
+                <div>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <PdfProgressButton state={pdfProgress.state} action="worksheet" label="Open worksheet PDF" icon={ExternalLink} onClick={() => download("worksheet")} disabled={busy} />
+                    <PdfProgressButton state={pdfProgress.state} action="key" label="Open answer key PDF" icon={ExternalLink} onClick={() => download("key")} disabled={busy} outline />
+                  </div>
+                  {pdfProgress.state?.action !== "selection" && <PdfGenerationProgress state={pdfProgress.state} />}
                 </div>
               )}
 

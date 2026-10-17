@@ -12,6 +12,8 @@ import { addTheoryQuestionIds, groupTheoryTopics } from "@/lib/theory-topic-sele
 import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
 import { useTopicsByIds } from "@/hooks/use-syllabus";
+import { usePdfProgress } from "@/hooks/use-pdf-progress";
+import { PdfGenerationProgress, PdfProgressButton } from "@/components/PdfGenerationProgress";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((module) => module.supabase);
 
@@ -24,6 +26,7 @@ const TheoryTopicalPdfPage = () => {
   const [subtopicId, setSubtopicId] = useState("all");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
+  const pdfProgress = usePdfProgress();
   useSyncGrade(decodedLevel);
 
   // A new level has a different question bank; topic changes within it do not clear the basket.
@@ -67,10 +70,10 @@ const TheoryTopicalPdfPage = () => {
   const generate = async () => {
     if (!selected.length) return toast.error("Select at least one mapped question");
     setGenerating(true);
-    try { await createTheoryTopicalPdf(selected); } catch (error) { toast.error(error instanceof Error ? error.message : "PDF generation failed"); } finally { setGenerating(false); }
+    try { await pdfProgress.run("theory", async (report) => { await createTheoryTopicalPdf(selected, report); }); } catch (error) { toast.error(error instanceof Error ? error.message : "PDF generation failed"); } finally { setGenerating(false); }
   };
 
-  return <div className="min-h-screen bg-background bg-grid">
+  return <div data-grade={grade ?? undefined} className="min-h-screen bg-background bg-grid">
     <header className="border-b border-border/40"><div className="container py-6">
       <Button variant="ghost" size="sm" onClick={() => navigate(`/theory-papers/${encodeURIComponent(decodedLevel)}`)} className="mb-3 gap-1 text-muted-foreground"><ArrowLeft className="h-4 w-4" /> Theory papers</Button>
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -105,11 +108,9 @@ const TheoryTopicalPdfPage = () => {
         <section aria-label="Selected questions" className="min-w-0 border-y border-border bg-background py-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="flex items-center gap-2 font-semibold">Your PDF <Badge>{selected.length} selected</Badge></h2>
-            <Button className="w-full gap-2 sm:w-auto" onClick={generate} disabled={!selected.length || generating}>
-              {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileStack className="h-4 w-4" />}
-              {generating ? "Creating PDF…" : "Create theory PDF"}
-            </Button>
+            <div className="w-full sm:w-52"><PdfProgressButton state={pdfProgress.state} action="theory" label="Create theory PDF" icon={FileStack} onClick={generate} disabled={!selected.length || generating} /></div>
           </div>
+          <PdfGenerationProgress state={pdfProgress.state} />
           {selected.length > 0 && <div className="mt-3 max-h-[min(12rem,25dvh)] space-y-1 overflow-y-auto overscroll-contain" aria-label="PDF question order">{selected.map((question, index) => <div key={question.mapping_id} className="flex items-center gap-2 border-b border-border/40 py-2 text-xs">
             <span className="w-5 shrink-0 font-bold text-primary">{index + 1}</span>
             <span className="min-w-0 flex-1 break-words">{question.paper_code} · {question.session} {question.year} · Q{question.question_number}</span>
