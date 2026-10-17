@@ -1,5 +1,7 @@
 # Architecture rules
 
+- PDF creators report awaited work milestones through a shared progress reporter and reusable action/HUD; percentages never advance on simulated timers, and a brief completion paint precedes the existing open/save fallback.
+
 - Past-paper pacing accumulates visible, unanswered question visits in a shared monotonic clock, pauses for explanations, and freezes on answer/finish; PDF answer-sheet attribution is explicitly estimated because PDF reading focus cannot be measured reliably. Timing snapshots travel in existing performance payloads without schema changes.
 
 - Past-paper grade estimates use a source-cited, reviewed static component-threshold catalog matched by syllabus, year, canonical series and exact component; missing data and partial/retry sets never receive inferred grades or qualification-level A* predictions.

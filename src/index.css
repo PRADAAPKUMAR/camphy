@@ -72,6 +72,9 @@
     --grade-accent-border: var(--grade-accent) / 0.25;
     --grade-foreground: var(--background);
     --grade-glow: 0 8px 28px -12px hsl(var(--grade-accent) / 0.3);
+    --pdf-progress-surface: var(--card) / 0.75;
+    --pdf-progress-beam: linear-gradient(90deg, hsl(var(--grade-accent) / 0.55), hsl(var(--grade-accent)));
+    --pdf-progress-button-fill: linear-gradient(90deg, hsl(var(--grade-accent) / 0.14), hsl(var(--grade-accent) / 0.35));
   }
 }
 
@@ -100,6 +103,17 @@
 }
 
 @layer utilities {
+  .pdf-progress-hud { background: hsl(var(--pdf-progress-surface)); backdrop-filter: blur(16px); box-shadow: var(--grade-glow); }
+  .pdf-action { transition: border-radius 240ms, background 240ms; }
+  .pdf-action-active { border-radius: 999px; background: hsl(var(--card)); color: hsl(var(--foreground)); border: 1px solid hsl(var(--grade-accent-border)); }
+  .pdf-action-fill { background: var(--pdf-progress-button-fill); transition: transform 240ms ease-out; }
+  .pdf-progress-beam { background: var(--pdf-progress-beam); box-shadow: var(--grade-glow); transition: transform 240ms ease-out; }
+  .pdf-complete-check { animation: pdfCheck 240ms cubic-bezier(0.2, 1.6, 0.5, 1); }
+  @keyframes pdfCheck { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .pdf-action, .pdf-action-fill, .pdf-progress-beam { transition: none; }
+    .pdf-complete-check { animation: none; }
+  }
   .glass-card {
     @apply backdrop-blur-xl border shadow-lg;
     -webkit-backdrop-filter: blur(24px);
