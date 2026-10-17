@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDown, ArrowLeft, ArrowUp, ChevronDown, FileStack, Loader2, TriangleAlert, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, ChevronDown, FileStack, TriangleAlert, X } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

@@ -8,7 +8,6 @@ import {
   ChevronRight,
   ExternalLink,
   FileText,
-  Loader2,
   Shuffle,
   Sparkles,
   X,

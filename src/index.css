@@ -99,6 +99,8 @@
     --grade-accent-subtle: var(--grade-accent) / 0.1;
     --grade-accent-border: var(--grade-accent) / 0.25;
     --grade-glow: 0 8px 28px -12px hsl(var(--grade-accent) / 0.3);
+    --pdf-progress-beam: linear-gradient(90deg, hsl(var(--grade-accent) / 0.55), hsl(var(--grade-accent)));
+    --pdf-progress-button-fill: linear-gradient(90deg, hsl(var(--grade-accent) / 0.14), hsl(var(--grade-accent) / 0.35));
   }
 }
 
