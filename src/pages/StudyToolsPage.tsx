@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Timer as TimerIcon, Brain, CalendarDays, ArrowLeft } from "lucide-react";
 import MultiTimers from "@/components/study/MultiTimers";
 import FocusMode from "@/components/study/FocusMode";
@@ -14,7 +13,10 @@ const TABS = [
 type TabKey = (typeof TABS)[number]["key"];
 
 const StudyToolsPage = () => {
-  const [tab, setTab] = useState<TabKey>("timers");
+  const [params, setParams] = useSearchParams();
+  const requestedTab = params.get("tab");
+  const tab: TabKey = TABS.some((item) => item.key === requestedTab) ? requestedTab as TabKey : "timers";
+  const setTab = (next: TabKey) => setParams((current) => { const result = new URLSearchParams(current); result.set("tab", next); return result; });
 
   return (
     <div className="min-h-screen bg-background page-transition">

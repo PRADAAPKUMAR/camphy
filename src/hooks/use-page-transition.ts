@@ -12,6 +12,8 @@ export const usePageTransition = () => {
   const navType = useNavigationType();
 
   useEffect(() => {
+    // The study overview is used repeatedly; keep navigation immediate and still.
+    if (location.pathname.startsWith("/grade/")) return;
     const main =
       document.querySelector("main") || document.querySelector("[role='main']") || document.body;
     const cls = navType === "POP" ? "page-transition-back" : "page-transition";
