@@ -1,10 +1,10 @@
 # Grade-first navigation
 
 # Animation pack
-- [ ] Add shared fluid MCQ selection, correct pulse and 2-pixel incorrect wobble
-- [ ] Add rolling timer, answered-question and result counters
-- [ ] Refine existing PDF completion, skeleton and interaction motion without delaying work
-- [ ] Verify instant locking, reduced motion, real practice and PDF flows
+- [x] Add shared fluid MCQ selection, correct pulse and 2-pixel incorrect wobble
+- [x] Add rolling timer, answered-question and result counters
+- [x] Refine existing PDF completion, skeleton and interaction motion without delaying work
+- [x] Verify instant locking, reduced motion, real practice and PDF flows
 
 # PDF preparation feedback
 - [x] Add shared grade-coloured progress and completion feedback to worksheet preparation, both MCQ PDFs and theory PDFs

@@ -53,7 +53,7 @@ const MCQOptionGroup = memo(({ question, userAnswer, correctAnswer, onSelect, di
       const correct = hasResult && correctAnswer === opt;
       const wrong = hasResult && selected && !correct;
       return <Button key={opt} variant="ghost" type="button" data-option={opt}
-        className={cn("mcq-option relative isolate overflow-hidden rounded-lg border p-0 font-semibold", compact ? "h-11 w-9 shrink-0 text-sm" : "h-14 w-full text-lg sm:h-16 sm:text-xl",
+        className={cn("mcq-option relative isolate overflow-hidden rounded-lg border p-0 font-semibold disabled:opacity-100", compact ? "h-11 w-9 shrink-0 text-sm" : "h-14 w-full text-lg sm:h-16 sm:text-xl",
           correct ? "border-success/50 bg-success text-success-foreground" : wrong ? "border-destructive/50 bg-destructive text-destructive-foreground" : hasResult ? "border-border/30 bg-muted/20 text-muted-foreground/50" : selected ? "border-primary bg-primary text-primary-foreground" : "border-border/50 bg-muted/40 text-foreground hover:border-primary/50 hover:bg-primary/20")}
         aria-label={`Question ${question}${compact ? "," : ""} option ${opt}`} aria-pressed={selected}
         aria-keyshortcuts={compact ? undefined : `${opt} ${index + 1}`} disabled={!!userAnswer || !!disabled} onClick={() => onSelect(opt)}>
