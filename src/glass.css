@@ -1,0 +1,190 @@
+/* Shared materials. Grade and scoring tokens remain independent. */
+
+  :root {
+    --background: 226 43% 7%;
+    --foreground: 220 35% 96%;
+    --card: 226 32% 14%;
+    --popover: 226 32% 13%;
+    --muted: 226 27% 19%;
+    --muted-foreground: 220 19% 73%;
+    --border: 224 25% 27%;
+    --input: 224 25% 34%;
+    --primary: 216 100% 74%;
+    --primary-foreground: 226 50% 9%;
+    --accent: 190 86% 67%;
+    --secondary: 225 27% 21%;
+    --ring: 199 100% 78%;
+    --radius: 0.85rem;
+    --glass-surface: linear-gradient(135deg, hsl(228 32% 21% / .84), hsl(228 35% 12% / .9));
+    --glass-edge: hsl(220 50% 88% / .14);
+    --glass-shadow: 0 16px 48px -24px hsl(240 65% 2% / .8), inset 0 1px 0 hsl(220 60% 95% / .09);
+    --glass-floating: hsl(226 32% 13% / .96);
+    --glass-ease: cubic-bezier(.22, 1, .36, 1);
+  }
+
+  body {
+    background-image: radial-gradient(ellipse at 12% 0%, hsl(262 65% 27% / .28), transparent 48%),
+      radial-gradient(ellipse at 95% 35%, hsl(205 75% 22% / .22), transparent 48%);
+    min-width: 320px;
+  }
+
+  ::selection { background: hsl(216 100% 74% / .28); color: hsl(var(--foreground)); }
+  :focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 4px; }
+
+
+
+  .glass-app { position: relative; isolation: isolate; min-height: 100vh; }
+  .glass-atmosphere {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(ellipse at 8% 6%, hsl(269 76% 42% / .18), transparent 45%),
+      radial-gradient(ellipse at 92% 24%, hsl(205 90% 43% / .14), transparent 44%),
+      radial-gradient(ellipse at 50% 100%, hsl(230 70% 32% / .13), transparent 60%);
+  }
+  .physics-light-field {
+    background: radial-gradient(ellipse at 12% 12%, hsl(262 70% 42% / .07), transparent 42%),
+      radial-gradient(ellipse at 95% 65%, hsl(194 85% 40% / .05), transparent 42%);
+  }
+  #page-content { position: relative; min-width: 0; }
+  #page-content > div { background-color: transparent; }
+  #page-content > div > header {
+    background-color: hsl(var(--card) / .28);
+    background-image: linear-gradient(110deg, hsl(230 55% 66% / .04), transparent 65%);
+    border-color: var(--glass-edge);
+  }
+  .glass-nav {
+    background: hsl(226 38% 10% / .9);
+    border-color: var(--glass-edge);
+    -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+    box-shadow: 0 4px 32px hsl(240 60% 2% / .2);
+  }
+  .glass-panel, .glass-card, .glass-card-hover, .grade-tile {
+    background: var(--glass-surface);
+    border: 1px solid var(--glass-edge);
+    border-radius: 1.25rem;
+    box-shadow: var(--glass-shadow);
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  }
+  .glass-panel .glass-panel, .glass-card .glass-card,
+  .glass-panel .glass-card, .glass-card .glass-panel {
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+  .glass-floating {
+    background: var(--glass-floating);
+    border-color: hsl(220 50% 88% / .2);
+    border-radius: 1rem;
+    box-shadow: 0 24px 80px -20px hsl(240 65% 2% / .85), inset 0 1px 0 hsl(220 60% 95% / .12);
+    -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+  }
+  .glass-control {
+    border-color: hsl(var(--input));
+    background: hsl(226 38% 9% / .75);
+    border-radius: .75rem;
+    box-shadow: inset 0 1px 2px hsl(240 60% 2% / .18);
+    transition: border-color 160ms, background-color 160ms, box-shadow 160ms;
+  }
+  .glass-control:hover { border-color: hsl(220 35% 65% / .6); }
+  .glass-control:focus-visible { border-color: hsl(var(--ring)); }
+  .glass-button { border-radius: .75rem; }
+  .glass-button-primary {
+    background-image: linear-gradient(125deg, hsl(0 0% 100% / .2), transparent 65%);
+    box-shadow: inset 0 1px 0 hsl(0 0% 100% / .3), 0 4px 18px -8px hsl(var(--primary) / .6);
+  }
+  .glass-button-outline { background: hsl(var(--card) / .65); border-color: var(--glass-edge); }
+  .glass-button-outline:hover, .glass-button-ghost:hover { background-color: hsl(var(--muted) / .7); }
+  .glass-tabs { background: hsl(226 38% 9% / .65); border: 1px solid var(--glass-edge); border-radius: .9rem; }
+  .glass-tab { border-radius: .6rem; }
+  .glass-tab[data-state="active"] { box-shadow: inset 0 1px 0 hsl(0 0% 100% / .12), 0 2px 8px hsl(240 60% 2% / .25); }
+  .glass-table { border: 1px solid var(--glass-edge); border-radius: 1rem; background: hsl(var(--card) / .8); }
+  .glass-table thead { background: hsl(226 32% 19% / .95); }
+  .glass-overlay { background: hsl(230 55% 3% / .76); }
+  .glass-reading { background: hsl(226 32% 12% / .97); border: 1px solid var(--glass-edge); border-radius: 1rem; }
+
+  /* Layered glass artwork, rendered locally without image downloads. */
+  .glass-icon {
+    --icon-color: var(--grade-accent, var(--primary));
+    position: relative; display: inline-flex; align-items: center; justify-content: center;
+    width: 3.75rem; height: 3.75rem; flex-shrink: 0; isolation: isolate;
+  }
+  .glass-icon[data-tone="blue"] { --icon-color: 216 100% 72%; }
+  .glass-icon[data-tone="violet"] { --icon-color: 268 100% 77%; }
+  .glass-icon[data-tone="cyan"] { --icon-color: 186 93% 65%; }
+  .glass-icon[data-tone="amber"] { --icon-color: 34 100% 68%; }
+  .glass-icon[data-tone="green"] { --icon-color: 158 72% 60%; }
+  .glass-icon[data-tone="pink"] { --icon-color: 324 100% 77%; }
+  .glass-icon--sm { width: 2.75rem; height: 2.75rem; }
+  .glass-icon--lg { width: 5rem; height: 5rem; }
+  .glass-icon__light { position: absolute; inset: 5%; border-radius: 50%; background: hsl(var(--icon-color) / .18); filter: blur(12px); }
+  .glass-icon__back {
+    position: absolute; inset: 12% 22% 22% 8%; border-radius: 28%; transform: rotate(-12deg);
+    background: linear-gradient(145deg, hsl(var(--icon-color)), hsl(var(--icon-color) / .4));
+    box-shadow: 0 5px 18px -5px hsl(var(--icon-color) / .65);
+    transition: transform 240ms var(--glass-ease);
+  }
+  .glass-icon__face {
+    position: absolute; inset: 23% 6% 6% 23%; display: flex; align-items: center; justify-content: center;
+    border-radius: 27%; border: 1px solid hsl(0 0% 100% / .5);
+    background: linear-gradient(135deg, hsl(0 0% 100% / .32), hsl(var(--icon-color) / .14));
+    box-shadow: inset 0 1px 0 hsl(0 0% 100% / .4), 0 7px 16px hsl(230 60% 3% / .3);
+    color: hsl(0 0% 100%); transform: rotate(7deg);
+    transition: transform 240ms var(--glass-ease);
+  }
+  .glass-icon__face > svg { width: 62% !important; height: 62% !important; filter: drop-shadow(0 1px 2px hsl(230 60% 3% / .25)); }
+  .glass-icon__spark { position: absolute; top: 10%; right: 5%; width: 9%; height: 9%; background: hsl(var(--icon-color)); border-radius: 50%; box-shadow: 0 0 10px hsl(var(--icon-color) / .4); }
+  .glass-hero { position: relative; }
+  .glass-hero-label { display: inline-flex; align-items: center; gap: .5rem; padding: .5rem 1rem; border: 1px solid hsl(var(--primary) / .25); background: hsl(var(--primary) / .07); border-radius: 999px; }
+  .glass-hero-label::before { content: ""; width: 6px; height: 6px; background: hsl(var(--primary)); border-radius: 50%; box-shadow: 0 0 10px hsl(var(--primary) / .6); }
+  .glass-stat { border: 1px solid var(--glass-edge); border-radius: 999px; background: hsl(var(--card) / .72); box-shadow: inset 0 1px 0 hsl(0 0% 100% / .04); }
+  .glass-section-label { font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: hsl(var(--muted-foreground)); }
+  .glass-focus .glass-atmosphere { opacity: .35; }
+  .glass-focus .glass-card, .glass-focus .glass-panel { background: hsl(226 32% 12% / .97); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .glass-focus .glass-card-hover, .glass-focus .grade-tile { transform: none; }
+  .glass-focus .physics-light-field { display: none; }
+
+
+/* Existing page surfaces use this material so every route shares the system. */
+
+  .bg-grid { background-image: radial-gradient(hsl(220 35% 80% / .055) .8px, transparent .8px); background-size: 28px 28px; }
+  .glass-card, .glass-card-hover, .grade-tile { background: var(--glass-surface); border-radius: 1.25rem; border-color: var(--glass-edge); box-shadow: var(--glass-shadow); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+  .grade-tile { border-color: hsl(var(--grade-accent) / .22); }
+  .grade-crest { background: hsl(var(--grade-accent) / .07); border-color: hsl(var(--grade-accent) / .24); border-radius: 1rem; }
+  .glass-card-hover, .grade-tile { transition: transform 220ms var(--glass-ease), border-color 180ms, background-color 180ms, box-shadow 220ms; }
+  .glass-card-hover:hover, .grade-tile:hover { background: var(--glass-surface); border-color: hsl(var(--grade-accent) / .5); box-shadow: var(--glass-shadow), 0 12px 32px -24px hsl(var(--grade-accent) / .6); }
+  .glass-card-hover::before, .grade-tile::before { display: none; }
+  .glass-card-hover > *, .grade-tile > * { z-index: auto; }
+  .glass-focus .glass-card-hover:hover, .glass-focus .grade-tile:hover { transform: none; }
+  .glass-focus .page-transition, .glass-focus .page-transition-back { animation: none; }
+  .page-transition { animation: glassPageIn 260ms var(--glass-ease); }
+  .page-transition-back { animation: glassPageIn 200ms var(--glass-ease); }
+  @keyframes glassPageIn { from { opacity: .4; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  @media (hover: hover) and (pointer: fine) {
+    :is(.grade-tile, .glass-card-hover):hover .glass-icon__back { transform: rotate(-18deg) translate(-1px, -2px); }
+    :is(.grade-tile, .glass-card-hover):hover .glass-icon__face { transform: rotate(0deg) translate(1px, -1px); }
+  }
+  @media (hover: none) { .glass-card-hover:hover, .grade-tile:hover { transform: none; } }
+  @media (max-width: 640px) {
+    .glass-card, .glass-card-hover, .grade-tile { -webkit-backdrop-filter: none; backdrop-filter: none; background: linear-gradient(135deg, hsl(228 32% 18% / .96), hsl(228 35% 11% / .97)); }
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass-panel, .glass-card, .glass-card-hover, .grade-tile, .glass-floating, .glass-nav { background: hsl(var(--card)); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+    .glass-icon__back, .glass-icon__face { transform: none !important; }
+    .glass-card-hover:hover, .grade-tile:hover, .grade-tile:active, .glass-card-hover:active { transform: none; }
+    .page-transition, .page-transition-back { animation: none; will-change: auto; }
+  }
+  @media (forced-colors: active) {
+    .glass-atmosphere, .glass-icon__light, .glass-icon__spark { display: none; }
+    .glass-panel, .glass-card, .glass-card-hover, .grade-tile, .glass-floating, .glass-nav, .glass-control { background: Canvas; border: 1px solid CanvasText; box-shadow: none; }
+    .glass-icon__face, .glass-icon__back { background: Canvas; color: CanvasText; border: 1px solid CanvasText; box-shadow: none; }
+    .gradient-text { background: none; color: CanvasText; -webkit-text-fill-color: CanvasText; }
+  }
+  @media print {
+    .glass-atmosphere, .glass-icon__light { display: none; }
+    .glass-panel, .glass-card, .glass-card-hover { background: white; color: black; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  }
+
+
+.glass-reading.rounded-none { border-radius: 0; }
+.glass-reading.border-0 { border: 0; }

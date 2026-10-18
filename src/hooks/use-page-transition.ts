@@ -13,7 +13,7 @@ export const usePageTransition = () => {
 
   useEffect(() => {
     const main =
-      document.querySelector("main") || document.querySelector("[role='main']") || document.body;
+      document.getElementById("page-content") || document.body;
     const cls = navType === "POP" ? "page-transition-back" : "page-transition";
     main.classList.add(cls);
 

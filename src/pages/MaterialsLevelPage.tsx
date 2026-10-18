@@ -1,3 +1,4 @@
+import GlassIcon from "@/components/GlassIcon";
 import { useState, useMemo } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -230,9 +231,7 @@ const MaterialsLevelPage = () => {
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-grade/10 border border-grade/20">
-              <BookMarked className="h-5 w-5 text-grade" />
-            </div>
+            <GlassIcon name="materials" tone="pink" />
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">
                 {currentPath.length > 0

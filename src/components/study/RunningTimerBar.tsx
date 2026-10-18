@@ -24,7 +24,7 @@ const RunningTimerBar = () => {
 
   return (
     <div className="fixed bottom-4 left-1/2 z-40 w-[min(92vw,44rem)] -translate-x-1/2">
-      <div className="glass-card flex flex-wrap items-center gap-3 rounded-2xl px-4 py-3">
+      <div className="glass-floating flex flex-wrap items-center gap-3 rounded-2xl px-4 py-3">
         <Link
           to="/study-tools"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"

@@ -69,7 +69,7 @@ const MobileExamShell = ({
 
       {/* Answers launcher */}
       <Drawer open={open} onOpenChange={setOpen}>
-        <div className="shrink-0 border-t bg-card px-3 pb-[env(safe-area-inset-bottom)] pt-2">
+        <div className="shrink-0 glass-reading rounded-none border-x-0 border-b-0 px-3 pb-[env(safe-area-inset-bottom)] pt-2">
           <DrawerTrigger asChild>
             <Button
               className="h-12 w-full justify-between font-semibold"

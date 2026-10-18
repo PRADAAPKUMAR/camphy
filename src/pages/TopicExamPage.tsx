@@ -200,7 +200,7 @@ const TopicExamPage = () => {
   if (paperLoading) {
     return (
       <div className="flex h-screen flex-col bg-background">
-        <div className="flex items-center justify-between border-b bg-card px-5 py-3 shadow-sm">
+        <div className="flex items-center justify-between glass-reading rounded-none border-x-0 border-t-0 px-5 py-3">
           <Skeleton className="h-5 w-48" />
           <Skeleton className="h-8 w-24 rounded-md" />
         </div>
@@ -320,7 +320,7 @@ const TopicExamPage = () => {
 
   return (
     <div className="flex h-screen flex-col bg-background">
-      <div className="flex items-center justify-between border-b bg-card px-5 py-3 shadow-sm">
+      <div className="flex items-center justify-between glass-reading rounded-none border-x-0 border-t-0 px-5 py-3">
         <div className="flex items-center gap-4">{breadcrumb}</div>
         {timerEl}
       </div>

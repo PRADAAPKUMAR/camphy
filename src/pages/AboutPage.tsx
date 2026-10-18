@@ -1,3 +1,4 @@
+import GlassIcon from "@/components/GlassIcon";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -70,7 +71,7 @@ const AboutPage = () => {
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary mb-2">
                 About the Educator
               </p>
-              <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-2">
+              <GlassIcon name="atom" tone="violet" className="mx-auto mb-5" /><h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-2">
                 S. Pradaap <span className="gradient-text">Kumar</span>
               </h1>
               <p className="text-muted-foreground">

@@ -1,3 +1,4 @@
+import GlassIcon from "@/components/GlassIcon";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -369,7 +370,7 @@ const AdminUploadPage = () => {
               onClick={() => setView("__images")}
               className="glass-card flex flex-col items-start gap-2 rounded-2xl p-5 text-left transition hover:border-primary/50"
             >
-              <Images className="h-8 w-8 text-primary" />
+              <GlassIcon icon={Images} tone="cyan" />
               <span className="font-semibold">Question images</span>
               <span className="text-xs text-muted-foreground">
                 Upload one JPG per MCQ question and manage what is already uploaded.
@@ -381,7 +382,7 @@ const AdminUploadPage = () => {
               onClick={() => setView("__theory")}
               className="glass-card flex flex-col items-start gap-2 rounded-2xl p-5 text-left transition hover:border-primary/50"
             >
-              <FileText className="h-8 w-8 text-primary" />
+              <GlassIcon name="theory" tone="violet" />
               <span className="font-semibold">Theory past papers</span>
               <span className="text-xs text-muted-foreground">
                 Upload question paper &amp; mark scheme PDFs (auto-paired by filename) and write

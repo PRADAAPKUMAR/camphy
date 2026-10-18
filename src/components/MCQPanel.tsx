@@ -131,7 +131,7 @@ const MCQPanel = memo(({
   );
 
   return (
-    <div className="flex h-full flex-col bg-card">
+    <div className="glass-reading flex h-full flex-col rounded-none border-0">
       {/* Header with progress */}
       <div className="border-b px-5 py-4">
         <div className="flex items-center justify-between mb-2">

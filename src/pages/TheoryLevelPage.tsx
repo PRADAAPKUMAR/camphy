@@ -1,3 +1,4 @@
+import GlassIcon from "@/components/GlassIcon";
 import { useMemo } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -64,7 +65,7 @@ const TheoryLevelPage = () => {
           </Button>
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight">{normalizeGradeLabel(decodedLevel)} — Theory Papers</h1>
+              <GlassIcon name="theory" tone="violet" className="mb-4" /><h1 className="text-3xl font-extrabold tracking-tight">{normalizeGradeLabel(decodedLevel)} — Theory Papers</h1>
               <p className="text-sm text-muted-foreground">Open a paper to read the questions, official answer key and explanations</p>
             </div>
             <Button asChild className="gap-2"><Link to={`/theory-topical/${encodeURIComponent(decodedLevel)}`}><FileStack className="h-4 w-4" />Build topical PDF</Link></Button>

@@ -105,7 +105,8 @@ const RouterContent = () => {
     pathname.startsWith("/topic-theory/");
 
   return (
-    <>
+    <div className={`glass-app${navExcluded || pathname.startsWith("/theory-paper/") ? " glass-focus" : ""}`}>
+    <div className="glass-atmosphere" aria-hidden="true" />
     <PageMetadata />
     <a href="#page-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-3 focus:text-primary-foreground">Skip to content</a>
     {user && profile && !profile.setup_completed && pathname !== "/profile" && !pathname.startsWith("/auth") && <Navigate to="/profile" replace />}
@@ -178,7 +179,7 @@ const RouterContent = () => {
     </Suspense>
     </div>
       <RunningTimerBar />
-    </>
+    </div>
   );
 };
 

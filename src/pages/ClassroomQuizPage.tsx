@@ -1,3 +1,4 @@
+import GlassIcon from "@/components/GlassIcon";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -268,7 +269,7 @@ const ClassroomQuizPage = () => {
               <ArrowLeft className="h-4 w-4" /> {GRADES[grade].label} home
             </Button>
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary"><Gamepad2 className="h-7 w-7" /></div>
+              <GlassIcon name="quiz" tone="violet" />
               <div><p className="font-mono text-xs text-primary">{GRADES[grade].label} · Classroom activity</p><h1 className="text-3xl font-extrabold sm:text-4xl">Classroom Quiz</h1></div>
             </div>
           </div>

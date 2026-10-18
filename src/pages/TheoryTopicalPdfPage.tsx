@@ -1,3 +1,4 @@
+import GlassIcon from "@/components/GlassIcon";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -77,12 +78,12 @@ const TheoryTopicalPdfPage = () => {
     <header className="border-b border-border/40"><div className="container py-6">
       <Button variant="ghost" size="sm" onClick={() => navigate(`/theory-papers/${encodeURIComponent(decodedLevel)}`)} className="mb-3 gap-1 text-muted-foreground"><ArrowLeft className="h-4 w-4" /> Theory papers</Button>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-extrabold sm:text-3xl">{normalizeGradeLabel(decodedLevel)} — Topical Theory PDF</h1>
+        <GlassIcon name="theory" tone="violet" /><h1 className="flex-1 text-2xl font-extrabold sm:text-3xl">{normalizeGradeLabel(decodedLevel)} — Topical Theory PDF</h1>
         {grade && <Button variant="link" asChild><Link to={gradePath(grade)}>Grade Home</Link></Button>}
       </div>
     </div></header>
     <main className="container grid items-start gap-6 py-6 md:grid-cols-[minmax(220px,300px)_minmax(0,1fr)]">
-      <section className="min-w-0 md:sticky md:top-20" aria-label="Topic browser">
+      <section className="glass-panel min-w-0 p-4 md:sticky md:top-20" aria-label="Topic browser">
         <h2 className="mb-3 font-semibold">Topics</h2>
         {isLoading || loadingHierarchy ? <div className="space-y-2">{[1, 2, 3, 4].map((item) => <Skeleton key={item} className="h-12" />)}</div>
           : isError ? <div className="space-y-3"><p className="text-sm text-destructive">Questions could not be loaded.</p><Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button></div>
@@ -105,7 +106,7 @@ const TheoryTopicalPdfPage = () => {
           </div>)}</div>}
       </section>
       <div className="grid h-[calc(100dvh-6rem)] min-h-[24rem] min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-6 overflow-hidden md:sticky md:top-20">
-        <section aria-label="Selected questions" className="min-w-0 border-y border-border bg-background py-4">
+        <section aria-label="Selected questions" className="glass-reading min-w-0 p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="flex items-center gap-2 font-semibold">Your PDF <Badge>{selected.length} selected</Badge></h2>
             <div className="w-full sm:w-52"><PdfProgressButton state={pdfProgress.state} action="theory" label="Create theory PDF" icon={FileStack} onClick={generate} disabled={!selected.length || generating} /></div>

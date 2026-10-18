@@ -1,3 +1,4 @@
+import GlassIcon from "@/components/GlassIcon";
 import { useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -137,7 +138,7 @@ const TopicLevelPage = () => {
             className="glass-card-hover mb-6 flex items-center justify-between gap-4 rounded-xl p-5"
           >
             <span className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-grade/20 bg-grade/10 text-grade"><LayoutGrid className="h-5 w-5" /></span>
+              <GlassIcon name="practice" tone="cyan" />
               <span><span className="block font-bold">Mapped Past-Paper Topical MCQ</span><span className="block text-xs text-muted-foreground">Practice individual questions grouped by syllabus topic and subtopic.</span></span>
             </span>
             <ChevronRight className="h-5 w-5 text-muted-foreground" />

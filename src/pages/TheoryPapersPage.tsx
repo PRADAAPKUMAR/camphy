@@ -1,8 +1,9 @@
+import GlassIcon from "@/components/GlassIcon";
 import { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTileTransition } from "@/hooks/use-tile-transition";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Atom, FileText, FlaskConical, Microscope } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,9 +13,9 @@ import { normalizeGradeLabel } from "@/lib/grades";
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
 const levelIcons: Record<string, React.ReactNode> = {
-  IGCSE: <Microscope className="h-6 w-6" />,
-  "AS Level": <FlaskConical className="h-6 w-6" />,
-  "A Level": <Atom className="h-6 w-6" />,
+  IGCSE: <GlassIcon name="microscope" tone="blue" />,
+  "AS Level": <GlassIcon name="flask" tone="amber" />,
+  "A Level": <GlassIcon name="atom" tone="green" />,
 };
 
 const levelDescriptions: Record<string, string> = {
@@ -64,9 +65,7 @@ const TheoryPapersPage = () => {
             <ArrowLeft className="h-4 w-4" /> Home
           </Button>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
-              <FileText className="h-5 w-5 text-primary" />
-            </div>
+            <GlassIcon name="theory" tone="violet" />
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">Theory Past Papers</h1>
               <p className="text-sm text-muted-foreground">
@@ -96,7 +95,7 @@ const TheoryPapersPage = () => {
                     {...linkTileProps(`/theory-papers/${encodeURIComponent(level)}`)}
                     className="glass-card-hover group flex flex-col gap-4 rounded-2xl p-7"
                   >
-                    <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
+                    <div className="mb-2 shrink-0">
                       {levelIcons[normalizeGradeLabel(level)]}
                     </div>
                     <div>
