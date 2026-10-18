@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import MCQOptionGroup from "@/components/question-mode/MCQOptionGroup";
 import Timer from "@/components/Timer";
@@ -26,7 +26,7 @@ describe("practice motion preserves exam behaviour", () => {
     vi.useFakeTimers();
     const finish = vi.fn();
     const { unmount } = render(<Timer durationMinutes={1 / 60} onTimeUp={finish} isRunning />);
-    vi.advanceTimersByTime(1000);
+    act(() => { vi.advanceTimersByTime(1000); });
     expect(finish).toHaveBeenCalled();
     unmount();
     vi.useRealTimers();

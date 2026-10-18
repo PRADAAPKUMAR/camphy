@@ -131,7 +131,7 @@ const MultiTimers = () => {
                 </div>
 
                 <p
-                  className={`mt-3 font-mono text-4xl font-bold tabular-nums ${finished ? "animate-pulse" : ""}`}
+                  className={`mt-3 font-mono text-4xl font-bold tabular-nums ${finished ? "motion-safe:animate-pulse" : ""}`}
                   style={{ color: finished ? `hsl(var(--destructive))` : `hsl(${hsl})` }}
                 >
                   <RollingNumber value={fmt(t.left)} />
@@ -202,7 +202,7 @@ const MultiTimers = () => {
             </p>
             <p
               className={`font-mono text-[clamp(3.5rem,17vw,12rem)] font-bold leading-none tabular-nums ${
-                fullTimer.left === 0 ? "animate-pulse" : ""
+                fullTimer.left === 0 ? "motion-safe:animate-pulse" : ""
               }`}
               style={{
                 color:

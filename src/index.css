@@ -119,6 +119,7 @@
   .mcq-option { transition: background-color 100ms, border-color 100ms, color 100ms; }
   .mcq-option-fill { pointer-events: none; background: hsl(var(--motion-selection-fill)); opacity: 0; }
   .mcq-option-trace { pointer-events: none; opacity: 0; color: inherit; }
+  .mcq-option > .mcq-option-trace { width: 100%; height: 100%; }
   .mcq-option-trace rect { fill: none; stroke: currentColor; stroke-width: 2; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 1; }
   .mcq-picked .mcq-option-fill { animation: optionSlide 320ms var(--motion-ease); }
   .mcq-picked .mcq-option-trace { opacity: 1; animation: optionTraceFade 320ms ease-out; }

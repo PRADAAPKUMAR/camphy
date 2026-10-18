@@ -56,7 +56,7 @@ const RunningTimerBar = () => {
           <div key={t.id} className="flex items-center gap-2">
             <span className="max-w-[9rem] truncate text-xs text-muted-foreground">{t.label}</span>
             <span
-              className={`font-mono text-sm font-bold tabular-nums ${t.left === 0 ? "animate-pulse" : ""}`}
+              className={`font-mono text-sm font-bold tabular-nums ${t.left === 0 ? "motion-safe:animate-pulse" : ""}`}
               style={{
                 color: t.left === 0 ? `hsl(var(--destructive))` : `hsl(${colorHsl(t.color)})`,
               }}
