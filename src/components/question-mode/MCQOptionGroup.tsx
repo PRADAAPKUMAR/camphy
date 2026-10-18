@@ -36,8 +36,15 @@ const MCQOptionGroup = memo(({ question, userAnswer, correctAnswer, onSelect, di
       if (wrong) { wrong.classList.add("mcq-wrong-wobble"); animated.push(wrong); }
     }
     const clear = () => animated.forEach((el) => el.classList.remove("mcq-picked", "mcq-correct-pulse", "mcq-wrong-wobble"));
-    root.addEventListener("animationend", clear);
-    return () => { root.removeEventListener("animationend", clear); clear(); };
+    const ended = (event: AnimationEvent) => {
+      if (!(event.target instanceof Element)) return;
+      const option = event.target.closest("[data-option]");
+      if (event.animationName === "optionSlide") option?.classList.remove("mcq-picked");
+      if (event.animationName === "optionCorrect") option?.classList.remove("mcq-correct-pulse");
+      if (event.animationName === "optionWrong") option?.classList.remove("mcq-wrong-wobble");
+    };
+    root.addEventListener("animationend", ended);
+    return () => { root.removeEventListener("animationend", ended); clear(); };
   }, [question, userAnswer, correctAnswer]);
 
   return <div ref={group} className={cn("grid grid-cols-4", compact ? "gap-1" : "gap-2 sm:gap-3")}>

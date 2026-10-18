@@ -1,5 +1,7 @@
 # Architecture rules
 
+- Practice motion uses a shared option group and digit-only rolling counter; visual animation never gates answers, scoring or clocks, and respects reduced motion to keep all practice modes consistent.
+
 - PDF creators report awaited work milestones through a shared progress reporter and reusable action/HUD; percentages never advance on simulated timers, and a brief completion paint precedes the existing open/save fallback.
 
 - Past-paper pacing accumulates visible, unanswered question visits in a shared monotonic clock, pauses for explanations, and freezes on answer/finish; PDF answer-sheet attribution is explicitly estimated because PDF reading focus cannot be measured reliably. Timing snapshots travel in existing performance payloads without schema changes.
