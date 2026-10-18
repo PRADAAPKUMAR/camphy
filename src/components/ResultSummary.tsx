@@ -1,3 +1,4 @@
+import RollingNumber from "@/components/motion/RollingNumber";
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -117,9 +118,9 @@ const ResultSummary = memo(({
           <Award className={`h-7 w-7 ${getScoreColor()}`} />
         </div>
         <div className={`text-4xl font-black tabular-nums ${getScoreColor()}`}>
-          {score}/{totalQuestions}
+          <RollingNumber value={`${score}/${totalQuestions}`} initialValue={`0/${totalQuestions}`} />
         </div>
-        <p className="mt-1 text-sm text-muted-foreground font-medium">{percentage}% correct</p>
+        <p className="mt-1 text-sm text-muted-foreground font-medium"><RollingNumber value={`${percentage}%`} initialValue="0%" /> correct</p>
         <Button
           variant="outline"
           className="mt-4"

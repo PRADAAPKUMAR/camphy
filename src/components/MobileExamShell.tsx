@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, ClipboardList } from "lucide-react";
 import MCQPanel from "@/components/MCQPanel";
 
-const OPTIONS = ["A", "B", "C", "D"] as const;
+import MCQOptionGroup from "@/components/question-mode/MCQOptionGroup";
+import RollingNumber from "@/components/motion/RollingNumber";
 
 interface MobileExamShellProps {
   breadcrumb: ReactNode;
@@ -54,7 +55,6 @@ const MobileExamShell = ({
 
   const userAnswer = answers[current];
   const correct = correctAnswers[current];
-  const hasResult = correct !== undefined && !!userAnswer;
 
   return (
     <div className="flex h-[100dvh] flex-col bg-background">
@@ -80,7 +80,7 @@ const MobileExamShell = ({
                 Answer Sheet
               </span>
               <span className="font-mono text-xs">
-                {answeredCount} / {totalQuestions} · {progress}%
+                <RollingNumber value={`${answeredCount} / ${totalQuestions} · ${progress}%`} />
               </span>
             </Button>
           </DrawerTrigger>
@@ -106,7 +106,7 @@ const MobileExamShell = ({
                       <ChevronLeft className="h-5 w-5" />
                     </Button>
                     <p className="text-sm font-semibold">
-                      Question {current} of {totalQuestions}
+                      Question <RollingNumber value={current} /> of {totalQuestions}
                     </p>
                     <Button
                       variant="outline"
@@ -119,40 +119,10 @@ const MobileExamShell = ({
                       <ChevronRight className="h-5 w-5" />
                     </Button>
                   </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    {OPTIONS.map((opt) => {
-                      const selected = userAnswer === opt;
-                      const isCorrectOpt = hasResult && opt === correct;
-                      const isWrongSel = selected && hasResult && userAnswer !== correct;
-                      let cls =
-                        "flex h-12 items-center justify-center rounded-lg text-base font-semibold transition-colors ";
-                      if (hasResult) {
-                        if (isCorrectOpt) cls += "bg-success text-success-foreground";
-                        else if (isWrongSel) cls += "bg-destructive text-destructive-foreground";
-                        else cls += "bg-muted/40 text-muted-foreground/50";
-                      } else if (selected) {
-                        cls += "bg-primary text-primary-foreground";
-                      } else {
-                        cls += "bg-muted/60 text-foreground active:bg-primary/25";
-                      }
-                      return (
-                        <Button variant="ghost"
-                          key={opt}
-                          className={cls}
-                          aria-label={`Question ${current} option ${opt}`}
-                          disabled={isSubmitted || !!userAnswer}
-                          onClick={() => {
-                            onSelectAnswer(current, opt);
-                            if (current < totalQuestions) {
-                              setTimeout(() => setCurrent((c) => Math.min(totalQuestions, c + 1)), 250);
-                            }
-                          }}
-                        >
-                          {opt}
-                        </Button>
-                      );
-                    })}
-                  </div>
+                  <MCQOptionGroup question={current} userAnswer={userAnswer} correctAnswer={correct} disabled={isSubmitted} onSelect={(opt) => {
+                    onSelectAnswer(current, opt);
+                    if (current < totalQuestions) setTimeout(() => setCurrent((c) => Math.min(totalQuestions, c + 1)), 250);
+                  }} />
                 </div>
 
                 {/* Full answer sheet (reused component) */}

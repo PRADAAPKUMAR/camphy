@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import QuestionCard from "@/components/question-mode/QuestionCard";
 import QuestionStrip from "@/components/question-mode/QuestionStrip";
+import RollingNumber from "@/components/motion/RollingNumber";
 import OptionButtons from "@/components/question-mode/OptionButtons";
 import ResultSummary from "@/components/ResultSummary";
 import ExplanationDialog from "@/components/ExplanationDialog";
@@ -241,12 +242,12 @@ const QuestionModePage = () => {
             </Breadcrumb>
             <p className="text-xs text-muted-foreground">
               {isRetrySet ? "Retrying your wrong questions" : "Question mode"} ·{" "}
-              {answeredCount}/{questions.length} answered
+              <RollingNumber value={`${answeredCount}/${questions.length}`} /> answered
             </p>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="gap-1 border-border/40 font-mono text-xs">
-              <TimerIcon className="h-3.5 w-3.5" /> {fmtSeconds(elapsed)}
+              <TimerIcon className="h-3.5 w-3.5" /> <RollingNumber value={fmtSeconds(elapsed)} />
             </Badge>
             <Button variant="ghost" size="sm" asChild className="gap-1 text-muted-foreground">
               <Link to={`/exam/${paper.id}`}>
@@ -301,7 +302,7 @@ const QuestionModePage = () => {
                   <ChevronLeft className="h-5 w-5" />
                 </Button>
                 <p className="text-sm font-semibold">
-                  Question {currentQuestion}
+                  Question <RollingNumber value={currentQuestion} />
                   <span className="text-muted-foreground">
                     {" "}
                     ({current + 1} of {questions.length})

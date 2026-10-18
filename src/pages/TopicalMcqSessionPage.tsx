@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import QuestionCard from "@/components/question-mode/QuestionCard";
 import QuestionStrip from "@/components/question-mode/QuestionStrip";
+import RollingNumber from "@/components/motion/RollingNumber";
 import OptionButtons from "@/components/question-mode/OptionButtons";
 import ResultSummary from "@/components/ResultSummary";
 import ExplanationDialog, { type ExplanationData } from "@/components/ExplanationDialog";
@@ -268,11 +269,11 @@ const TopicalMcqSessionPage = () => {
               </BreadcrumbList>
             </Breadcrumb>
             <p className="text-xs text-muted-foreground">
-              Question mode · {answeredCount}/{items.length} answered
+              Question mode · <RollingNumber value={`${answeredCount}/${items.length}`} /> answered
             </p>
           </div>
           <Badge variant="outline" className="gap-1 border-border/40 font-mono text-xs">
-            <TimerIcon className="h-3.5 w-3.5" /> {fmtSeconds(elapsed)}
+            <TimerIcon className="h-3.5 w-3.5" /> <RollingNumber value={fmtSeconds(elapsed)} />
           </Badge>
         </div>
       </header>
