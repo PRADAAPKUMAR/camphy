@@ -1,5 +1,7 @@
-import { useEffect, useState, useCallback, memo } from "react";
+import { useEffect, useState, memo } from "react";
 import { Timer as TimerIcon } from "lucide-react";
+
+import RollingNumber from "@/components/motion/RollingNumber";
 
 interface TimerProps {
   durationMinutes: number;
@@ -37,14 +39,12 @@ const Timer = memo(({ durationMinutes, onTimeUp, isRunning }: TimerProps) => {
     <div
       className={`flex items-center gap-2 rounded-lg border px-4 py-2 font-mono text-sm font-bold tabular-nums transition-colors ${
         isLow
-          ? "border-destructive/30 bg-destructive/10 text-destructive animate-pulse"
+          ? "border-destructive/30 bg-destructive/10 text-destructive motion-safe:animate-pulse"
           : "border-primary/20 bg-primary/5 text-primary"
       }`}
     >
       <TimerIcon className="h-4 w-4" />
-      <span>
-        {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
-      </span>
+      <RollingNumber value={`${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`} />
     </div>
   );
 });
