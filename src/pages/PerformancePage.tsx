@@ -1,3 +1,4 @@
+import { GlassIcon } from "@/components/ui/glass-icon";
 import { lazy, Suspense, useMemo, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, BarChart3, Target, ListChecks, Trophy, Trash2, TrendingUp, FileText, Layers, ChevronRight } from "lucide-react";
@@ -36,9 +37,7 @@ const StatCard = ({ icon, label, value }: { icon: React.ReactNode; label: string
       <p className="text-xs leading-snug text-muted-foreground">{label}</p>
       <p className="mt-2 text-2xl font-bold tabular-nums">{value}</p>
     </div>
-    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-grade/20 bg-grade/10 text-grade">
-      {icon}
-    </div>
+    <GlassIcon className="h-10 w-10 shrink-0 text-grade">{icon}</GlassIcon>
   </div>
 );
 
@@ -162,9 +161,7 @@ const PerformancePage = () => {
           </Button>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
-                <BarChart3 className="h-5 w-5 text-primary" />
-              </div>
+              <GlassIcon className="h-10 w-10 text-primary"><BarChart3 className="h-5 w-5 text-primary" /></GlassIcon>
               <div>
                 <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{gradeDetails ? `${gradeDetails.label} Performance` : "Physics Performance"}</h1>
                 <p className="text-xs text-muted-foreground sm:text-sm">
@@ -200,9 +197,7 @@ const PerformancePage = () => {
       <main className="container relative py-10">
         {history.length === 0 ? (
           <div className="glass-card mx-auto max-w-lg rounded-2xl p-8 text-center">
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
-              <Target className="h-7 w-7" />
-            </div>
+            <GlassIcon className="mx-auto mb-5 h-14 w-14 text-primary"><Target className="h-7 w-7" /></GlassIcon>
             <h2 className="mb-2 text-xl font-bold">Your Physics performance dashboard is ready.</h2>
             <p className="mb-6 text-sm text-muted-foreground">
               Complete your first practice paper to start tracking your progress.

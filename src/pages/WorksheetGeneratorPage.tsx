@@ -1,3 +1,4 @@
+import { GlassIcon } from "@/components/ui/glass-icon";
 import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -281,9 +282,7 @@ const WorksheetGeneratorPage = () => {
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-border/40 bg-primary/10">
-              <FileText className="h-5 w-5 text-primary" />
-            </div>
+            <GlassIcon className="h-11 w-11 text-primary"><FileText className="h-5 w-5 text-primary" /></GlassIcon>
             <div>
               <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">MCQ Worksheet Generator</h1>
               <p className="text-sm text-muted-foreground">

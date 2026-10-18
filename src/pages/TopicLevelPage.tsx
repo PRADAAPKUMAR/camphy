@@ -1,3 +1,4 @@
+import { GlassIcon } from "@/components/ui/glass-icon";
 import { useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -137,7 +138,7 @@ const TopicLevelPage = () => {
             className="glass-card-hover mb-6 flex items-center justify-between gap-4 rounded-xl p-5"
           >
             <span className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-grade/20 bg-grade/10 text-grade"><LayoutGrid className="h-5 w-5" /></span>
+              <GlassIcon className="h-10 w-10 text-grade"><LayoutGrid className="h-5 w-5" /></GlassIcon>
               <span><span className="block font-bold">Mapped Past-Paper Topical MCQ</span><span className="block text-xs text-muted-foreground">Practice individual questions grouped by syllabus topic and subtopic.</span></span>
             </span>
             <ChevronRight className="h-5 w-5 text-muted-foreground" />
@@ -145,7 +146,7 @@ const TopicLevelPage = () => {
         )}
         {!hasMCQ && !hasTheory ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <Target className="h-12 w-12 text-muted-foreground/40 mb-4" />
+            <GlassIcon className="mb-4 h-14 w-14 text-muted-foreground"><Target className="h-7 w-7" /></GlassIcon>
             <p className="text-muted-foreground font-medium">No topics available for this level yet.</p>
           </div>
         ) : (
@@ -173,9 +174,7 @@ const TopicLevelPage = () => {
                       onClick={() => navigate(`/topic-exam/${paper.id}`)}
                     >
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-grade/10 border border-grade/20 text-grade transition-all group-hover:bg-grade group-hover:text-grade-foreground">
-                          <ScrollText className="h-4 w-4" />
-                        </div>
+                        <GlassIcon className="h-9 w-9 shrink-0 text-grade"><ScrollText className="h-4 w-4" /></GlassIcon>
                         <h3 className="text-base font-semibold">{paper.topic}</h3>
                       </div>
                       <div className="flex flex-wrap gap-2">
@@ -202,9 +201,7 @@ const TopicLevelPage = () => {
                       onClick={() => navigate(`/topic-theory/${q.id}`)}
                     >
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-grade/10 border border-grade/20 text-grade transition-all group-hover:bg-grade group-hover:text-grade-foreground">
-                          <FileText className="h-4 w-4" />
-                        </div>
+                        <GlassIcon className="h-9 w-9 shrink-0 text-grade"><FileText className="h-4 w-4" /></GlassIcon>
                         <h3 className="text-base font-semibold">{q.topic}</h3>
                       </div>
                     </div>

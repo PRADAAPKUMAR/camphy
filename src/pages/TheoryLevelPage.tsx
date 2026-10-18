@@ -1,3 +1,4 @@
+import { GlassIcon } from "@/components/ui/glass-icon";
 import { useMemo } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -121,7 +122,7 @@ const TheoryLevelPage = () => {
                               className="glass-card-hover group flex flex-col gap-3 rounded-lg p-5"
                             >
                               <div className="flex items-center gap-2">
-                                <FileText className="h-5 w-5 text-grade" />
+                                <GlassIcon icon={FileText} className="h-9 w-9" />
                                 <span className="font-mono text-sm font-bold">{paper.paper_code}</span>
                               </div>
                               <p className="text-sm text-muted-foreground">{paper.session} {paper.year}</p>

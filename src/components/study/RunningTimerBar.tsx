@@ -45,7 +45,7 @@ const RunningTimerBar = () => {
             <button
               onClick={() => studyTimerStore.toggleFocus()}
               aria-label="Pause focus timer"
-              className="text-muted-foreground hover:text-foreground"
+              className="glass-button glass-button-ghost glass-button-icon inline-flex h-8 w-8 items-center justify-center text-muted-foreground hover:text-foreground"
             >
               <Pause className="h-3.5 w-3.5" />
             </button>
@@ -65,21 +65,21 @@ const RunningTimerBar = () => {
             <button
               onClick={() => studyTimerStore.adjustTimer(t.id, -1)}
               aria-label="Subtract one minute"
-              className="text-muted-foreground hover:text-foreground"
+              className="glass-button glass-button-ghost glass-button-icon inline-flex h-8 w-8 items-center justify-center text-muted-foreground hover:text-foreground"
             >
               <Minus className="h-3.5 w-3.5" />
             </button>
             <button
               onClick={() => studyTimerStore.adjustTimer(t.id, 1)}
               aria-label="Add one minute"
-              className="text-muted-foreground hover:text-foreground"
+              className="glass-button glass-button-ghost glass-button-icon inline-flex h-8 w-8 items-center justify-center text-muted-foreground hover:text-foreground"
             >
               <Plus className="h-3.5 w-3.5" />
             </button>
             <button
               onClick={() => studyTimerStore.toggleTimer(t.id)}
               aria-label={t.running ? "Pause timer" : "Start timer"}
-              className="text-muted-foreground hover:text-foreground"
+              className="glass-button glass-button-ghost glass-button-icon inline-flex h-8 w-8 items-center justify-center text-muted-foreground hover:text-foreground"
             >
               {t.running ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
             </button>

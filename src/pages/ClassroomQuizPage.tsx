@@ -1,3 +1,4 @@
+import { GlassIcon } from "@/components/ui/glass-icon";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -262,13 +263,13 @@ const ClassroomQuizPage = () => {
   if (phase === "setup") {
     return (
       <div className="min-h-screen bg-background bg-grid page-transition">
-        <header className="border-b border-border/40 bg-radial-glow">
+        <header className="glass-nav border-b border-border/40 bg-radial-glow">
           <div className="container py-8 sm:py-10">
             <Button variant="ghost" size="sm" className="mb-4 gap-2 text-muted-foreground" onClick={() => navigate(`/grade/${grade}`)}>
               <ArrowLeft className="h-4 w-4" /> {GRADES[grade].label} home
             </Button>
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary"><Gamepad2 className="h-7 w-7" /></div>
+              <GlassIcon className="h-14 w-14 text-primary"><Gamepad2 className="h-7 w-7" /></GlassIcon>
               <div><p className="font-mono text-xs text-primary">{GRADES[grade].label} · Classroom activity</p><h1 className="text-3xl font-extrabold sm:text-4xl">Classroom Quiz</h1></div>
             </div>
           </div>
@@ -328,7 +329,7 @@ const ClassroomQuizPage = () => {
   if (phase === "results") {
     return <div className="min-h-screen bg-background bg-grid px-4 py-8 page-transition">
       <main className="mx-auto max-w-4xl">
-        <div className="mb-8 text-center"><Trophy className="mx-auto mb-4 h-14 w-14 text-primary" /><p className="font-mono text-xs text-primary">FINAL RESULTS</p><h1 className="mt-1 text-4xl font-extrabold">{ranked[0]?.rank === ranked[1]?.rank ? "It’s a tie!" : `${ranked[0]?.name} wins!`}</h1></div>
+        <div className="mb-8 text-center"><GlassIcon className="mx-auto mb-4 h-14 w-14 text-primary"><Trophy className="h-7 w-7" /></GlassIcon><p className="font-mono text-xs text-primary">FINAL RESULTS</p><h1 className="mt-1 text-4xl font-extrabold">{ranked[0]?.rank === ranked[1]?.rank ? "It’s a tie!" : `${ranked[0]?.name} wins!`}</h1></div>
         <div className="space-y-3">{ranked.map((team, index) => <div key={team.id} className={`glass-card flex items-center gap-4 rounded-xl p-5 ${team.rank === 1 ? "border-primary/50 glow-sm" : ""}`}>
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-muted text-lg font-black">{team.rank === 1 ? <Crown className="h-6 w-6 text-primary" /> : team.rank}</div>
           <div className="min-w-0 flex-1"><p className="truncate text-lg font-bold">{team.name}</p><p className="text-sm text-muted-foreground">{team.correct}/{answeredQuestionCount} correct</p></div>
@@ -340,7 +341,7 @@ const ClassroomQuizPage = () => {
   }
 
   return <div className="min-h-screen bg-background bg-grid page-transition">
-    <header className="border-b border-border/40 bg-background/90 px-3 py-3 backdrop-blur-xl">
+    <header className="glass-nav border-b border-border/40 bg-background/90 px-3 py-3 backdrop-blur-xl">
       <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3">
         <div><p className="font-mono text-xs text-primary">QUESTION {current + 1} OF {questions.length}</p><h1 className="text-lg font-bold">Classroom Quiz</h1></div>
         <div className={`flex min-w-32 items-center justify-center gap-2 rounded-lg border px-5 py-2 font-mono text-2xl font-black tabular-nums ${secondsLeft <= 5 && phase === "question" ? "border-destructive/50 bg-destructive/10 text-destructive animate-pulse" : "border-primary/30 bg-primary/10 text-primary"}`}><Clock3 className="h-5 w-5" />{fmtTime(secondsLeft)}</div>
@@ -365,7 +366,7 @@ const ClassroomQuizPage = () => {
           <span className="font-semibold">Reviewing question {shownIndex + 1} — timer paused</span>
           <Button size="sm" onClick={() => setViewIndex(null)}>Back to live question {current + 1}</Button>
         </div>}
-        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border/50 bg-card/60 px-4 py-3">
+        <div className="glass-control flex flex-wrap items-center gap-2 rounded-xl border border-border/50 bg-card/60 px-4 py-3">
           <Badge className="font-mono text-sm">{shownQuestion?.paper_code ?? "—"}</Badge>
           {(shownQuestion?.session || shownQuestion?.year) && <span className="text-sm text-muted-foreground">{[shownQuestion?.session, shownQuestion?.year].filter(Boolean).join(" ")}</span>}
           <Badge variant="secondary" className="text-sm">Question {shownQuestion?.question_number}</Badge>
@@ -380,7 +381,7 @@ const ClassroomQuizPage = () => {
             {shownPhase === "reveal" && <div className="flex items-center justify-center gap-3 rounded-xl border border-success/40 bg-success/10 p-4 text-lg font-bold text-success"><Check className="h-6 w-6" /> Correct answer: {shownQuestion?.correct_answer}</div>}
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{teams.map((team, index) => {
               const answer = shownAnswers[team.id];
-              return <div key={team.id} className="rounded-xl border bg-card/70 p-3" style={teamTone(index)}>
+              return <div key={team.id} className="glass-control rounded-xl border bg-card/70 p-3" style={teamTone(index)}>
                 <div className="mb-3 flex items-center justify-between gap-2"><p className="truncate font-bold">{team.name}</p>{answer ? <Badge variant="secondary">Locked {answer.option}</Badge> : <span className="text-xs text-muted-foreground">{shownPhase === "reveal" ? "No answer" : "Choose answer"}</span>}</div>
                 <div className="grid grid-cols-4 gap-2">{OPTIONS.map((option) => {
                   const selected = answer?.option === option;

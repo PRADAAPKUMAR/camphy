@@ -1,3 +1,4 @@
+import { GlassIcon } from "@/components/ui/glass-icon";
 import { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTileTransition } from "@/hooks/use-tile-transition";
@@ -64,9 +65,7 @@ const TheoryPapersPage = () => {
             <ArrowLeft className="h-4 w-4" /> Home
           </Button>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
-              <FileText className="h-5 w-5 text-primary" />
-            </div>
+            <GlassIcon className="h-10 w-10 text-primary"><FileText className="h-5 w-5 text-primary" /></GlassIcon>
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">Theory Past Papers</h1>
               <p className="text-sm text-muted-foreground">
@@ -96,9 +95,7 @@ const TheoryPapersPage = () => {
                     {...linkTileProps(`/theory-papers/${encodeURIComponent(level)}`)}
                     className="glass-card-hover group flex flex-col gap-4 rounded-2xl p-7"
                   >
-                    <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
-                      {levelIcons[normalizeGradeLabel(level)]}
-                    </div>
+                    <GlassIcon className="h-14 w-14 text-primary">{levelIcons[normalizeGradeLabel(level)]}</GlassIcon>
                     <div>
                       <h2 className="text-xl font-bold">{normalizeGradeLabel(level)}</h2>
                       <p className="text-xs text-muted-foreground">{levelDescriptions[normalizeGradeLabel(level)]}</p>

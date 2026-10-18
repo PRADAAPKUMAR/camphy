@@ -1,3 +1,4 @@
+import { GlassIcon } from "@/components/ui/glass-icon";
 import { useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, BarChart3, BookOpen, Brain, CalendarDays, ChevronRight, ClipboardList, FilePlus2, FileText, Gamepad2, RotateCcw, Target, Timer } from "lucide-react";
@@ -7,7 +8,7 @@ import { collectWrongQuestions, readPerformanceHistory } from "@/lib/performance
 
 function ResourceLink({ to, title, description, icon: Icon }: { to: string; title: string; description: string; icon: LucideIcon }) {
   return <Link to={to} className="workspace-resource">
-    <span className="workspace-resource-icon"><Icon className="h-5 w-5" aria-hidden="true" /></span>
+    <GlassIcon icon={Icon} className="workspace-resource-icon" />
     <span className="min-w-0 flex-1"><span className="block text-sm font-semibold">{title}</span><span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{description}</span></span>
     <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden="true" />
   </Link>;
@@ -40,7 +41,7 @@ function GradeWorkspace({ grade }: { grade: GradeKey }) {
           <h2 id="next-step" className="text-2xl font-bold">{retry ? "Turn mistakes into progress." : "Build confidence, one topic at a time."}</h2>
           <p className="mt-3 max-w-md text-sm leading-6 text-muted-foreground">{retry ? `${retry.questions.length} ${retry.questions.length === 1 ? "question to revisit" : "questions to revisit"} from ${retry.paperCode}. Take another look, then explore the explanation.` : "Choose a topic to work on, practise at your own pace, and make room for the ideas that need another look."}</p>
           <div className="mt-7 flex flex-wrap items-center gap-4">
-            <Link className="workspace-primary" to={retry ? `/question-mode/${retry.paperId}?qs=${retry.questions.join(",")}` : practice}>{retry ? <RotateCcw className="h-4 w-4" /> : <Target className="h-4 w-4" />}{retry ? "Retry mistakes" : "Choose a topic"}<ArrowRight className="h-4 w-4" /></Link>
+            <Link className="workspace-primary glass-button" to={retry ? `/question-mode/${retry.paperId}?qs=${retry.questions.join(",")}` : practice}>{retry ? <RotateCcw className="h-4 w-4" /> : <Target className="h-4 w-4" />}{retry ? "Retry mistakes" : "Choose a topic"}<ArrowRight className="h-4 w-4" /></Link>
             <Link to={retry ? practice : gradeSectionPath(grade, "theory")} className="workspace-text-link text-sm">{retry ? "Browse topics" : "Explore past papers"}</Link>
           </div>
         </section>

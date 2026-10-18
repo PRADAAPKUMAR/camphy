@@ -54,7 +54,7 @@ const MobileExamShell = ({
   return (
     <div className="flex h-[100dvh] flex-col bg-background">
       {/* Compact top bar */}
-      <div className="flex shrink-0 items-center justify-between gap-2 border-b bg-card px-3 py-2 shadow-sm">
+      <div className="glass-nav flex shrink-0 items-center justify-between gap-2 border-b bg-card px-3 py-2 shadow-sm">
         <div className="min-w-0 flex-1 truncate text-xs [&_*]:truncate">{breadcrumb}</div>
         <div className="shrink-0 text-sm">{timer}</div>
       </div>
@@ -64,7 +64,7 @@ const MobileExamShell = ({
 
       {/* Answers launcher */}
       <Drawer open={open} onOpenChange={setOpen}>
-        <div className="shrink-0 border-t bg-card px-3 pb-[env(safe-area-inset-bottom)] pt-2">
+        <div className="glass-nav shrink-0 border-t bg-card px-3 pb-[env(safe-area-inset-bottom)] pt-2">
           <DrawerTrigger asChild>
             <Button
               className="h-12 w-full justify-between font-semibold"

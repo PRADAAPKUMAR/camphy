@@ -200,7 +200,7 @@ const ExamPage = () => {
   if (paperLoading) {
     return (
       <div className="flex h-screen flex-col bg-background">
-        <div className="flex items-center justify-between border-b bg-card px-5 py-3 shadow-sm">
+        <div className="glass-nav flex items-center justify-between border-b bg-card px-5 py-3 shadow-sm">
           <Skeleton className="h-5 w-48" />
           <Skeleton className="h-8 w-24 rounded-md" />
         </div>
@@ -314,7 +314,7 @@ const ExamPage = () => {
   return (
     <div className="flex h-screen flex-col bg-background">
       {/* Top bar */}
-      <div className="flex items-center justify-between border-b bg-card px-5 py-3 shadow-sm">
+      <div className="glass-nav flex items-center justify-between border-b bg-card px-5 py-3 shadow-sm">
         <div className="flex items-center gap-4">{breadcrumb}</div>
         {timerEl}
       </div>

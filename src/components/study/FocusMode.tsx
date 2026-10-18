@@ -31,8 +31,8 @@ const FocusMode = () => {
   return (
     <>
       <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-        <div className="glass-card flex flex-col items-center rounded-2xl p-8">
-          <div className="mb-6 flex items-center gap-2">
+        <div className="glass-card flex min-w-0 flex-col items-center rounded-2xl p-4 sm:p-8">
+          <div className="mb-6 flex max-w-full flex-wrap items-center justify-center gap-2">
             <div
               className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold"
               style={{ background: `hsl(${ring} / 0.12)`, color: `hsl(${ring})` }}
@@ -44,19 +44,19 @@ const FocusMode = () => {
               type="button"
               onClick={() => setFull(true)}
               aria-label="Full screen focus timer"
-              className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/30 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+              className="glass-study-tab inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/30 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
             >
               <Maximize2 className="h-3.5 w-3.5" /> Full screen
             </button>
           </div>
 
           <div
-            className="relative flex h-56 w-56 items-center justify-center rounded-full"
+            className="relative flex h-52 w-52 items-center justify-center rounded-full sm:h-56 sm:w-56"
             style={{
               background: `conic-gradient(hsl(${ring}) ${pct}%, hsl(var(--muted) / 0.5) ${pct}% 100%)`,
             }}
           >
-            <div className="flex h-[13rem] w-[13rem] flex-col items-center justify-center rounded-full bg-card">
+            <div className="glass-dial flex h-48 w-48 flex-col items-center justify-center rounded-full bg-card sm:h-[13rem] sm:w-[13rem]">
               <span className="font-mono text-5xl font-bold tabular-nums" style={{ color: `hsl(${ring})` }}>
                 {m}:{s}
               </span>
@@ -68,7 +68,7 @@ const FocusMode = () => {
 
           <div className="mt-6">{adjust}</div>
 
-          <div className="mt-4 flex gap-3">
+          <div className="mt-4 flex flex-wrap justify-center gap-3">
             <Button className="gap-2" onClick={() => studyTimerStore.toggleFocus()}>
               {running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
               {running ? "Pause" : "Start"}
@@ -82,7 +82,7 @@ const FocusMode = () => {
           </div>
         </div>
 
-        <div className="glass-card rounded-2xl p-6">
+        <div className="glass-card min-w-0 rounded-2xl p-6">
           <h3 className="mb-4 text-lg font-bold">Session settings</h3>
           <div className="space-y-4">
             <div>
@@ -125,7 +125,7 @@ const FocusMode = () => {
                   key={f}
                   type="button"
                   onClick={() => studyTimerStore.setFocusLengths(f, b, true)}
-                  className="rounded-full border border-border/60 bg-muted/30 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
+                  className="glass-study-tab rounded-full border border-border/60 bg-muted/30 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground"
                 >
                   {f} / {b}
                 </button>
@@ -154,7 +154,7 @@ const FocusMode = () => {
             background: `conic-gradient(hsl(${ring}) ${pct}%, hsl(var(--muted) / 0.5) ${pct}% 100%)`,
           }}
         >
-          <div className="flex h-[92%] w-[92%] flex-col items-center justify-center rounded-full bg-card">
+          <div className="glass-dial flex h-[92%] w-[92%] flex-col items-center justify-center rounded-full bg-card">
             <span
               className="font-mono text-[clamp(3rem,12vw,8rem)] font-bold leading-none tabular-nums"
               style={{ color: `hsl(${ring})` }}
@@ -167,7 +167,7 @@ const FocusMode = () => {
           </div>
         </div>
         <div className="mt-8">{adjust}</div>
-        <div className="mt-4 flex gap-3">
+        <div className="mt-4 flex flex-wrap justify-center gap-3">
           <Button size="lg" className="gap-2" onClick={() => studyTimerStore.toggleFocus()}>
             {running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
             {running ? "Pause" : "Start"}

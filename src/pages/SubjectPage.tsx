@@ -1,3 +1,4 @@
+import { GlassIcon } from "@/components/ui/glass-icon";
 import { useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -120,9 +121,7 @@ const SubjectPage = () => {
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-grade/10 border border-grade/20">
-              <FlaskConical className="h-5 w-5 text-grade" />
-            </div>
+            <GlassIcon className="h-10 w-10 text-grade"><FlaskConical className="h-5 w-5 text-grade" /></GlassIcon>
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">Physics — {normalizeGradeLabel(decodedLevel)}</h1>
               <p className="text-sm text-muted-foreground">
@@ -136,7 +135,7 @@ const SubjectPage = () => {
       <main className="container relative py-8">
         {years.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <FlaskConical className="h-12 w-12 text-muted-foreground/40 mb-4" />
+            <GlassIcon className="mb-4 h-14 w-14 text-muted-foreground"><FlaskConical className="h-7 w-7" /></GlassIcon>
             <p className="text-muted-foreground font-medium">No papers found for this level.</p>
           </div>
         ) : (
@@ -174,9 +173,7 @@ const SubjectPage = () => {
                           onClick={() => navigate(`/exam/${paper.id}`)}
                         >
                           <div className="flex items-center gap-3 mb-3">
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-grade/10 border border-grade/20 text-grade transition-all group-hover:bg-grade group-hover:text-grade-foreground">
-                              <ScrollText className="h-4 w-4" />
-                            </div>
+                            <GlassIcon className="h-9 w-9 shrink-0 text-grade"><ScrollText className="h-4 w-4" /></GlassIcon>
                             <div>
                               <h3 className="text-base font-semibold font-mono">{paper.paper_code}</h3>
                             </div>

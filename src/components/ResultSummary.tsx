@@ -1,3 +1,4 @@
+import { GlassIcon } from "@/components/ui/glass-icon";
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -98,12 +99,10 @@ const ResultSummary = memo(({
   };
 
   return (
-    <div className="flex h-full flex-col bg-card">
+    <div className="glass-pane flex h-full flex-col bg-card">
       {/* Score header */}
       <div className="border-b p-6 text-center">
-        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-          <Award className={`h-7 w-7 ${getScoreColor()}`} />
-        </div>
+        <GlassIcon className="mx-auto mb-3 h-14 w-14 text-primary"><Award className={`h-7 w-7 ${getScoreColor()}`} /></GlassIcon>
         <div className={`text-4xl font-black tabular-nums ${getScoreColor()}`}>
           {score}/{totalQuestions}
         </div>

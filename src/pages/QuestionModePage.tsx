@@ -207,7 +207,7 @@ const QuestionModePage = () => {
 
   return (
     <div className="min-h-screen bg-background bg-grid">
-      <header className="border-b border-border/40">
+      <header className="glass-nav border-b border-border/40">
         <div className="flex w-full flex-wrap items-center justify-between gap-3 px-2 py-3 sm:px-4">
           <div className="min-w-0">
             <Breadcrumb className="mb-1">

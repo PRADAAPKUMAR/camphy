@@ -58,7 +58,7 @@ const SiteNav = () => {
     <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="min-h-11 min-w-11" aria-label="Account menu"><Avatar className="h-8 w-8"><AvatarImage src={profile?.avatar_url ?? undefined} alt="" /><AvatarFallback>{(profile?.display_name || user.email || "U").slice(0, 1).toUpperCase()}</AvatarFallback></Avatar></Button></DropdownMenuTrigger>
     <DropdownMenuContent align="end" className="w-56"><DropdownMenuLabel className="truncate">{profile?.display_name || user.email}</DropdownMenuLabel><DropdownMenuSeparator /><DropdownMenuItem asChild><Link to="/profile"><UserRound className="mr-2 h-4 w-4" />Profile &amp; preferences</Link></DropdownMenuItem>{role === "admin" && <DropdownMenuItem asChild><Link to="/admin/upload"><Shield className="mr-2 h-4 w-4" />Admin console</Link></DropdownMenuItem>}<DropdownMenuSeparator /><DropdownMenuItem onSelect={() => void signOut()}><LogOut className="mr-2 h-4 w-4" />Sign out</DropdownMenuItem></DropdownMenuContent>
   </DropdownMenu> : <Button variant="outline" size="sm" className="min-h-11 px-2 sm:px-3" asChild><Link to={`/auth?returnTo=${encodeURIComponent(pathname)}`} aria-label="Sign in"><LogIn className="h-4 w-4 sm:mr-1.5" /><span className="hidden sm:inline">Sign in</span></Link></Button>;
-  return <nav aria-label="Main navigation" className="workspace-nav relative z-40 border-b border-border/60 bg-background" data-grade={grade ?? undefined}>
+  return <nav aria-label="Main navigation" className="glass-nav workspace-nav relative z-40 border-b border-border/60 bg-background" data-grade={grade ?? undefined}>
     <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-8">
       <div className="flex min-w-0 items-center gap-3 sm:gap-5">
         <Link to={grade ? `/grade/${grade}` : "/"} className="workspace-brand flex shrink-0 items-center gap-2 text-sm font-extrabold" aria-label="PhysicsHQ home"><img src="/favicon.png" alt="" width="26" height="26" className="h-[26px] w-[26px] object-contain" /><span className="hidden min-[370px]:inline">Physics<span className="text-primary">HQ</span></span></Link>
@@ -76,7 +76,7 @@ const SiteNav = () => {
       {papers}
       {primary.slice(1).map((item) => <Link key={item.to} to={item.to} className={linkClass(item.to)} aria-current={selected(item.to) ? "page" : undefined}>{item.label}</Link>)}
     </div>}
-    {menuOpen && <div id="workspace-menu" className="border-t border-border/50 bg-background"><div className="mx-auto grid max-w-6xl gap-1 px-4 py-3 sm:grid-cols-3 sm:px-8">{secondary.map((item) => <Link key={item.to} to={item.to} onClick={() => setMenuOpen(false)} className="workspace-menu-link" aria-current={isActive(pathname, item.to) ? "page" : undefined}>{item.label}</Link>)}</div></div>}
+    {menuOpen && <div id="workspace-menu" className="glass-menu-panel border-t border-border/50 bg-background"><div className="mx-auto grid max-w-6xl gap-1 px-4 py-3 sm:grid-cols-3 sm:px-8">{secondary.map((item) => <Link key={item.to} to={item.to} onClick={() => setMenuOpen(false)} className="workspace-menu-link" aria-current={isActive(pathname, item.to) ? "page" : undefined}>{item.label}</Link>)}</div></div>}
   </nav>;
 };
 export default SiteNav;

@@ -1,3 +1,4 @@
+import { GlassIcon } from "@/components/ui/glass-icon";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
@@ -117,9 +118,7 @@ const MaterialsPage = () => {
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 border border-accent/20">
-              <BookMarked className="h-5 w-5 text-accent" />
-            </div>
+            <GlassIcon className="h-10 w-10 text-accent"><BookMarked className="h-5 w-5 text-accent" /></GlassIcon>
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">Study Materials</h1>
               <p className="text-muted-foreground text-sm">Select your level to browse resources</p>
@@ -131,7 +130,7 @@ const MaterialsPage = () => {
       <main className="container relative py-10">
         {levels.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <BookMarked className="h-12 w-12 text-muted-foreground/40 mb-4" />
+            <GlassIcon className="mb-4 h-14 w-14 text-muted-foreground"><BookMarked className="h-7 w-7" /></GlassIcon>
             <p className="text-muted-foreground font-medium">No study materials available yet.</p>
           </div>
         ) : (
@@ -142,9 +141,7 @@ const MaterialsPage = () => {
                 className="glass-card-hover group cursor-pointer rounded-2xl p-7 flex flex-col gap-4"
                 {...tileProps(`/materials/${encodeURIComponent(l.level)}`)}
               >
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-accent/10 border border-accent/20 text-accent transition-all group-hover:bg-accent group-hover:text-accent-foreground">
-                  {levelIcons[normalizeGradeLabel(l.level)] || <Zap className="h-6 w-6" />}
-                </div>
+                <GlassIcon className="h-14 w-14 shrink-0 text-accent">{levelIcons[normalizeGradeLabel(l.level)] || <Zap className="h-6 w-6" />}</GlassIcon>
                 <div>
                   <h3 className="text-xl font-bold mb-1">{normalizeGradeLabel(l.level)}</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">

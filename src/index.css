@@ -343,3 +343,163 @@
     :is(.glass-card, .glass-card-hover, .grade-tile, .level-card, .workspace-panel, .workspace-resource, .tile-surface, .tile-lift) { transition: border-color 180ms ease; }
   }
 }
+
+/* Shared glass language. Small controls use highlights rather than another
+   backdrop blur, keeping dense question lists and mobile pages inexpensive. */
+@layer utilities {
+  .glass-canvas > .bg-background:not(.bg-grid) {
+    background-image:
+      radial-gradient(ellipse at 5% 0%, hsl(var(--grade-accent) / 0.1), transparent 48rem),
+      radial-gradient(ellipse at 95% 40%, hsl(var(--study-4) / 0.06), transparent 44rem);
+  }
+
+  .glass-nav,
+  .glass-menu-panel {
+    background: linear-gradient(120deg, hsl(var(--card) / 0.88), hsl(var(--background) / 0.92));
+    border-color: hsl(var(--foreground) / 0.1);
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.05);
+  }
+  .glass-nav {
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+  .glass-nav .workspace-nav-link {
+    border-radius: 0.75rem 0.75rem 0 0;
+  }
+  .glass-nav .workspace-nav-active {
+    background: linear-gradient(to bottom, hsl(var(--grade-accent) / 0.13), transparent);
+  }
+
+  .glass-overlay {
+    background: linear-gradient(145deg, hsl(var(--popover) / 0.97), hsl(var(--background) / 0.95));
+    border-color: hsl(var(--foreground) / 0.16);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 20px 60px -20px hsl(222 47% 3% / 0.7), inset 0 1px 0 hsl(var(--foreground) / 0.1);
+  }
+  .glass-overlay:not([data-vaul-drawer]):not([role="dialog"]) { border-radius: 0.75rem; }
+
+  /* Buttons that serve as tiles retain the larger tile surface and hover. */
+  .glass-button:where(:not(.grade-tile, .glass-card, .glass-card-hover)) {
+    border: 1px solid hsl(var(--foreground) / 0.16);
+    border-radius: 0.75rem;
+    background-image: linear-gradient(150deg, hsl(var(--foreground) / 0.16), transparent 65%);
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.12), 0 3px 8px -4px hsl(222 47% 3% / 0.5);
+    transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+  }
+  .glass-button-primary { border-color: hsl(var(--primary) / 0.6); }
+  .glass-button-danger { border-color: hsl(var(--destructive) / 0.7); }
+  .glass-button-neutral {
+    background-color: hsl(var(--card) / 0.65);
+    background-image: linear-gradient(145deg, hsl(var(--foreground) / 0.06), transparent 65%);
+  }
+  .glass-button-ghost:where(:not(.grade-tile, .glass-card, .glass-card-hover)) { border-color: transparent; background-image: none; box-shadow: none; }
+  .glass-button-icon {
+    border-color: hsl(var(--foreground) / 0.12);
+    background-image: linear-gradient(145deg, hsl(var(--foreground) / 0.07), transparent);
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.06);
+  }
+  .glass-control,
+  .glass-field {
+    border: 1px solid hsl(var(--foreground) / 0.14);
+    border-radius: 0.75rem;
+    background: linear-gradient(145deg, hsl(var(--card) / 0.7), hsl(var(--background) / 0.6));
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.05);
+  }
+  .glass-field {
+    background: linear-gradient(145deg, hsl(var(--background) / 0.7), hsl(var(--card) / 0.45));
+    box-shadow: inset 0 2px 4px hsl(222 47% 3% / 0.15), 0 1px 0 hsl(var(--foreground) / 0.04);
+  }
+  /* Native select options need their own opaque background in system popups. */
+  select.glass-field option { background: hsl(var(--popover)); color: hsl(var(--foreground)); }
+  .glass-tab { border: 1px solid transparent; border-radius: 0.5rem; }
+  .glass-tab[data-state="active"] {
+    border-color: hsl(var(--foreground) / 0.15);
+    background-image: linear-gradient(145deg, hsl(var(--foreground) / 0.1), transparent);
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.08), 0 2px 6px hsl(222 47% 3% / 0.2);
+  }
+  .glass-badge,
+  .glass-check,
+  .glass-toggle,
+  .glass-avatar {
+    background-image: linear-gradient(145deg, hsl(var(--foreground) / 0.1), transparent 65%);
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.12);
+  }
+  .glass-study-tab {
+    background-image: linear-gradient(145deg, hsl(var(--foreground) / 0.07), transparent);
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.06);
+  }
+  .glass-study-tab:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 3px;
+  }
+  .glass-dial {
+    background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--background) / 0.96));
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.12), inset 0 -4px 16px hsl(222 47% 3% / 0.2);
+  }
+  .glass-pane {
+    background: linear-gradient(145deg, hsl(var(--card) / 0.9), hsl(var(--background) / 0.85));
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.08);
+  }
+  .glass-track,
+  .glass-feedback {
+    background-image: linear-gradient(to bottom, hsl(var(--foreground) / 0.06), transparent);
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.1);
+  }
+
+  .glass-icon {
+    border: 1px solid hsl(var(--grade-accent) / 0.3);
+    border-color: color-mix(in srgb, currentColor 30%, transparent);
+    background:
+      linear-gradient(145deg, hsl(var(--foreground) / 0.16), transparent 55%),
+      linear-gradient(135deg, hsl(var(--grade-accent) / 0.16), hsl(var(--card) / 0.7));
+    background:
+      linear-gradient(145deg, hsl(var(--foreground) / 0.16), transparent 55%),
+      linear-gradient(135deg, color-mix(in srgb, currentColor 16%, transparent), hsl(var(--card) / 0.7));
+    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.2), inset 0 -1px 0 hsl(var(--background) / 0.2), 0 5px 12px -6px hsl(222 47% 3% / 0.5);
+  }
+  .glass-icon > svg {
+    flex-shrink: 0;
+    stroke-width: 1.75;
+    filter: drop-shadow(0 1px 2px hsl(var(--background) / 0.4));
+  }
+  .glass-icon.workspace-resource-icon { color: hsl(var(--grade-accent)); }
+
+  @media (hover: hover) and (pointer: fine) {
+    .glass-button:where(:not(.grade-tile, .glass-card, .glass-card-hover)):not(:disabled):hover {
+      border-color: hsl(var(--foreground) / 0.35);
+      box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.2), 0 5px 16px -6px hsl(222 47% 3% / 0.5);
+    }
+    .glass-button-ghost:where(:not(.grade-tile, .glass-card, .glass-card-hover)):not(:disabled):hover { background-color: hsl(var(--foreground) / 0.06); }
+    .glass-field:not(:disabled):hover { border-color: hsl(var(--foreground) / 0.25); }
+  }
+  @media (max-width: 639px) {
+    :is(.glass-card, .glass-card-hover, .grade-tile, .level-card, .workspace-panel, .workspace-resource, .tile-surface, .glass-nav) {
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    :is(.glass-overlay, .glass-nav, .glass-menu-panel, .glass-card, .glass-card-hover, .grade-tile, .level-card, .workspace-panel, .workspace-resource, .tile-surface) {
+      background-color: hsl(var(--card));
+    }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    :is(.glass-overlay, .glass-nav, .glass-menu-panel, .glass-control, .glass-field, .glass-icon, .glass-pane, .glass-dial, .glass-card, .glass-card-hover, .grade-tile, .level-card, .workspace-panel, .workspace-resource, .tile-surface) {
+      background: hsl(var(--card));
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+  @media (forced-colors: active) {
+    :is(.glass-overlay, .glass-nav, .glass-menu-panel, .glass-control, .glass-field, .glass-button, .glass-icon, .glass-pane, .glass-dial, .glass-card, .glass-card-hover, .grade-tile, .level-card, .workspace-panel, .workspace-resource, .tile-surface) {
+      border-color: ButtonText;
+      background: Canvas;
+      color: CanvasText;
+      box-shadow: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+    .glass-icon > svg { filter: none; }
+  }
+}

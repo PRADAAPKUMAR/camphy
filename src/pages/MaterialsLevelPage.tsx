@@ -1,3 +1,4 @@
+import { GlassIcon } from "@/components/ui/glass-icon";
 import { useState, useMemo } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -230,9 +231,7 @@ const MaterialsLevelPage = () => {
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-grade/10 border border-grade/20">
-              <BookMarked className="h-5 w-5 text-grade" />
-            </div>
+            <GlassIcon className="h-10 w-10 text-grade"><BookMarked className="h-5 w-5 text-grade" /></GlassIcon>
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">
                 {currentPath.length > 0
@@ -282,9 +281,7 @@ const MaterialsLevelPage = () => {
                   onClick={() => navigateToFolder(folder)}
                   className="glass-card-hover group rounded-xl p-5 flex h-auto items-center gap-4 text-left w-full whitespace-normal transition-all"
                 >
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-grade/10 border border-grade/20 text-grade transition-all group-hover:bg-grade group-hover:text-grade-foreground">
-                    <Folder className="h-5 w-5" />
-                  </div>
+                  <GlassIcon className="h-11 w-11 shrink-0 text-grade"><Folder className="h-5 w-5" /></GlassIcon>
                   <div className="min-w-0 flex-1">
                     <h3 className="text-sm font-semibold truncate">{folder}</h3>
                   </div>
@@ -320,9 +317,7 @@ const MaterialsLevelPage = () => {
                     className="glass-card-hover group rounded-xl p-5 block cursor-pointer no-underline text-inherit"
                   >
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-grade/10 border border-grade/20 text-grade">
-                        <FileText className="h-4 w-4" />
-                      </div>
+                      <GlassIcon className="h-9 w-9 shrink-0 text-grade"><FileText className="h-4 w-4" /></GlassIcon>
                       <div className="min-w-0">
                         <h3 className="text-sm font-semibold truncate">{mat.title}</h3>
                         {mat.description && (
@@ -343,7 +338,7 @@ const MaterialsLevelPage = () => {
 
         {subfolders.length === 0 && files.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20">
-            <BookMarked className="h-12 w-12 text-muted-foreground/40 mb-4" />
+            <GlassIcon className="mb-4 h-14 w-14 text-muted-foreground"><BookMarked className="h-7 w-7" /></GlassIcon>
             <p className="text-muted-foreground font-medium">
               {search ? "No materials match your search." : "No materials found here."}
             </p>

@@ -110,7 +110,7 @@ const RouterContent = () => {
     <a href="#page-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-3 focus:text-primary-foreground">Skip to content</a>
     {user && profile && !profile.setup_completed && pathname !== "/profile" && !pathname.startsWith("/auth") && <Navigate to="/profile" replace />}
     {!navExcluded && <SiteNav />}
-    <div id="page-content" tabIndex={-1} data-grade={pageGrade ?? undefined}>
+    <div id="page-content" className="glass-canvas" tabIndex={-1} data-grade={pageGrade ?? undefined}>
     <Suspense fallback={
       <div className="min-h-screen bg-background">
         <div className="border-b border-border/40">

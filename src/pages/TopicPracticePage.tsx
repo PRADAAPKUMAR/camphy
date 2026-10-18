@@ -1,3 +1,4 @@
+import { GlassIcon } from "@/components/ui/glass-icon";
 import { useTileTransition } from "@/hooks/use-tile-transition";
 import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -124,7 +125,7 @@ const TopicPracticePage = () => {
       <main className="container relative py-8">
         {levels.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <Target className="h-12 w-12 text-muted-foreground/40 mb-4" />
+            <GlassIcon className="mb-4 h-14 w-14 text-muted-foreground"><Target className="h-7 w-7" /></GlassIcon>
             <p className="text-muted-foreground font-medium">No topic-wise questions available yet.</p>
           </div>
         ) : (
@@ -133,9 +134,7 @@ const TopicPracticePage = () => {
               className="glass-card-hover group cursor-pointer rounded-2xl p-7"
               {...tileProps("/topical-mcq")}
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-accent/10 border border-accent/20 text-accent mb-4 transition-all group-hover:bg-accent group-hover:text-accent-foreground group-hover:glow-sm">
-                <LayoutGrid className="h-5 w-5" />
-              </div>
+              <GlassIcon className="h-14 w-14 text-accent mb-4"><LayoutGrid className="h-5 w-5" /></GlassIcon>
               <h3 className="text-xl font-bold mb-1">Topical MCQ</h3>
               <p className="text-sm text-muted-foreground">
                 One question at a time with instant marking
@@ -147,9 +146,7 @@ const TopicPracticePage = () => {
                 className="glass-card-hover group cursor-pointer rounded-2xl p-7"
                 {...tileProps(`/topic-practice/${encodeURIComponent(lvl)}`)}
               >
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary mb-4 transition-all group-hover:bg-primary group-hover:text-primary-foreground group-hover:glow-sm">
-                  {levelIcons[normalizeGradeLabel(lvl)] || <Target className="h-5 w-5" />}
-                </div>
+                <GlassIcon className="h-14 w-14 text-primary mb-4">{levelIcons[normalizeGradeLabel(lvl)] || <Target className="h-5 w-5" />}</GlassIcon>
                 <h3 className="text-xl font-bold mb-1">{normalizeGradeLabel(lvl)}</h3>
                 <p className="text-sm text-muted-foreground">
                   {mcqLevels?.[lvl] ?? 0} MCQ · {theoryLevels?.[lvl] ?? 0} Theory

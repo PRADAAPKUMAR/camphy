@@ -1,3 +1,4 @@
+import { GlassIcon } from "@/components/ui/glass-icon";
 import { useState, useSyncExternalStore } from "react";
 import { Play, Pause, RotateCcw, X, Plus, Bell, Maximize2, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -71,10 +72,10 @@ const MultiTimers = () => {
                     key={p.label}
                     type="button"
                     onClick={() => studyTimerStore.addTimer(p.label, p.minutes)}
-                    className="rounded-full border px-3 py-1.5 text-xs font-medium transition-colors hover:text-foreground"
+                    className="glass-study-tab rounded-full border px-3 py-1.5 text-xs font-medium transition-colors hover:text-foreground"
                     style={{
                       borderColor: `hsl(${group.color} / 0.35)`,
-                      background: `hsl(${group.color} / 0.08)`,
+                      backgroundColor: `hsl(${group.color} / 0.08)`,
                       color: `hsl(${group.color})`,
                     }}
                   >
@@ -92,7 +93,7 @@ const MultiTimers = () => {
 
       {timers.length === 0 ? (
         <div className="glass-card rounded-2xl p-10 text-center">
-          <Bell className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
+          <GlassIcon className="mx-auto mb-3 h-14 w-14 text-muted-foreground"><Bell className="h-7 w-7" /></GlassIcon>
           <p className="text-sm text-muted-foreground">
             No timers running. Add one above or tap a paper preset to time a full paper.
           </p>
@@ -115,14 +116,14 @@ const MultiTimers = () => {
                     <button
                       onClick={() => setFullId(t.id)}
                       aria-label="Full screen timer"
-                      className="text-muted-foreground transition-colors hover:text-foreground"
+                      className="glass-button glass-button-ghost glass-button-icon inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
                     >
                       <Maximize2 className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => studyTimerStore.removeTimer(t.id)}
                       aria-label="Remove timer"
-                      className="text-muted-foreground transition-colors hover:text-destructive"
+                      className="glass-button glass-button-ghost glass-button-icon inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-destructive"
                     >
                       <X className="h-4 w-4" />
                     </button>

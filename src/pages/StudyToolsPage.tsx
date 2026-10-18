@@ -1,3 +1,4 @@
+import { GlassIcon } from "@/components/ui/glass-icon";
 import { Link, useSearchParams } from "react-router-dom";
 import { Timer as TimerIcon, Brain, CalendarDays, ArrowLeft } from "lucide-react";
 import MultiTimers from "@/components/study/MultiTimers";
@@ -43,14 +44,15 @@ const StudyToolsPage = () => {
                 <button
                   key={t.key}
                   onClick={() => setTab(t.key)}
-                  className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all"
+                  aria-pressed={active}
+                  className="glass-study-tab inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all"
                   style={{
-                    background: active ? `hsl(${t.color} / 0.15)` : "transparent",
+                    backgroundColor: active ? `hsl(${t.color} / 0.15)` : "transparent",
                     borderColor: active ? `hsl(${t.color} / 0.45)` : "hsl(var(--border))",
                     color: active ? `hsl(${t.color})` : "hsl(var(--muted-foreground))",
                   }}
                 >
-                  <t.icon className="h-4 w-4" />
+                  <GlassIcon icon={t.icon} className="h-7 w-7 rounded-lg text-current [&>svg]:h-4 [&>svg]:w-4" />
                   {t.label}
                 </button>
               );

@@ -1,3 +1,4 @@
+import { GlassIcon } from "@/components/ui/glass-icon";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -369,7 +370,7 @@ const AdminUploadPage = () => {
               onClick={() => setView("__images")}
               className="glass-card flex flex-col items-start gap-2 rounded-2xl p-5 text-left transition hover:border-primary/50"
             >
-              <Images className="h-8 w-8 text-primary" />
+              <GlassIcon className="h-14 w-14 text-primary"><Images className="h-7 w-7" /></GlassIcon>
               <span className="font-semibold">Question images</span>
               <span className="text-xs text-muted-foreground">
                 Upload one JPG per MCQ question and manage what is already uploaded.
@@ -381,7 +382,7 @@ const AdminUploadPage = () => {
               onClick={() => setView("__theory")}
               className="glass-card flex flex-col items-start gap-2 rounded-2xl p-5 text-left transition hover:border-primary/50"
             >
-              <FileText className="h-8 w-8 text-primary" />
+              <GlassIcon className="h-14 w-14 text-primary"><FileText className="h-7 w-7" /></GlassIcon>
               <span className="font-semibold">Theory past papers</span>
               <span className="text-xs text-muted-foreground">
                 Upload question paper &amp; mark scheme PDFs (auto-paired by filename) and write
@@ -404,7 +405,7 @@ const AdminUploadPage = () => {
                 onClick={() => setView(t.name)}
                 className="glass-card flex flex-col items-start gap-2 rounded-2xl p-5 text-left transition hover:border-primary/50"
               >
-                <Table2 className="h-8 w-8 text-primary" />
+                <GlassIcon className="h-14 w-14 text-primary"><Table2 className="h-7 w-7" /></GlassIcon>
                 <span className="font-mono text-sm font-semibold">{t.name}</span>
                 <span className="text-xs text-muted-foreground">
                   {t.columns.length} columns · edit, add, delete or download rows

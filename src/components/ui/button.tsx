@@ -9,18 +9,18 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground",
-        destructive: "bg-destructive text-destructive-foreground",
-        outline: "border border-input bg-background",
-        secondary: "bg-secondary text-secondary-foreground",
-        ghost: "",
+        default: "glass-button glass-button-primary bg-primary text-primary-foreground",
+        destructive: "glass-button glass-button-danger bg-destructive text-destructive-foreground",
+        outline: "glass-button glass-button-neutral border border-input bg-background",
+        secondary: "glass-button glass-button-neutral bg-secondary text-secondary-foreground",
+        ghost: "glass-button glass-button-ghost",
         link: "text-primary underline-offset-4",
       },
       size: {
         default: "h-10 px-4 py-2",
         sm: "h-9 rounded-md px-3",
         lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
+        icon: "glass-button-icon h-10 w-10",
       },
     },
     defaultVariants: {
