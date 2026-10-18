@@ -34,7 +34,7 @@ function GradeWorkspace({ grade }: { grade: GradeKey }) {
       </header>
 
       <div className="grid items-stretch gap-4 lg:grid-cols-[1.35fr_1fr]">
-        <section aria-labelledby="next-step" className="workspace-panel relative overflow-hidden p-6 sm:p-8">
+        <section aria-labelledby="next-step" className="workspace-panel tile-lift relative overflow-hidden p-6 sm:p-8">
           <span className="absolute inset-y-0 left-0 w-1 bg-grade" aria-hidden="true" />
           <div className="mb-6 flex items-center gap-2 text-xs font-medium text-grade"><Target className="h-4 w-4" />Your next step</div>
           <h2 id="next-step" className="text-2xl font-bold">{retry ? "Turn mistakes into progress." : "Build confidence, one topic at a time."}</h2>
@@ -45,7 +45,7 @@ function GradeWorkspace({ grade }: { grade: GradeKey }) {
           </div>
         </section>
 
-        <section aria-labelledby="recent-performance" className="workspace-panel flex flex-col p-6 sm:p-7">
+        <section aria-labelledby="recent-performance" className="workspace-panel tile-lift flex flex-col p-6 sm:p-7">
           <div className="flex items-center justify-between gap-3"><h2 id="recent-performance" className="flex items-center gap-2 text-sm font-semibold"><BarChart3 className="h-4 w-4 text-muted-foreground" />Recent performance</h2><Link to={gradeSectionPath(grade, "performance")} className="workspace-text-link text-xs">View progress<ArrowRight className="h-3.5 w-3.5" /></Link></div>
           {history.length ? <>
             <dl className="my-6 grid grid-cols-3 gap-3">
@@ -60,11 +60,11 @@ function GradeWorkspace({ grade }: { grade: GradeKey }) {
       <section aria-labelledby="study-resources" className="mt-8 sm:mt-10">
         <div className="mb-4 flex items-baseline justify-between gap-3"><h2 id="study-resources" className="text-base font-semibold">Make it your study session</h2><span className="hidden text-xs text-muted-foreground sm:inline">Questions, explanations, and a place to begin.</span></div>
         <div className="grid gap-4 md:grid-cols-2">
-          <div className="workspace-panel overflow-hidden"><div className="workspace-section-label">Past papers</div>
+          <div className="grid gap-3"><div className="workspace-section-label">Past papers</div>
             {details.hasMcqPapers && <ResourceLink to={gradeSectionPath(grade, "mcq")} title="MCQ past papers" description="Full papers, organised by year and series." icon={ClipboardList} />}
             <ResourceLink to={gradeSectionPath(grade, "theory")} title="Theory past papers" description="Structured questions, official answers, and explanations." icon={FileText} />
           </div>
-          <div className="workspace-panel overflow-hidden"><div className="workspace-section-label">Learn & practise</div>
+          <div className="grid gap-3"><div className="workspace-section-label">Learn & practise</div>
             <ResourceLink to={practice} title="Practice by topic" description="Spend more time on the ideas that need it." icon={Target} />
             <ResourceLink to={gradeSectionPath(grade, "materials")} title="Study materials" description="Notes, revision guides, and learning resources." icon={BookOpen} />
           </div>
@@ -73,7 +73,7 @@ function GradeWorkspace({ grade }: { grade: GradeKey }) {
 
       <section aria-labelledby="study-tools" className="mt-8">
         <h2 id="study-tools" className="mb-4 text-base font-semibold">Find your focus</h2>
-        <div className="workspace-tools workspace-panel grid overflow-hidden sm:grid-cols-3">
+        <div className="workspace-tools grid gap-3 sm:grid-cols-3">
           <ResourceLink to="/study-tools?tab=timers" title="Exam timers" description="Make time for a full paper." icon={Timer} />
           <ResourceLink to="/study-tools?tab=focus" title="Focus mode" description="One task. A little breathing room." icon={Brain} />
           <ResourceLink to="/study-tools?tab=timetable" title="Timetable" description="Give your revision a rhythm." icon={CalendarDays} />

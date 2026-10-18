@@ -31,12 +31,14 @@ const WeakestSubtopics = lazy(() => import("@/components/performance/WeakestSubt
 const RetryMistakes = lazy(() => import("@/components/performance/RetryMistakes"));
 
 const StatCard = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-  <div className="glass-card rounded-2xl p-4 sm:p-5">
-    <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary sm:h-10 sm:w-10">
+  <div className="glass-card tile-lift flex items-center justify-between gap-3 p-5 sm:p-6">
+    <div className="min-w-0">
+      <p className="text-xs leading-snug text-muted-foreground">{label}</p>
+      <p className="mt-2 text-2xl font-bold tabular-nums">{value}</p>
+    </div>
+    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-grade/20 bg-grade/10 text-grade">
       {icon}
     </div>
-    <p className="text-xl font-bold sm:text-2xl">{value}</p>
-    <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">{label}</p>
   </div>
 );
 
@@ -222,7 +224,7 @@ const PerformancePage = () => {
 
               {showSplit && (
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 sm:gap-4">
-                  <div className="glass-card rounded-2xl p-4 sm:p-5">
+                  <div className="glass-card tile-lift rounded-2xl p-4 sm:p-5">
                     <div className="mb-2 flex items-center gap-2 text-sm font-bold">
                       <FileText className="h-4 w-4 text-primary" /> Past Paper Performance
                     </div>
@@ -232,7 +234,7 @@ const PerformancePage = () => {
                       {paperSummary.questions} questions
                     </p>
                   </div>
-                  <div className="glass-card rounded-2xl p-4 sm:p-5">
+                  <div className="glass-card tile-lift rounded-2xl p-4 sm:p-5">
                     <div className="mb-2 flex items-center gap-2 text-sm font-bold">
                       <Layers className="h-4 w-4 text-primary" /> Topic Practice Performance
                     </div>
@@ -262,7 +264,7 @@ const PerformancePage = () => {
                   {byLevel.map((l) => {
                     const pct = l.total ? Math.round((l.score / l.total) * 100) : 0;
                     return (
-                      <div key={l.level} className="glass-card rounded-2xl p-5">
+                      <div key={l.level} className="glass-card tile-lift rounded-2xl p-5">
                         <div className="mb-3 flex items-center justify-between">
                           <h3 className="font-bold">{normalizeGradeLabel(l.level)}</h3>
                           <Badge variant="secondary" className="bg-secondary/60 text-xs">

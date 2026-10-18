@@ -76,7 +76,7 @@ const SubtopicRow = ({ sub }: { sub: SubtopicNode }) => {
 const TopicRow = ({ topic }: { topic: TopicNodeStats }) => {
   const [open, setOpen] = useState(false);
   return (
-    <div className="glass-card rounded-xl">
+    <div className="glass-card tile-lift rounded-xl">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}

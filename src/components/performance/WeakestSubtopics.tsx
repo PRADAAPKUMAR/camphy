@@ -47,7 +47,7 @@ const WeakestSubtopics = ({ records }: { records: PerformanceRecord[] }) => {
       </h2>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {weak.map((s) => (
-          <div key={s.key} className="glass-card rounded-xl p-4">
+          <div key={s.key} className="glass-card tile-lift rounded-xl p-4">
             <div className="mb-2 flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">

@@ -109,15 +109,8 @@
   }
 
   .glass-card-hover {
-    @apply glass-card transition-all duration-300;
+    @apply glass-card;
     -webkit-backdrop-filter: blur(24px);
-  }
-  .glass-card-hover:hover {
-    background: hsl(222 30% 20% / 0.7);
-    border-color: hsl(217 91% 60% / 0.25);
-    box-shadow: 0 12px 40px -8px hsl(217 91% 60% / 0.15), inset 0 1px 0 0 hsl(210 40% 96% / 0.08);
-    -webkit-transform: translateY(-2px);
-    transform: translateY(-2px);
   }
 
   .level-card-igcse { --level-accent: var(--primary); }
@@ -135,11 +128,6 @@
     box-shadow: var(--grade-glow);
     transition: border-color 200ms, background 200ms, transform 200ms;
   }
-  .grade-tile:hover {
-    border-color: hsl(var(--grade-accent) / 0.6);
-    background: hsl(var(--card) / 0.9);
-    transform: translateY(-2px);
-  }
   .grade-crest {
     color: hsl(var(--grade-accent));
     background: hsl(var(--grade-accent-subtle));
@@ -149,19 +137,11 @@
   [data-grade] .glass-card-hover {
     border-color: hsl(var(--grade-accent-border));
   }
-  [data-grade] .glass-card-hover:hover {
-    border-color: hsl(var(--grade-accent) / 0.55);
-    box-shadow: var(--grade-glow);
-  }
   [data-grade] [aria-current="page"] { color: hsl(var(--grade-accent)); }
   @media (prefers-reduced-motion: reduce) {
     .grade-tile:hover { transform: none; }
   }
 
-  .level-card:hover {
-    border-color: hsl(var(--level-accent) / 0.6);
-    box-shadow: 0 12px 40px -8px hsl(var(--level-accent) / 0.2), inset 0 1px 0 hsl(var(--foreground) / 0.08);
-  }
 
   .level-card:focus-visible {
     outline-color: hsl(var(--level-accent));
@@ -178,10 +158,6 @@
     background: hsl(var(--level-accent) / 0.1);
   }
 
-  .level-card:hover .level-card-icon {
-    background: hsl(var(--level-accent) / 0.2);
-    border-color: hsl(var(--level-accent) / 0.5);
-  }
 
   .gradient-text {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
@@ -329,5 +305,41 @@
   @media (max-width: 369px) {
     .workspace-nav-link { min-width: 44px; padding-inline: 6px; font-size: 11px; }
     .workspace-nav-active::after { left: 6px; right: 6px; }
+  }
+}
+
+/* Shared glass tile treatment inspired by the supplied StatsCard reference.
+   Form/scroll containers share the surface; only individual tiles lift. */
+@layer utilities {
+  :is(.glass-card, .glass-card-hover, .grade-tile, .level-card, .workspace-panel, .workspace-resource, .tile-surface) {
+    --tile-accent: var(--grade-accent, var(--primary));
+    border: 1px solid hsl(var(--tile-accent) / 0.18);
+    border-radius: 1rem;
+    background: linear-gradient(135deg, hsl(var(--card) / 0.78), hsl(var(--background) / 0.62));
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 8px 28px -12px hsl(var(--tile-accent) / 0.14), inset 0 1px 0 hsl(var(--foreground) / 0.06);
+    transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1), border-color 180ms ease, box-shadow 220ms ease;
+  }
+  .level-card { --tile-accent: var(--level-accent, var(--primary)); }
+  :is(.glass-card-hover, .grade-tile, .level-card, .workspace-resource, .tile-lift):focus-visible {
+    outline: 2px solid hsl(var(--tile-accent, var(--grade-accent)));
+    outline-offset: 3px;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    :is(.glass-card-hover, .grade-tile, .level-card, .workspace-resource, .tile-lift, a.glass-card, button.glass-card):hover {
+      border-color: hsl(var(--tile-accent, var(--grade-accent)) / 0.45);
+      box-shadow: 0 16px 36px -14px hsl(var(--tile-accent, var(--grade-accent)) / 0.25), inset 0 1px 0 hsl(var(--foreground) / 0.09);
+    }
+    .level-card:hover .level-card-icon {
+      background: hsl(var(--level-accent) / 0.2);
+      border-color: hsl(var(--level-accent) / 0.5);
+    }
+  }
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    :is(.glass-card-hover, .grade-tile, .level-card, .workspace-resource, .tile-lift, a.glass-card, button.glass-card):hover { transform: translateY(-5px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :is(.glass-card, .glass-card-hover, .grade-tile, .level-card, .workspace-panel, .workspace-resource, .tile-surface, .tile-lift) { transition: border-color 180ms ease; }
   }
 }
