@@ -1,4 +1,3 @@
-import RollingNumber from "@/components/motion/RollingNumber";
 import { useSyncExternalStore } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Pause, Play, Plus, Minus, Timer as TimerIcon } from "lucide-react";
@@ -41,7 +40,7 @@ const RunningTimerBar = () => {
               className="font-mono text-sm font-bold tabular-nums"
               style={{ color: `hsl(var(--study-1))` }}
             >
-              <RollingNumber value={fmt(state.focus.left)} />
+              {fmt(state.focus.left)}
             </span>
             <button
               onClick={() => studyTimerStore.toggleFocus()}
@@ -56,12 +55,12 @@ const RunningTimerBar = () => {
           <div key={t.id} className="flex items-center gap-2">
             <span className="max-w-[9rem] truncate text-xs text-muted-foreground">{t.label}</span>
             <span
-              className={`font-mono text-sm font-bold tabular-nums ${t.left === 0 ? "motion-safe:animate-pulse" : ""}`}
+              className={`font-mono text-sm font-bold tabular-nums ${t.left === 0 ? "animate-pulse" : ""}`}
               style={{
                 color: t.left === 0 ? `hsl(var(--destructive))` : `hsl(${colorHsl(t.color)})`,
               }}
             >
-              <RollingNumber value={fmt(t.left)} />
+              {fmt(t.left)}
             </span>
             <button
               onClick={() => studyTimerStore.adjustTimer(t.id, -1)}

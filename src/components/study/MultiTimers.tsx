@@ -1,4 +1,3 @@
-import RollingNumber from "@/components/motion/RollingNumber";
 import { useState, useSyncExternalStore } from "react";
 import { Play, Pause, RotateCcw, X, Plus, Bell, Maximize2, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -131,10 +130,10 @@ const MultiTimers = () => {
                 </div>
 
                 <p
-                  className={`mt-3 font-mono text-4xl font-bold tabular-nums ${finished ? "motion-safe:animate-pulse" : ""}`}
+                  className={`mt-3 font-mono text-4xl font-bold tabular-nums ${finished ? "animate-pulse" : ""}`}
                   style={{ color: finished ? `hsl(var(--destructive))` : `hsl(${hsl})` }}
                 >
-                  <RollingNumber value={fmt(t.left)} />
+                  {fmt(t.left)}
                 </p>
 
                 <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted/50">
@@ -202,7 +201,7 @@ const MultiTimers = () => {
             </p>
             <p
               className={`font-mono text-[clamp(3.5rem,17vw,12rem)] font-bold leading-none tabular-nums ${
-                fullTimer.left === 0 ? "motion-safe:animate-pulse" : ""
+                fullTimer.left === 0 ? "animate-pulse" : ""
               }`}
               style={{
                 color:
@@ -211,7 +210,7 @@ const MultiTimers = () => {
                     : `hsl(${colorHsl(fullTimer.color)})`,
               }}
             >
-              <RollingNumber value={fmt(fullTimer.left)} />
+              {fmt(fullTimer.left)}
             </p>
             <div className="mt-10 h-3 w-full max-w-xl overflow-hidden rounded-full bg-muted/50">
               <div

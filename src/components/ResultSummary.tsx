@@ -1,4 +1,3 @@
-import RollingNumber from "@/components/motion/RollingNumber";
 import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -6,8 +5,6 @@ import { CircleCheck, CircleX, Undo2, Award, Lightbulb } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import GradeBoundaryEstimate from "@/components/GradeBoundaryEstimate";
 import type { BoundaryPaper } from "@/lib/grade-boundaries";
-import PacingAnalysis from "@/components/PacingAnalysis";
-import { BOTTLENECK_SECONDS, formatPacingTime } from "@/lib/question-pacing";
 
 const OPTIONS = ["A", "B", "C", "D"] as const;
 
@@ -18,18 +15,14 @@ interface ResultSummaryProps {
   correctAnswers: Record<number, string>;
   onExplain?: (question: number) => void;
   paper?: BoundaryPaper;
-  questionTimes?: Record<number, number>;
-  questionNumbers?: number[];
-  durationMinutes?: number;
-  estimatedTiming?: boolean;
 }
 
-const ResultRow = memo(({ q, userAnswer, correct, onExplain, seconds }: { q: number; userAnswer: string | undefined; correct: string | undefined; onExplain?: (question: number) => void; seconds?: number }) => {
+const ResultRow = memo(({ q, userAnswer, correct, onExplain }: { q: number; userAnswer: string | undefined; correct: string | undefined; onExplain?: (question: number) => void }) => {
   const isCorrect = Boolean(userAnswer && correct && userAnswer === correct);
 
   return (
     <div
-      className={`flex flex-wrap items-center gap-1 rounded-lg px-2 py-2 ${
+      className={`flex items-center gap-1 rounded-lg px-2 py-2 ${
         isCorrect
           ? "bg-success/5"
           : userAnswer
@@ -81,7 +74,6 @@ const ResultRow = memo(({ q, userAnswer, correct, onExplain, seconds }: { q: num
           </Button>
         )}
       </span>
-      {seconds !== undefined && seconds > 0 && <span aria-label={`Question ${q} time${seconds > BOTTLENECK_SECONDS ? ", over 2 minutes" : ""}`} className={`w-full pl-8 font-mono text-xs ${seconds > BOTTLENECK_SECONDS ? "text-destructive" : "text-muted-foreground"}`}>{formatPacingTime(seconds)}{seconds > BOTTLENECK_SECONDS ? " · Over 2 minutes" : ""}</span>}
     </div>
   );
 });
@@ -95,14 +87,9 @@ const ResultSummary = memo(({
   correctAnswers,
   onExplain,
   paper,
-  questionTimes,
-  questionNumbers,
-  durationMinutes = 45,
-  estimatedTiming = false,
 }: ResultSummaryProps) => {
   const navigate = useNavigate();
-  const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
-  const questions = questionNumbers ?? Array.from({ length: totalQuestions }, (_, i) => i + 1);
+  const percentage = Math.round((score / totalQuestions) * 100);
 
   const getScoreColor = () => {
     if (percentage >= 80) return "text-success";
@@ -118,9 +105,9 @@ const ResultSummary = memo(({
           <Award className={`h-7 w-7 ${getScoreColor()}`} />
         </div>
         <div className={`text-4xl font-black tabular-nums ${getScoreColor()}`}>
-          <RollingNumber value={`${score}/${totalQuestions}`} initialValue={`0/${totalQuestions}`} />
+          {score}/{totalQuestions}
         </div>
-        <p className="mt-1 text-sm text-muted-foreground font-medium"><RollingNumber value={`${percentage}%`} initialValue="0%" /> correct</p>
+        <p className="mt-1 text-sm text-muted-foreground font-medium">{percentage}% correct</p>
         <Button
           variant="outline"
           className="mt-4"
@@ -134,16 +121,14 @@ const ResultSummary = memo(({
       {/* Answer review */}
       <ScrollArea className="min-h-0 flex-1">
         {paper && <GradeBoundaryEstimate paper={paper} score={score} totalQuestions={totalQuestions} />}
-        {questionTimes && <PacingAnalysis times={questionTimes} questions={questions} durationMinutes={durationMinutes} estimated={estimatedTiming} />}
         <div className="space-y-0.5 p-4">
-          {questions.map((q) => (
+          {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((q) => (
             <ResultRow
               key={q}
               q={q}
               userAnswer={answers[q]}
               correct={correctAnswers[q]}
               onExplain={onExplain}
-              seconds={questionTimes?.[q]}
             />
           ))}
         </div>

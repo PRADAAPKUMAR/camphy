@@ -72,15 +72,6 @@
     --grade-accent-border: var(--grade-accent) / 0.25;
     --grade-foreground: var(--background);
     --grade-glow: 0 8px 28px -12px hsl(var(--grade-accent) / 0.3);
-    --pdf-progress-surface: var(--card) / 0.75;
-    --pdf-progress-beam: linear-gradient(90deg, hsl(var(--grade-accent) / 0.55), hsl(var(--grade-accent)));
-    --pdf-progress-button-fill: linear-gradient(90deg, hsl(var(--grade-accent) / 0.14), hsl(var(--grade-accent) / 0.35));
-    --motion-fast: 240ms;
-    --motion-feedback: 650ms;
-    --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
-    --motion-selection-fill: var(--foreground) / 0.12;
-    --motion-success-glow: 0 0 0 4px hsl(var(--success) / 0.12), 0 0 18px hsl(var(--success) / 0.3);
-    --motion-sheen: linear-gradient(105deg, transparent 25%, hsl(var(--foreground) / 0.07) 50%, transparent 75%);
   }
 }
 
@@ -105,53 +96,10 @@
     --grade-accent-subtle: var(--grade-accent) / 0.1;
     --grade-accent-border: var(--grade-accent) / 0.25;
     --grade-glow: 0 8px 28px -12px hsl(var(--grade-accent) / 0.3);
-    --pdf-progress-beam: linear-gradient(90deg, hsl(var(--grade-accent) / 0.55), hsl(var(--grade-accent)));
-    --pdf-progress-button-fill: linear-gradient(90deg, hsl(var(--grade-accent) / 0.14), hsl(var(--grade-accent) / 0.35));
   }
 }
 
 @layer utilities {
-  .rolling-number, .rolling-number-visual { display: inline-flex; align-items: baseline; }
-  .rolling-number { vertical-align: baseline; }
-  .rolling-digit { position: relative; display: inline-block; width: 1ch; height: 1.2em; overflow: hidden; vertical-align: bottom; }
-  .rolling-digit-new { display: block; line-height: 1.2; }
-  .rolling-digit-old { position: absolute; inset: 0; line-height: 1.2; opacity: 0; }
-  .mcq-option { transition: background-color 100ms, border-color 100ms, color 100ms; }
-  .mcq-option-fill { pointer-events: none; background: hsl(var(--motion-selection-fill)); opacity: 0; }
-  .mcq-option-trace { pointer-events: none; opacity: 0; color: inherit; }
-  .mcq-option > .mcq-option-trace { width: 100%; height: 100%; }
-  .mcq-option-trace rect { fill: none; stroke: currentColor; stroke-width: 2; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 1; }
-  .mcq-picked .mcq-option-fill { animation: optionSlide 320ms var(--motion-ease); }
-  .mcq-picked .mcq-option-trace { opacity: 1; animation: optionTraceFade 320ms ease-out; }
-  .mcq-picked .mcq-option-trace rect { animation: optionTrace 280ms var(--motion-ease) forwards; }
-  .mcq-correct-pulse { animation: optionCorrect var(--motion-feedback) ease-out; }
-  .mcq-wrong-wobble { animation: optionWrong var(--motion-fast) ease-out; }
-  .skeleton-shimmer { position: relative; overflow: hidden; isolation: isolate; }
-  .skeleton-shimmer::after { content: ""; position: absolute; inset: 0; background: var(--motion-sheen); animation: skeletonSweep 1800ms ease-in-out infinite; }
-  .motion-reveal { animation: fadeInUp var(--motion-fast) var(--motion-ease); }
-  @keyframes optionSlide { from { transform: translateX(-100%); opacity: 0.6; } to { transform: translateX(0); opacity: 0; } }
-  @keyframes optionTrace { to { stroke-dashoffset: 0; } }
-  @keyframes optionTraceFade { 75% { opacity: 1; } to { opacity: 0; } }
-  @keyframes optionCorrect { 0%, 100% { box-shadow: none; } 35% { box-shadow: var(--motion-success-glow); } }
-  @keyframes optionWrong { 0%, 100% { transform: translateX(0); } 25%, 65% { transform: translateX(-2px); } 45%, 85% { transform: translateX(2px); } }
-  @keyframes skeletonSweep { from { transform: translateX(-110%); } to { transform: translateX(110%); } }
-  @media (prefers-reduced-motion: reduce) {
-    .mcq-option, .grade-tile, .glass-card-hover { transition: none; }
-    .mcq-picked .mcq-option-fill, .mcq-picked .mcq-option-trace, .mcq-picked .mcq-option-trace rect, .mcq-correct-pulse, .mcq-wrong-wobble, .motion-reveal { animation: none; }
-    .mcq-option-trace, .skeleton-shimmer::after { display: none; }
-    .glass-card-hover:hover { transform: none; }
-  }
-  .pdf-progress-hud { background: hsl(var(--pdf-progress-surface)); backdrop-filter: blur(16px); box-shadow: var(--grade-glow); }
-  .pdf-action { transition: border-radius 240ms, background 240ms; }
-  .pdf-action-active { border-radius: 999px; background: hsl(var(--card)); color: hsl(var(--foreground)); border: 1px solid hsl(var(--grade-accent-border)); }
-  .pdf-action-fill { background: var(--pdf-progress-button-fill); transition: transform 240ms ease-out; }
-  .pdf-progress-beam { background: var(--pdf-progress-beam); box-shadow: var(--grade-glow); transition: transform 240ms ease-out; }
-  .pdf-complete-check { animation: pdfCheck 240ms cubic-bezier(0.2, 1.6, 0.5, 1); }
-  @keyframes pdfCheck { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) {
-    .pdf-action, .pdf-action-fill, .pdf-progress-beam { transition: none; }
-    .pdf-complete-check { animation: none; }
-  }
   .glass-card {
     @apply backdrop-blur-xl border shadow-lg;
     -webkit-backdrop-filter: blur(24px);
@@ -206,40 +154,8 @@
     box-shadow: var(--grade-glow);
   }
   [data-grade] [aria-current="page"] { color: hsl(var(--grade-accent)); }
-  /* Tactile press + ambient light sweep on glass tiles */
-  .grade-tile, .glass-card-hover { position: relative; overflow: hidden; isolation: isolate; }
-  .grade-tile:active, .glass-card-hover:active { transform: scale(0.985); transition-duration: 100ms; }
-  .grade-tile::before, .glass-card-hover::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    border-radius: inherit;
-    background: var(--motion-sheen);
-    transform: translateX(-110%);
-    transition: transform 800ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .grade-tile:hover::before, .glass-card-hover:hover::before { transform: translateX(110%); }
-  .grade-tile > *, .glass-card-hover > * { position: relative; z-index: 1; }
-
-  /* Level-themed glow for selected chips/filters */
-  .grade-glow-active {
-    border-color: hsl(var(--grade-accent) / 0.55) !important;
-    background: hsl(var(--grade-accent) / 0.12);
-    box-shadow: 0 0 18px -4px hsl(var(--grade-accent) / 0.45), inset 0 0 0 1px hsl(var(--grade-accent) / 0.15);
-    transition: box-shadow 200ms, border-color 200ms, background 200ms;
-  }
-  [data-state="active"][role="tab"], [data-state="on"] {
-    box-shadow: 0 0 16px -4px hsl(var(--grade-accent) / 0.45);
-  }
-  [role="checkbox"][data-state="checked"] {
-    box-shadow: 0 0 10px -1px hsl(var(--grade-accent) / 0.5);
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .grade-tile:hover, .grade-tile:active, .glass-card-hover:active { transform: none; }
-    .grade-tile::before, .glass-card-hover::before { display: none; }
+    .grade-tile:hover { transform: none; }
   }
 
   .level-card:hover {

@@ -1,14 +1,5 @@
 # Grade-first navigation
 
-# PDF preparation feedback
-- [x] Add shared grade-coloured progress and completion feedback to worksheet preparation, both MCQ PDFs and theory PDFs
-- [x] Verify generation milestones, failures, real PDF opening and mobile layout
-
-# Past-paper pacing analysis
-- [x] Track active question visits in both MCQ modes and retain timings in progress
-- [x] Add post-exam pace targets, fastest/slowest questions and over-two-minute highlights
-- [x] Verify regression tests and both real past-paper result flows
-
 # Cambridge component grade predictor
 - [x] Curate verified official Physics MCQ component thresholds with source links (2024–2025 May/June and Oct/Nov; IGCSE Extended and AS)
 - [x] Integrate component estimates, threshold scale and next-grade marks into full past-paper results

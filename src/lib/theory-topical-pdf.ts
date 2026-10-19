@@ -1,5 +1,4 @@
 import type { PDFDocument as PDFDocumentType } from "pdf-lib";
-import type { PdfProgressReporter } from "@/lib/pdf-progress";
 
 export interface TheoryTopicalQuestion {
   mapping_id: string;
@@ -17,27 +16,23 @@ export interface TheoryTopicalQuestion {
 
 const safeFilePart = (value: string) => value.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "");
 
-export const createTheoryTopicalPdf = async (questions: TheoryTopicalQuestion[], onProgress?: PdfProgressReporter) => {
+export const createTheoryTopicalPdf = async (questions: TheoryTopicalQuestion[]) => {
   if (!questions.length) throw new Error("Select at least one question");
-  await onProgress?.({ percent: 15, message: "Fetching original question PDFs…" });
   const { PDFDocument, StandardFonts, rgb } = await import("pdf-lib");
   const output = await PDFDocument.create();
   const regular = await output.embedFont(StandardFonts.Helvetica);
   const bold = await output.embedFont(StandardFonts.HelveticaBold);
   const sources = new Map<string, PDFDocumentType>();
 
-  for (const question of questions) {
-    if (sources.has(question.paper_id)) continue;
-    const response = await fetch(question.question_url);
-    if (!response.ok) throw new Error(`Could not load ${question.paper_code}`);
-    sources.set(question.paper_id, await PDFDocument.load(await response.arrayBuffer()));
-  }
-  await onProgress?.({ percent: 60, message: "Laying out question headers & original pages…" });
-
   for (let index = 0; index < questions.length; index += 1) {
     const question = questions[index];
-    const source = sources.get(question.paper_id);
-    if (!source) throw new Error(`Could not load ${question.paper_code}`);
+    let source = sources.get(question.paper_id);
+    if (!source) {
+      const response = await fetch(question.question_url);
+      if (!response.ok) throw new Error(`Could not load ${question.paper_code}`);
+      source = await PDFDocument.load(await response.arrayBuffer());
+      sources.set(question.paper_id, source);
+    }
 
     if (question.start_page < 1 || question.end_page < question.start_page || question.end_page > source.getPageCount()) {
       throw new Error(`Invalid page range for ${question.paper_code} Q${question.question_number}`);
@@ -64,11 +59,9 @@ export const createTheoryTopicalPdf = async (questions: TheoryTopicalQuestion[],
     }
   }
 
-  await onProgress?.({ percent: 85, message: "Compiling theory PDF & source metadata…" });
   const bytes = await output.save();
   const blob = new Blob([Uint8Array.from(bytes).buffer], { type: "application/pdf" });
   const url = URL.createObjectURL(blob);
-  await onProgress?.({ percent: 100, message: "Ready! Opening in new tab…" });
   const popup = window.open(url, "_blank", "noopener,noreferrer");
   if (!popup) {
     const anchor = document.createElement("a");

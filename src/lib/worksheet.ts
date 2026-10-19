@@ -1,5 +1,3 @@
-import type { PdfProgressReporter } from "@/lib/pdf-progress";
-
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
 export interface WorksheetItem {
@@ -339,13 +337,12 @@ const drawAnswerKeyHeader = (
 };
 
 /** Opens the finished PDF in a new browser tab instead of downloading it. */
-const openPdfInNewTab = async (doc: any, fileName: string, onProgress?: PdfProgressReporter) => {
+const openPdfInNewTab = (doc: any, fileName: string) => {
   let url: string | undefined;
   try {
     const blob: Blob | null = doc.output("blob");
     if (!blob || !blob.size) throw new Error("The PDF document is empty");
     url = URL.createObjectURL(new Blob([blob], { type: "application/pdf" }));
-    await onProgress?.({ percent: 100, message: "Ready! Opening in new tab…" });
     try {
       if (window.open(url, "_blank")) return;
     } catch {
@@ -373,13 +370,11 @@ const openPdfInNewTab = async (doc: any, fileName: string, onProgress?: PdfProgr
   }
 };
 
-export const generateWorksheetPdf = async (loaded: LoadedImage[], meta: WorksheetMeta, onProgress?: PdfProgressReporter) => {
-  await onProgress?.({ percent: 15, message: "Preparing question assets & branding…" });
+export const generateWorksheetPdf = async (loaded: LoadedImage[], meta: WorksheetMeta) => {
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
   const logoDataUrl = await loadLogoDataUrl();
 
-  await onProgress?.({ percent: 60, message: "Laying out Cambridge header & pages…" });
   let y = drawWorksheetHeader(doc, meta, logoDataUrl);
 
   const imageWidth = CONTENT_WIDTH - NUMBER_COL;
@@ -432,7 +427,6 @@ export const generateWorksheetPdf = async (loaded: LoadedImage[], meta: Workshee
     y += h + GAP_AFTER_QUESTION;
   });
 
-  await onProgress?.({ percent: 85, message: "Compiling worksheet & page metadata…" });
   // page numbers
   const pages = doc.getNumberOfPages();
   for (let p = 1; p <= pages; p++) {
@@ -444,7 +438,7 @@ export const generateWorksheetPdf = async (loaded: LoadedImage[], meta: Workshee
     doc.setTextColor(0);
   }
 
-  await openPdfInNewTab(doc, `${meta.fileBase}_Worksheet.pdf`, onProgress);
+  openPdfInNewTab(doc, `${meta.fileBase}_Worksheet.pdf`);
   return { unavailableQuestions };
 };
 
@@ -452,14 +446,11 @@ export const generateAnswerKeyPdf = async (
   loaded: LoadedImage[],
   meta: WorksheetMeta,
   includeSources = true,
-  onProgress?: PdfProgressReporter,
 ) => {
-  await onProgress?.({ percent: 15, message: "Preparing answers & branding…" });
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
   const logoDataUrl = await loadLogoDataUrl();
 
-  await onProgress?.({ percent: 60, message: "Laying out answer-key header & pages…" });
   let y = drawAnswerKeyHeader(doc, meta, logoDataUrl);
   doc.setFontSize(10);
 
@@ -491,8 +482,7 @@ export const generateAnswerKeyPdf = async (
     y += lineHeight;
   });
 
-  await onProgress?.({ percent: 85, message: "Compiling answer key & source metadata…" });
-  await openPdfInNewTab(doc, `${meta.fileBase}_Answer_Key.pdf`, onProgress);
+  openPdfInNewTab(doc, `${meta.fileBase}_Answer_Key.pdf`);
 };
 
 export const sanitizeFilePart = (value: string) =>

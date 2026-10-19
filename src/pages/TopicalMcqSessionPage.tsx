@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/breadcrumb";
 import QuestionCard from "@/components/question-mode/QuestionCard";
 import QuestionStrip from "@/components/question-mode/QuestionStrip";
-import RollingNumber from "@/components/motion/RollingNumber";
 import OptionButtons from "@/components/question-mode/OptionButtons";
 import ResultSummary from "@/components/ResultSummary";
 import ExplanationDialog, { type ExplanationData } from "@/components/ExplanationDialog";
@@ -26,7 +25,6 @@ import { displayLevel, syllabusVersionForLevel } from "@/lib/syllabus";
 import { buildTopicalSet } from "@/lib/topical-bank";
 import { gradeFromLevel, gradeSectionPath } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
-import { useMcqKeyboard } from "@/hooks/use-mcq-keyboard";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
@@ -137,13 +135,6 @@ const TopicalMcqSessionPage = () => {
     },
     [currentItem, finished, answers, keyByIndex],
   );
-
-  useMcqKeyboard({
-    enabled: !finished && items.length > 0,
-    onSelect: handleSelect,
-    onNext: () => setCurrent((c) => Math.min(items.length - 1, c + 1)),
-    onPrev: () => setCurrent((c) => Math.max(0, c - 1)),
-  });
 
   const openExplanation = useCallback(
     async (index: number) => {
@@ -269,11 +260,11 @@ const TopicalMcqSessionPage = () => {
               </BreadcrumbList>
             </Breadcrumb>
             <p className="text-xs text-muted-foreground">
-              Question mode · <RollingNumber value={`${answeredCount}/${items.length}`} /> answered
+              Question mode · {answeredCount}/{items.length} answered
             </p>
           </div>
           <Badge variant="outline" className="gap-1 border-border/40 font-mono text-xs">
-            <TimerIcon className="h-3.5 w-3.5" /> <RollingNumber value={fmtSeconds(elapsed)} />
+            <TimerIcon className="h-3.5 w-3.5" /> {fmtSeconds(elapsed)}
           </Badge>
         </div>
       </header>

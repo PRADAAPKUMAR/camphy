@@ -19,7 +19,7 @@ const qualifications = [
   "Bachelor's Degree in Physics",
   "Bachelor of Education (B.Ed.)",
 ];
-//HI
+
 const curricula = [
   { name: "Cambridge IGCSE Physics", code: "0625" },
   { name: "Cambridge AS & A Level Physics", code: "9702" },
@@ -67,11 +67,15 @@ const AboutPage = () => {
               SPK
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary mb-2">About the Educator</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary mb-2">
+                About the Educator
+              </p>
               <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-2">
                 S. Pradaap <span className="gradient-text">Kumar</span>
               </h1>
-              <p className="text-muted-foreground">Physics Educator · 14+ years · Cambridge & IB DP Specialist</p>
+              <p className="text-muted-foreground">
+                Physics Educator · 14+ years · Cambridge & IB DP Specialist
+              </p>
             </div>
           </div>
         </div>
@@ -82,21 +86,25 @@ const AboutPage = () => {
         <section className="glass-card rounded-2xl p-8">
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="h-4 w-4 text-primary" />
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Introduction</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              Introduction
+            </h2>
           </div>
           <div className="space-y-4 text-muted-foreground leading-relaxed">
             <p>
-              I am <span className="text-foreground font-semibold">S. Pradaap Kumar</span>, an experienced Physics
-              educator with over <span className="text-foreground font-semibold">14 years of teaching expertise</span>{" "}
-              across Higher Secondary, IGCSE, AS & A Level, and IB DP Physics. I am passionate about making Physics
-              conceptually clear, application-oriented, and engaging through modern teaching methodologies, simulations,
-              experiments, and technology integration.
+              I am <span className="text-foreground font-semibold">S. Pradaap Kumar</span>, an
+              experienced Physics educator with over{" "}
+              <span className="text-foreground font-semibold">14 years of teaching expertise</span>{" "}
+              across Higher Secondary, IGCSE, AS & A Level, and IB DP Physics. I am passionate
+              about making Physics conceptually clear, application-oriented, and engaging through
+              modern teaching methodologies, simulations, experiments, and technology integration.
             </p>
             <p>
-              Currently, I teach Cambridge International Physics at a private institution and mentor students for
-              academic excellence. Over the years, my students have consistently achieved outstanding results —
-              including multiple <span className="text-foreground font-semibold">A* and A grades</span> in IGCSE and AS
-              Level Physics examinations.
+              Currently, I teach Cambridge International Physics at a private institution and
+              mentor students for academic excellence. Over the years, my students have
+              consistently achieved outstanding results — including multiple{" "}
+              <span className="text-foreground font-semibold">A* and A grades</span> in IGCSE and
+              AS Level Physics examinations.
             </p>
           </div>
         </section>
@@ -164,8 +172,9 @@ const AboutPage = () => {
             ))}
           </div>
           <p className="text-sm text-muted-foreground mt-5 leading-relaxed">
-            I'm passionate about developing high-quality Physics study materials, interactive learning resources, and
-            educational websites — designed to help students build strong conceptual understanding and exam confidence.
+            I'm passionate about developing high-quality Physics study materials, interactive
+            learning resources, and educational websites — designed to help students build strong
+            conceptual understanding and exam confidence.
           </p>
         </section>
 
@@ -196,12 +205,15 @@ const AboutPage = () => {
             </h2>
           </div>
           <p className="text-muted-foreground leading-relaxed mb-6">
-            I believe Physics is best learned through curiosity, visualization, experimentation, and structured
-            analytical thinking.
+            I believe Physics is best learned through curiosity, visualization, experimentation,
+            and structured analytical thinking.
           </p>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {philosophy.map(({ icon: Icon, label }) => (
-              <div key={label} className="glass-card-hover rounded-xl p-4 flex items-center gap-3">
+              <div
+                key={label}
+                className="glass-card-hover rounded-xl p-4 flex items-center gap-3"
+              >
                 <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary shrink-0">
                   <Icon className="h-4 w-4" />
                 </div>

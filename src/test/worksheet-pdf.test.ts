@@ -65,19 +65,6 @@ describe("worksheet PDF safeguards", () => {
     expect(window.open).toHaveBeenCalled();
   });
 
-  it.each(["worksheet", "key"])("awaits real %s milestones before opening", async (kind) => {
-    const milestones: number[] = [];
-    const report = vi.fn(async ({ percent }: { percent: number }) => {
-      milestones.push(percent);
-      expect(window.open).not.toHaveBeenCalled();
-      if (percent === 100) expect(pdf.output).toHaveBeenCalledWith("blob");
-    });
-    if (kind === "worksheet") await generateWorksheetPdf(questions, meta, report);
-    else await generateAnswerKeyPdf(questions, meta, true, report);
-    expect(milestones).toEqual([15, 60, 85, 100]);
-    expect(window.open).toHaveBeenCalledTimes(1);
-  });
-
   it("keeps later questions and reports a failed image visibly", async () => {
     pdf.addImage.mockImplementationOnce(() => { throw new Error("Invalid JPEG"); });
     const result = await generateWorksheetPdf(questions, meta);

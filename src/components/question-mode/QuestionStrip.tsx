@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 interface QuestionStripProps {
   questions: number[];
   current: number;
@@ -20,12 +19,12 @@ const QuestionStrip = ({
       const answer = answers[q];
       const correct = correctAnswers[q];
       let cls =
-        "h-8 w-full p-0 rounded-lg border text-xs font-semibold tabular-nums transition-colors ";
+        "h-8 w-full rounded-lg border text-xs font-semibold tabular-nums transition-colors ";
       if (answer && correct !== undefined) {
         cls +=
           answer === correct
-            ? "border-success/40 bg-success/20 text-success"
-            : "border-destructive/40 bg-destructive/20 text-destructive";
+            ? "border-emerald-400/40 bg-emerald-500/20 text-emerald-300"
+            : "border-rose-400/40 bg-rose-500/20 text-rose-300";
       } else if (answer) {
         cls += "border-primary/40 bg-primary/20 text-foreground";
       } else {
@@ -33,9 +32,9 @@ const QuestionStrip = ({
       }
       if (q === current) cls += " ring-2 ring-primary ring-offset-1 ring-offset-background";
       return (
-        <Button variant="ghost" key={q} type="button" className={cls} onClick={() => onJump(q)} aria-label={`Go to question ${q}`}>
+        <button key={q} type="button" className={cls} onClick={() => onJump(q)} aria-label={`Go to question ${q}`}>
           {q}
-        </Button>
+        </button>
       );
     })}
   </div>

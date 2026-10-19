@@ -1,4 +1,3 @@
-import RollingNumber from "@/components/motion/RollingNumber";
 import { useState, useSyncExternalStore } from "react";
 import { Play, Pause, RotateCcw, Coffee, Brain, Maximize2, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -59,7 +58,7 @@ const FocusMode = () => {
           >
             <div className="flex h-[13rem] w-[13rem] flex-col items-center justify-center rounded-full bg-card">
               <span className="font-mono text-5xl font-bold tabular-nums" style={{ color: `hsl(${ring})` }}>
-                <RollingNumber value={`${m}:${s}`} />
+                {m}:{s}
               </span>
               <span className="mt-1 text-xs text-muted-foreground">
                 {sessions} session{sessions === 1 ? "" : "s"} done
@@ -160,7 +159,7 @@ const FocusMode = () => {
               className="font-mono text-[clamp(3rem,12vw,8rem)] font-bold leading-none tabular-nums"
               style={{ color: `hsl(${ring})` }}
             >
-              <RollingNumber value={`${m}:${s}`} />
+              {m}:{s}
             </span>
             <span className="mt-3 text-sm text-muted-foreground">
               {sessions} session{sessions === 1 ? "" : "s"} done

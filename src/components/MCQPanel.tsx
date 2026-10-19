@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CircleCheck, CircleX, Lightbulb } from "lucide-react";
 
-import MCQOptionGroup from "@/components/question-mode/MCQOptionGroup";
-import RollingNumber from "@/components/motion/RollingNumber";
+const OPTIONS = ["A", "B", "C", "D"] as const;
 
 interface MCQPanelProps {
   totalQuestions: number;
@@ -14,7 +13,6 @@ interface MCQPanelProps {
   onSubmit: () => void;
   isSubmitted: boolean;
   onExplain?: (question: number) => void;
-  onQuestionActivate?: (question: number) => void;
 }
 
 interface QuestionRowProps {
@@ -24,10 +22,9 @@ interface QuestionRowProps {
   onSelectAnswer: (question: number, option: string) => void;
   isSubmitted: boolean;
   onExplain?: (question: number) => void;
-  onQuestionActivate?: (question: number) => void;
 }
 
-const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubmitted, onExplain, onQuestionActivate }: QuestionRowProps) => {
+const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubmitted, onExplain }: QuestionRowProps) => {
   const isSelected = !!userAnswer;
   const hasResult = correctAnswer !== undefined;
   const isCorrect = isSelected && hasResult && userAnswer === correctAnswer;
@@ -37,8 +34,6 @@ const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubm
     <div
       role="group"
       aria-label={`Question ${q}`}
-      onFocus={() => onQuestionActivate?.(q)}
-      onPointerDown={() => onQuestionActivate?.(q)}
       className={`flex items-center justify-center gap-1 py-3 ${
         hasResult
           ? isCorrect
@@ -49,8 +44,46 @@ const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubm
           : ""
       }`}
     >
-      {onQuestionActivate ? <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-sm tabular-nums text-muted-foreground" aria-label={`Work on question ${q}`} title={`Work on question ${q}`} onClick={() => onQuestionActivate(q)}>{q}</Button> : <span className="w-8 text-right text-sm font-bold tabular-nums text-muted-foreground">{q}</span>}
-      <MCQOptionGroup compact question={q} userAnswer={userAnswer} correctAnswer={correctAnswer} disabled={isSubmitted} onSelect={(option) => onSelectAnswer(q, option)} />
+      <span className="w-8 text-right text-sm font-bold tabular-nums text-muted-foreground">
+        {q}
+      </span>
+      <div className="flex min-w-0 gap-1">
+        {OPTIONS.map((opt) => {
+          const isThisSelected = userAnswer === opt;
+          const isCorrectOpt = hasResult && opt === correctAnswer;
+          const isWrongSelection = isThisSelected && isWrong;
+
+          let className =
+             "flex h-11 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-semibold transition-all duration-150 ";
+
+          if (hasResult) {
+            if (isCorrectOpt) {
+              className += "bg-success text-success-foreground shadow-sm";
+            } else if (isWrongSelection) {
+              className += "bg-destructive text-destructive-foreground";
+            } else {
+              className += "bg-muted/40 text-muted-foreground/50";
+            }
+          } else if (isThisSelected) {
+            className += "bg-primary text-primary-foreground shadow-sm";
+          } else {
+            className += "bg-muted/60 text-foreground hover:bg-primary/15 cursor-pointer";
+          }
+
+          return (
+            <Button variant="ghost"
+              key={opt}
+               aria-label={`Question ${q}, option ${opt}`}
+               aria-pressed={isThisSelected}
+              className={className}
+              onClick={() => onSelectAnswer(q, opt)}
+              disabled={isSubmitted || isSelected}
+            >
+              {opt}
+            </Button>
+          );
+        })}
+      </div>
       <span className="flex w-14 items-center justify-end gap-1">
         {hasResult && (
           isCorrect ? (
@@ -85,7 +118,6 @@ const MCQPanel = memo(({
   onSubmit,
   isSubmitted,
   onExplain,
-  onQuestionActivate,
 }: MCQPanelProps) => {
   const answeredCount = Object.keys(answers).length;
   const progress = Math.round((answeredCount / totalQuestions) * 100);
@@ -102,7 +134,7 @@ const MCQPanel = memo(({
         <div className="flex items-center justify-between mb-2">
           <p className="text-sm font-semibold">Answer Sheet</p>
           <p className="text-xs font-mono text-muted-foreground">
-            <RollingNumber value={`${answeredCount}/${totalQuestions}`} />
+            {answeredCount}/{totalQuestions}
           </p>
         </div>
         <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden">
@@ -125,7 +157,6 @@ const MCQPanel = memo(({
               onSelectAnswer={handleSelectAnswer}
               isSubmitted={isSubmitted}
               onExplain={onExplain}
-              onQuestionActivate={onQuestionActivate}
             />
           ))}
         </div>

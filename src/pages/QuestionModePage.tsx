@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/breadcrumb";
 import QuestionCard from "@/components/question-mode/QuestionCard";
 import QuestionStrip from "@/components/question-mode/QuestionStrip";
-import RollingNumber from "@/components/motion/RollingNumber";
 import OptionButtons from "@/components/question-mode/OptionButtons";
 import ResultSummary from "@/components/ResultSummary";
 import ExplanationDialog from "@/components/ExplanationDialog";
@@ -26,9 +25,6 @@ import { savePerformanceRecord } from "@/lib/performance-history";
 import { syllabusVersionForLevel } from "@/lib/syllabus";
 import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
-import { useQuestionPacing } from "@/hooks/use-question-pacing";
-import { paperDurationMinutes } from "@/lib/question-pacing";
-import { useMcqKeyboard } from "@/hooks/use-mcq-keyboard";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
@@ -50,6 +46,7 @@ const QuestionModePage = () => {
   const [current, setCurrent] = useState(0);
   const [finished, setFinished] = useState(false);
   const [elapsed, setElapsed] = useState(0);
+  const shownAt = useRef<number>(Date.now());
 
   const explanation = useExplanation(paperId ? { paper_id: paperId } : null);
 
@@ -101,7 +98,10 @@ const QuestionModePage = () => {
   const currentQuestion = questions[Math.min(current, questions.length - 1)] ?? 1;
   const answeredCount = Object.keys(answers).length;
   const isRetrySet = !!searchParams.get("qs");
-  const pacing = useQuestionPacing(currentQuestion, !!paper && !paperLoading && !imagesLoading && !finished && !answers[currentQuestion] && !explanation.open);
+
+  useEffect(() => {
+    shownAt.current = Date.now();
+  }, [currentQuestion]);
 
   useEffect(() => {
     if (finished) return;
@@ -121,7 +121,8 @@ const QuestionModePage = () => {
     (option: string) => {
       const q = currentQuestion;
       if (finished || answers[q]) return;
-      pacing.commit(q);
+      const spent = Math.max(1, Math.round((Date.now() - shownAt.current) / 1000));
+      setTimes((prev) => ({ ...prev, [q]: spent }));
       setAnswers((prev) => ({ ...prev, [q]: option }));
 
       const known = answerKeyMap?.[q];
@@ -144,13 +145,11 @@ const QuestionModePage = () => {
         }
       })();
     },
-    [currentQuestion, finished, answers, answerKeyMap, paperId, pacing.commit],
+    [currentQuestion, finished, answers, answerKeyMap, paperId],
   );
 
   const finish = useCallback(() => {
     if (finished) return;
-    const finalTimes = pacing.finish();
-    setTimes(finalTimes);
     setFinished(true);
     const key = { ...answerKeyMap, ...correctAnswers };
     let score = 0;
@@ -177,19 +176,11 @@ const QuestionModePage = () => {
         questionResults: Object.fromEntries(
           Object.entries(answers).map(([q, a]) => [Number(q), key[Number(q)] === a]),
         ),
-        questionTimes: finalTimes,
-        timingMeasurement: "active-question",
+        questionTimes: times,
       });
     }
     toast.success(`Score: ${score}/${questions.length}`);
-  }, [finished, answerKeyMap, correctAnswers, answers, paper, paperId, questions, answeredCount, pacing.finish]);
-
-  useMcqKeyboard({
-    enabled: !finished && !!paper,
-    onSelect: handleSelect,
-    onNext: () => setCurrent((c) => Math.min(questions.length - 1, c + 1)),
-    onPrev: () => setCurrent((c) => Math.max(0, c - 1)),
-  });
+  }, [finished, answerKeyMap, correctAnswers, answers, paper, paperId, questions, times, answeredCount]);
 
   if (paperLoading || imagesLoading) {
     return (
@@ -242,12 +233,12 @@ const QuestionModePage = () => {
             </Breadcrumb>
             <p className="text-xs text-muted-foreground">
               {isRetrySet ? "Retrying your wrong questions" : "Question mode"} ·{" "}
-              <RollingNumber value={`${answeredCount}/${questions.length}`} /> answered
+              {answeredCount}/{questions.length} answered
             </p>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="gap-1 border-border/40 font-mono text-xs">
-              <TimerIcon className="h-3.5 w-3.5" /> <RollingNumber value={fmtSeconds(elapsed)} />
+              <TimerIcon className="h-3.5 w-3.5" /> {fmtSeconds(elapsed)}
             </Badge>
             <Button variant="ghost" size="sm" asChild className="gap-1 text-muted-foreground">
               <Link to={`/exam/${paper.id}`}>
@@ -269,9 +260,6 @@ const QuestionModePage = () => {
                   answers={answers}
                   correctAnswers={correctAnswers}
                   onExplain={explanation.openExplanation}
-                  questionTimes={times}
-                  questionNumbers={questions}
-                  durationMinutes={paperDurationMinutes(paper.level)}
                   paper={!isRetrySet && questions.length === TOTAL_QUESTIONS && Array.from({ length: TOTAL_QUESTIONS }, (_, i) => i + 1).every((q) => questions.includes(q) && ["A", "B", "C", "D"].includes(correctAnswers[q])) ? paper : undefined}
                 />
               </div>
@@ -302,7 +290,7 @@ const QuestionModePage = () => {
                   <ChevronLeft className="h-5 w-5" />
                 </Button>
                 <p className="text-sm font-semibold">
-                  Question <RollingNumber value={currentQuestion} />
+                  Question {currentQuestion}
                   <span className="text-muted-foreground">
                     {" "}
                     ({current + 1} of {questions.length})
