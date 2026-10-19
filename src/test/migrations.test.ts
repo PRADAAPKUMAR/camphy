@@ -49,7 +49,7 @@ describe("isolated PostgreSQL migration replay", () => {
       await db.exec(await progressRepair()); await db.exec(await progressRepair());
       const activities = await db.query<{ event_key: string }>("SELECT event_key FROM public.user_activity ORDER BY event_key");
       expect(activities.rows.map((row) => row.event_key)).toEqual(["activity-other", "activity-same"]);
-      const totals = await db.query<{ usage_summary: { total_questions_attempted: number; correct_total: number; mcq_total: number } }>("SELECT usage_summary FROM public.profiles");
+      const totals = await db.query<{ usage_summary: { total_questions_attempted: number; correct_total: number; mcq_total: number } }>("SELECT usage_summary FROM public.profiles WHERE id='11111111-1111-4111-8111-111111111111'");
       expect(totals.rows[0].usage_summary).toMatchObject({ total_questions_attempted: 5, correct_total: 3, mcq_total: 2 });
       await db.exec(`GRANT USAGE ON SCHEMA auth TO authenticated;
         INSERT INTO public.user_activity (user_id, event_key, activity_type, payload)
