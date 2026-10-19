@@ -22,6 +22,20 @@
       "when": 1792368000000,
       "tag": "0002_canonical_progress_keys",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792417922609,
+      "tag": "0003_restore_public_study_content_reads",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792418097973,
+      "tag": "0004_grant_public_study_content_reads",
+      "breakpoints": true
     }
   ]
 }
