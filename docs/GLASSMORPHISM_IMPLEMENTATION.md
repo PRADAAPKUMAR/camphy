@@ -43,8 +43,10 @@ particles with varied trajectories and inward rebounds at each screen edge. It
 sits behind content and translucent tiles, uses a capped device-pixel ratio, and
 stops drawing in hidden tabs. The navigation provides a pause/resume control (in
 the mobile menu on narrow screens); reduced motion suppresses ambient effects
-and tile morphs. Focused learning routes dim the particle field. Mobile cards use
-denser surfaces without backdrop blur; nested panels avoid redundant blur.
+and tile morphs. Focused learning routes dim the particle field. Navigation tiles
+use a translucent tint and 7px backdrop blur (6px on mobile),
+so particle halos transmit as diffused light while foreground text stays sharp.
+Utility/reading cards retain denser surfaces; nested panels avoid redundant blur.
 
 ## Validation
 
@@ -55,6 +57,8 @@ denser surfaces without backdrop blur; nested panels avoid redundant blur.
   answer locking, and results.
 - New route sweep passes 55 render/layout checks across desktop, mobile, narrow
   screens, and redirect destinations. Reduced-motion and forced-colors checks pass.
+- Desktop (1440px) and mobile (390px) pixel comparisons verify that a controlled
+  particle behind a tile remains visible as diffused light through its backdrop.
 - The motion browser suite verifies continuous orbits, moving canvas particles,
   expansion and reverse navigation, scroll restoration, pause/reduced motion,
   320px layout, concurrent lazy loading, and interruption with Escape.

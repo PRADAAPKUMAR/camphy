@@ -25,6 +25,15 @@ export default function PhysicsParticles() {
       ctx.clearRect(0, 0, width, height);
       for (const p of particles) {
         stepParticle(p, dt, width, height);
+        // A wider, soft halo retains enough light to show through frosted glass;
+        // the small white core stays crisp outside a tile.
+        ctx.shadowBlur = 0;
+        const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 12);
+        glow.addColorStop(0, `hsl(${p.hue} 100% 78% / .6)`);
+        glow.addColorStop(.35, `hsl(${p.hue} 100% 70% / .22)`);
+        glow.addColorStop(1, `hsl(${p.hue} 100% 65% / 0)`);
+        ctx.fillStyle = glow;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 12, 0, Math.PI * 2); ctx.fill();
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.shadowColor = `hsl(${p.hue} 100% 75%)`; ctx.shadowBlur = 9;

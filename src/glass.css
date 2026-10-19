@@ -16,6 +16,7 @@
     --ring: 199 100% 78%;
     --radius: 0.85rem;
     --glass-surface: linear-gradient(135deg, hsl(228 32% 21% / .84), hsl(228 35% 12% / .9));
+    --glass-tile-surface: linear-gradient(135deg, hsl(228 32% 21% / .38), hsl(228 35% 12% / .5));
     --glass-edge: hsl(220 50% 88% / .14);
     --glass-shadow: 0 16px 48px -24px hsl(240 65% 2% / .8), inset 0 1px 0 hsl(220 60% 95% / .09);
     --glass-floating: hsl(226 32% 13% / .96);
@@ -145,11 +146,16 @@
 /* Existing page surfaces use this material so every route shares the system. */
 
   .bg-grid { background-image: radial-gradient(hsl(220 35% 80% / .055) .8px, transparent .8px); background-size: 28px 28px; }
-  .glass-card, .glass-card-hover, .grade-tile { background: var(--glass-surface); border-radius: 1.25rem; border-color: var(--glass-edge); box-shadow: var(--glass-shadow); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+  /* Let the moving light transmit through tiles without blurring their content. */
+  .glass-card-hover, .grade-tile {
+    background: var(--glass-tile-surface);
+    -webkit-backdrop-filter: blur(7px) saturate(135%);
+    backdrop-filter: blur(7px) saturate(135%);
+  }
   .grade-tile { border-color: hsl(var(--grade-accent) / .22); }
   .grade-crest { background: hsl(var(--grade-accent) / .07); border-color: hsl(var(--grade-accent) / .24); border-radius: 1rem; }
   .glass-card-hover, .grade-tile { transition: transform 220ms var(--glass-ease), border-color 180ms, background-color 180ms, box-shadow 220ms; }
-  .glass-card-hover:hover, .grade-tile:hover { background: var(--glass-surface); border-color: hsl(var(--grade-accent) / .5); box-shadow: var(--glass-shadow), 0 12px 32px -24px hsl(var(--grade-accent) / .6); }
+  .glass-card-hover:hover, .grade-tile:hover { background: var(--glass-tile-surface); border-color: hsl(var(--grade-accent) / .5); box-shadow: var(--glass-shadow), 0 12px 32px -24px hsl(var(--grade-accent) / .6); }
   .glass-card-hover::before, .grade-tile::before { display: none; }
   .glass-card-hover > *, .grade-tile > * { z-index: auto; }
   .glass-focus .glass-card-hover:hover, .glass-focus .grade-tile:hover { transform: none; }
@@ -163,7 +169,11 @@
   }
   @media (hover: none) { .glass-card-hover:hover, .grade-tile:hover { transform: none; } }
   @media (max-width: 640px) {
-    .glass-card, .glass-card-hover, .grade-tile { -webkit-backdrop-filter: none; backdrop-filter: none; background: linear-gradient(135deg, hsl(228 32% 18% / .96), hsl(228 35% 11% / .97)); }
+    .glass-card { -webkit-backdrop-filter: none; backdrop-filter: none; background: linear-gradient(135deg, hsl(228 32% 18% / .96), hsl(228 35% 11% / .97)); }
+    .glass-card-hover, .grade-tile {
+      -webkit-backdrop-filter: blur(6px) saturate(135%);
+      backdrop-filter: blur(6px) saturate(135%);
+    }
   }
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     .glass-panel, .glass-card, .glass-card-hover, .grade-tile, .glass-floating, .glass-nav { background: hsl(var(--card)); }
