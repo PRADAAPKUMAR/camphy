@@ -1,4 +1,4 @@
-import { GlassIcon } from "@/components/ui/glass-icon";
+import GlassIcon from "@/components/GlassIcon";
 import { useMemo } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -65,7 +65,7 @@ const TheoryLevelPage = () => {
           </Button>
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight">{normalizeGradeLabel(decodedLevel)} — Theory Papers</h1>
+              <GlassIcon name="theory" tone="violet" className="mb-4" /><h1 className="text-3xl font-extrabold tracking-tight">{normalizeGradeLabel(decodedLevel)} — Theory Papers</h1>
               <p className="text-sm text-muted-foreground">Open a paper to read the questions, official answer key and explanations</p>
             </div>
             <Button asChild className="gap-2"><Link to={`/theory-topical/${encodeURIComponent(decodedLevel)}`}><FileStack className="h-4 w-4" />Build topical PDF</Link></Button>
@@ -122,7 +122,7 @@ const TheoryLevelPage = () => {
                               className="glass-card-hover group flex flex-col gap-3 rounded-lg p-5"
                             >
                               <div className="flex items-center gap-2">
-                                <GlassIcon icon={FileText} className="h-9 w-9" />
+                                <FileText className="h-5 w-5 text-grade" />
                                 <span className="font-mono text-sm font-bold">{paper.paper_code}</span>
                               </div>
                               <p className="text-sm text-muted-foreground">{paper.session} {paper.year}</p>

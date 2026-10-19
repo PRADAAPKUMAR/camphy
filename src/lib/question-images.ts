@@ -4,8 +4,8 @@ export type QuestionImageMap = Record<number, string>;
 
 /**
  * Signed URLs for every uploaded question image of a paper, keyed by question
- * number. Papers with no uploaded images resolve to an empty map, so callers
- * can fall back to the PDF exam.
+ * number. Papers with no uploaded images resolve to an empty map; question
+ * mode displays an explicit unavailable-image state.
  */
 export const fetchQuestionImages = async (paperId: string): Promise<QuestionImageMap> => {
   const supabase = await getSupabase();

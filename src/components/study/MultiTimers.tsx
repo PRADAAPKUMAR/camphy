@@ -1,4 +1,4 @@
-import { GlassIcon } from "@/components/ui/glass-icon";
+import SplitFlapDisplay from "@/components/SplitFlapDisplay";
 import { useState, useSyncExternalStore } from "react";
 import { Play, Pause, RotateCcw, X, Plus, Bell, Maximize2, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -72,10 +72,10 @@ const MultiTimers = () => {
                     key={p.label}
                     type="button"
                     onClick={() => studyTimerStore.addTimer(p.label, p.minutes)}
-                    className="glass-study-tab rounded-full border px-3 py-1.5 text-xs font-medium transition-colors hover:text-foreground"
+                    className="rounded-full border px-3 py-1.5 text-xs font-medium transition-colors hover:text-foreground"
                     style={{
                       borderColor: `hsl(${group.color} / 0.35)`,
-                      backgroundColor: `hsl(${group.color} / 0.08)`,
+                      background: `hsl(${group.color} / 0.08)`,
                       color: `hsl(${group.color})`,
                     }}
                   >
@@ -93,7 +93,7 @@ const MultiTimers = () => {
 
       {timers.length === 0 ? (
         <div className="glass-card rounded-2xl p-10 text-center">
-          <GlassIcon className="mx-auto mb-3 h-14 w-14 text-muted-foreground"><Bell className="h-7 w-7" /></GlassIcon>
+          <Bell className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">
             No timers running. Add one above or tap a paper preset to time a full paper.
           </p>
@@ -116,14 +116,14 @@ const MultiTimers = () => {
                     <button
                       onClick={() => setFullId(t.id)}
                       aria-label="Full screen timer"
-                      className="glass-button glass-button-ghost glass-button-icon inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+                      className="text-muted-foreground transition-colors hover:text-foreground"
                     >
                       <Maximize2 className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => studyTimerStore.removeTimer(t.id)}
                       aria-label="Remove timer"
-                      className="glass-button glass-button-ghost glass-button-icon inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-destructive"
+                      className="text-muted-foreground transition-colors hover:text-destructive"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -134,7 +134,7 @@ const MultiTimers = () => {
                   className={`mt-3 font-mono text-4xl font-bold tabular-nums ${finished ? "animate-pulse" : ""}`}
                   style={{ color: finished ? `hsl(var(--destructive))` : `hsl(${hsl})` }}
                 >
-                  {fmt(t.left)}
+                  <SplitFlapDisplay value={fmt(t.left)} label={`${t.label} remaining`} />
                 </p>
 
                 <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted/50">
@@ -201,7 +201,7 @@ const MultiTimers = () => {
               {fullTimer.label}
             </p>
             <p
-              className={`font-mono text-[clamp(3.5rem,17vw,12rem)] font-bold leading-none tabular-nums ${
+              className={`font-mono text-[clamp(2rem,10vw,8rem)] font-bold leading-none tabular-nums ${
                 fullTimer.left === 0 ? "animate-pulse" : ""
               }`}
               style={{
@@ -211,7 +211,7 @@ const MultiTimers = () => {
                     : `hsl(${colorHsl(fullTimer.color)})`,
               }}
             >
-              {fmt(fullTimer.left)}
+              <SplitFlapDisplay value={fmt(fullTimer.left)} label={`${fullTimer.label} remaining`} />
             </p>
             <div className="mt-10 h-3 w-full max-w-xl overflow-hidden rounded-full bg-muted/50">
               <div

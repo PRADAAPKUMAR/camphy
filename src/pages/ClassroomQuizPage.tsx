@@ -1,4 +1,6 @@
-import { GlassIcon } from "@/components/ui/glass-icon";
+import ThemeToggle from "@/components/ThemeToggle";
+import SplitFlapDisplay from "@/components/SplitFlapDisplay";
+import GlassIcon from "@/components/GlassIcon";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -105,6 +107,8 @@ const ClassroomQuizPage = () => {
   const revealGuard = useRef(false);
   const [history, setHistory] = useState<Record<number, Record<string, TeamAnswer>>>({});
   const [viewIndex, setViewIndex] = useState<number | null>(null);
+  const questionNavRef = useRef<HTMLDivElement>(null);
+  const questionContentRef = useRef<HTMLElement>(null);
 
   const { data: topicGroups, isLoading: topicsLoading } = useQuery({
     queryKey: ["classroom-quiz-topics", level],
@@ -174,7 +178,6 @@ const ClassroomQuizPage = () => {
     return () => window.clearTimeout(timer);
   }, [allAnswered, phase, reveal, secondsLeft, viewIndex]);
 
-  if (!grade || !level) return <Navigate to={validGrade ? `/grade/${validGrade}` : "/"} replace />;
 
   const setTeamCount = (count: number) => {
     setTeams((previous) => {
@@ -251,6 +254,11 @@ const ClassroomQuizPage = () => {
     setPhase("question");
   };
 
+  useEffect(() => {
+    questionContentRef.current?.scrollTo({ top: 0 });
+    questionNavRef.current?.querySelector<HTMLElement>('[aria-current="step"]')?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [shownIndex]);
+
   const restart = () => {
     setPhase("setup");
     setQuestions([]);
@@ -260,16 +268,21 @@ const ClassroomQuizPage = () => {
     setTeams((previous) => previous.map((team) => ({ ...team, score: 0, correct: 0 })));
   };
 
+  if (!grade || !level) return <Navigate to={validGrade ? `/grade/${validGrade}` : "/"} replace />;
+
   if (phase === "setup") {
     return (
       <div className="min-h-screen bg-background bg-grid page-transition">
-        <header className="glass-nav border-b border-border/40 bg-radial-glow">
+        <header className="border-b border-border/40 bg-radial-glow">
           <div className="container py-8 sm:py-10">
-            <Button variant="ghost" size="sm" className="mb-4 gap-2 text-muted-foreground" onClick={() => navigate(`/grade/${grade}`)}>
-              <ArrowLeft className="h-4 w-4" /> {GRADES[grade].label} home
-            </Button>
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground" onClick={() => navigate(`/grade/${grade}`)}>
+                <ArrowLeft className="h-4 w-4" /> {GRADES[grade].label} home
+              </Button>
+              <ThemeToggle />
+            </div>
             <div className="flex items-center gap-4">
-              <GlassIcon className="h-14 w-14 text-primary"><Gamepad2 className="h-7 w-7" /></GlassIcon>
+              <GlassIcon name="quiz" tone="violet" />
               <div><p className="font-mono text-xs text-primary">{GRADES[grade].label} · Classroom activity</p><h1 className="text-3xl font-extrabold sm:text-4xl">Classroom Quiz</h1></div>
             </div>
           </div>
@@ -329,7 +342,8 @@ const ClassroomQuizPage = () => {
   if (phase === "results") {
     return <div className="min-h-screen bg-background bg-grid px-4 py-8 page-transition">
       <main className="mx-auto max-w-4xl">
-        <div className="mb-8 text-center"><GlassIcon className="mx-auto mb-4 h-14 w-14 text-primary"><Trophy className="h-7 w-7" /></GlassIcon><p className="font-mono text-xs text-primary">FINAL RESULTS</p><h1 className="mt-1 text-4xl font-extrabold">{ranked[0]?.rank === ranked[1]?.rank ? "It’s a tie!" : `${ranked[0]?.name} wins!`}</h1></div>
+        <div className="mb-3 flex justify-end"><ThemeToggle /></div>
+        <div className="mb-8 text-center"><Trophy className="mx-auto mb-4 h-14 w-14 text-primary" /><p className="font-mono text-xs text-primary">FINAL RESULTS</p><h1 className="mt-1 text-4xl font-extrabold">{ranked[0]?.rank === ranked[1]?.rank ? "It’s a tie!" : `${ranked[0]?.name} wins!`}</h1></div>
         <div className="space-y-3">{ranked.map((team, index) => <div key={team.id} className={`glass-card flex items-center gap-4 rounded-xl p-5 ${team.rank === 1 ? "border-primary/50 glow-sm" : ""}`}>
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-muted text-lg font-black">{team.rank === 1 ? <Crown className="h-6 w-6 text-primary" /> : team.rank}</div>
           <div className="min-w-0 flex-1"><p className="truncate text-lg font-bold">{team.name}</p><p className="text-sm text-muted-foreground">{team.correct}/{answeredQuestionCount} correct</p></div>
@@ -340,15 +354,22 @@ const ClassroomQuizPage = () => {
     </div>;
   }
 
-  return <div className="min-h-screen bg-background bg-grid page-transition">
-    <header className="glass-nav border-b border-border/40 bg-background/90 px-3 py-3 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3">
-        <div><p className="font-mono text-xs text-primary">QUESTION {current + 1} OF {questions.length}</p><h1 className="text-lg font-bold">Classroom Quiz</h1></div>
-        <div className={`flex min-w-32 items-center justify-center gap-2 rounded-lg border px-5 py-2 font-mono text-2xl font-black tabular-nums ${secondsLeft <= 5 && phase === "question" ? "border-destructive/50 bg-destructive/10 text-destructive animate-pulse" : "border-primary/30 bg-primary/10 text-primary"}`}><Clock3 className="h-5 w-5" />{fmtTime(secondsLeft)}</div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="hidden text-sm sm:inline-flex">{Object.keys(answers).length}/{teams.length} locked</Badge>
+  const shownPhase = reviewing ? "reveal" : phase;
+  const shownAnswers = reviewing ? history[shownIndex] ?? {} : answers;
+
+  return <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-background bg-grid page-transition">
+    <header className="shrink-0 border-b border-border/40 bg-background/90 px-2 py-2 backdrop-blur-xl sm:px-4">
+      <div className="mx-auto flex max-w-[1500px] items-center gap-2 sm:gap-4">
+          <div className="shrink-0"><p className="whitespace-nowrap font-mono text-[9px] text-primary sm:text-xs">QUESTION {shownIndex + 1} OF {questions.length}</p><h1 className="whitespace-nowrap text-xs font-bold sm:text-lg">Classroom Quiz</h1></div>
+          <section aria-labelledby="quiz-leaderboard-heading" className="flex min-w-0 flex-1 items-center gap-1.5">
+            <h2 id="quiz-leaderboard-heading" className="shrink-0"><Medal className="h-4 w-4 text-primary" /><span className="sr-only">Live leaderboard</span></h2>
+            <ol tabIndex={0} aria-label="Team scores" className="flex min-w-0 gap-1.5 overflow-x-auto rounded-lg py-1" aria-live="polite" aria-atomic="true">
+              {ranked.map((team) => <li key={team.id} className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border/40 bg-card/60 px-2 py-1.5 text-[10px] sm:text-xs"><span className="text-[9px] font-black text-muted-foreground">{team.rank}</span><span className="max-w-16 truncate font-semibold sm:max-w-24" title={team.name}>{team.name}</span><strong className="tabular-nums">{team.score.toLocaleString()}</strong></li>)}
+            </ol>
+          </section>
+          <ThemeToggle />
           <AlertDialog>
-            <AlertDialogTrigger asChild><Button variant="outline" size="sm" className="gap-2"><Flag className="h-4 w-4" /> End quiz</Button></AlertDialogTrigger>
+            <AlertDialogTrigger asChild><Button variant="outline" size="sm" aria-label="End quiz" className="h-9 w-9 shrink-0 gap-2 px-0 sm:w-auto sm:px-3"><Flag className="h-4 w-4" /><span className="hidden sm:inline">End quiz</span></Button></AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>End the quiz now?</AlertDialogTitle>
@@ -357,67 +378,70 @@ const ClassroomQuizPage = () => {
               <AlertDialogFooter><AlertDialogCancel>Continue quiz</AlertDialogCancel><AlertDialogAction onClick={() => setPhase("results")}>Show results</AlertDialogAction></AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </div>
       </div>
     </header>
-    <main className="mx-auto grid max-w-[1500px] gap-4 p-3 lg:grid-cols-[minmax(0,1fr)_390px] lg:p-5">
-      <section className="space-y-4">
-        {reviewing && <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/40 bg-primary/10 p-3 text-sm">
-          <span className="font-semibold">Reviewing question {shownIndex + 1} — timer paused</span>
-          <Button size="sm" onClick={() => setViewIndex(null)}>Back to live question {current + 1}</Button>
+
+    <main className="mx-auto grid min-h-0 w-full max-w-[1500px] flex-1 grid-cols-[minmax(0,1fr)_minmax(144px,38%)] gap-2 p-2 md:grid-cols-[minmax(0,1fr)_320px] md:gap-4 md:p-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <section ref={questionContentRef} aria-label="Question content" tabIndex={0} className="min-h-0 min-w-0 space-y-3 overflow-y-auto overscroll-contain rounded-xl pb-2 focus-visible:outline-offset-[-2px]">
+        {reviewing && <div className="space-y-2 rounded-xl border border-primary/40 bg-primary/10 p-3 text-xs sm:text-sm">
+          <p className="font-semibold">Reviewing question {shownIndex + 1} — timer paused</p>
+          <Button size="sm" className="h-auto min-h-9 whitespace-normal" onClick={() => setViewIndex(null)}>Back to live question {current + 1}</Button>
         </div>}
-        <div className="glass-control flex flex-wrap items-center gap-2 rounded-xl border border-border/50 bg-card/60 px-4 py-3">
-          <Badge className="font-mono text-sm">{shownQuestion?.paper_code ?? "—"}</Badge>
-          {(shownQuestion?.session || shownQuestion?.year) && <span className="text-sm text-muted-foreground">{[shownQuestion?.session, shownQuestion?.year].filter(Boolean).join(" ")}</span>}
-          <Badge variant="secondary" className="text-sm">Question {shownQuestion?.question_number}</Badge>
-          {shownQuestion?.topic_name && <Badge variant="outline" className="text-sm">{shownQuestion.topic_name}</Badge>}
-          <span className="ml-auto font-mono text-xs text-muted-foreground">Quiz Q{shownIndex + 1} of {questions.length}</span>
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border/50 bg-card/60 px-3 py-2 text-xs sm:text-sm">
+          <Badge className="max-w-full break-all font-mono text-[10px] sm:text-sm">{shownQuestion?.paper_code ?? "—"}</Badge>
+          {(shownQuestion?.session || shownQuestion?.year) && <span className="text-muted-foreground">{[shownQuestion?.session, shownQuestion?.year].filter(Boolean).join(" ")}</span>}
+          <Badge variant="secondary">Question {shownQuestion?.question_number}</Badge>
+          {shownQuestion?.topic_name && <Badge variant="outline">{shownQuestion.topic_name}</Badge>}
         </div>
         <QuestionCard question={shownQuestion?.question_number ?? shownIndex + 1} imageUrl={shownQuestion?.image_url ?? undefined} />
-        {(() => {
-          const shownPhase = reviewing ? "reveal" : phase;
-          const shownAnswers = reviewing ? history[shownIndex] ?? {} : answers;
-          return <>
-            {shownPhase === "reveal" && <div className="flex items-center justify-center gap-3 rounded-xl border border-success/40 bg-success/10 p-4 text-lg font-bold text-success"><Check className="h-6 w-6" /> Correct answer: {shownQuestion?.correct_answer}</div>}
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{teams.map((team, index) => {
-              const answer = shownAnswers[team.id];
-              return <div key={team.id} className="glass-control rounded-xl border bg-card/70 p-3" style={teamTone(index)}>
-                <div className="mb-3 flex items-center justify-between gap-2"><p className="truncate font-bold">{team.name}</p>{answer ? <Badge variant="secondary">Locked {answer.option}</Badge> : <span className="text-xs text-muted-foreground">{shownPhase === "reveal" ? "No answer" : "Choose answer"}</span>}</div>
-                <div className="grid grid-cols-4 gap-2">{OPTIONS.map((option) => {
-                  const selected = answer?.option === option;
-                  const correct = shownPhase === "reveal" && shownQuestion?.correct_answer === option;
-                  const wrong = shownPhase === "reveal" && selected && !correct;
-                  return <Button key={option} variant={correct ? "default" : wrong ? "destructive" : selected ? "secondary" : "outline"} className={`h-12 px-0 text-lg font-black ${correct ? "bg-success text-success-foreground" : ""}`} disabled={shownPhase !== "question" || !!answer} onClick={() => recordAnswer(team.id, option)}>{option}</Button>;
-                })}</div>
-                {shownPhase === "reveal" && <p className={`mt-2 text-right text-sm font-bold ${answer?.points ? "text-success" : "text-muted-foreground"}`}>{answer?.points ? `+${answer.points.toLocaleString()} points` : "No points"}</p>}
-              </div>;
-            })}</div>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <Button size="lg" variant="outline" className="gap-2" disabled={shownIndex === 0} onClick={() => setViewIndex(shownIndex - 1)}><ArrowLeft className="h-5 w-5" /> Previous</Button>
-              {shownPhase === "reveal" ? <Button size="lg" variant="outline" className="gap-2" onClick={() => shownQuestion && explanation.openExplanation(shownQuestion.question_number)}><Lightbulb className="h-5 w-5" /> View explanation</Button> : <div />}
-              {reviewing
-                ? <Button size="lg" className="gap-2" onClick={() => setViewIndex(shownIndex + 1 >= current ? null : shownIndex + 1)}>{shownIndex + 1 >= current ? "Back to live" : "Next reviewed"}<ChevronRight className="h-5 w-5" /></Button>
-                : phase === "reveal" ? <Button size="lg" className="gap-2" onClick={nextQuestion}>{current >= questions.length - 1 ? "Show final results" : "Next question"}<ChevronRight className="h-5 w-5" /></Button> : <div />}
-            </div>
-          </>;
-        })()}
       </section>
-      <aside className="space-y-4">
-        <div className="glass-card rounded-xl p-4"><div className="mb-3 flex items-center gap-2"><Medal className="h-5 w-5 text-primary" /><h2 className="font-bold">Live leaderboard</h2></div><div className="space-y-2">{ranked.map((team) => <div key={team.id} className="flex items-center gap-3 rounded-lg bg-muted/20 p-3"><span className="w-6 text-center font-black text-muted-foreground">{team.rank}</span><span className="min-w-0 flex-1 truncate font-semibold">{team.name}</span><strong className="tabular-nums">{team.score.toLocaleString()}</strong></div>)}</div></div>
-        <div className="glass-card rounded-xl p-4">
-          <h2 className="mb-3 font-bold">Questions</h2>
-          <div className="grid grid-cols-5 gap-1.5">{questions.map((_, i) => {
-            const done = i < current || (i === current && phase === "reveal");
-            const reachable = i <= current;
-            return <button key={i} type="button" disabled={!reachable} onClick={() => setViewIndex(i === current ? null : i)} aria-label={`Go to question ${i + 1}`}
-              className={`h-8 rounded-lg border text-xs font-semibold tabular-nums ${i === shownIndex ? "ring-2 ring-primary" : ""} ${done ? "border-primary/40 bg-primary/20 text-foreground" : i === current ? "border-primary/60 text-primary" : "border-border/40 bg-muted/20 text-muted-foreground opacity-50"}`}>{i + 1}</button>;
-          })}</div>
+
+      <aside aria-label="Quiz controls" className="flex min-h-0 min-w-0 flex-col gap-2 md:gap-3">
+        <div className={`flex shrink-0 flex-wrap items-center justify-center gap-2 rounded-xl border px-2 py-3 font-mono text-xl font-black tabular-nums sm:text-3xl ${secondsLeft <= 5 && phase === "question" && !reviewing ? "border-destructive/50 bg-destructive/10 text-destructive animate-pulse" : "border-primary/30 bg-primary/10 text-primary"}`}>
+          <Clock3 className="hidden h-5 w-5 sm:block" /><SplitFlapDisplay value={fmtTime(secondsLeft)} label="Quiz time remaining" />
+          {reviewing && <span className="w-full text-center text-[10px] font-normal">Paused for review</span>}
         </div>
-        {phase === "question" && !reviewing && <Button variant="outline" className="w-full" onClick={reveal}>End answering now</Button>}
+        <div role="region" aria-label="Team answers" className={`grid min-h-0 flex-1 content-start gap-1.5 rounded-xl p-0.5 md:gap-2 ${teams.length > 3 ? "grid-cols-2" : "grid-cols-1"}`}>
+          {teams.map((team, index) => {
+            const answer = shownAnswers[team.id];
+            return <div key={team.id} role="group" aria-label={`${team.name} answers`} className="min-w-0 rounded-xl border p-1 md:p-2" style={teamTone(index)}>
+              <div className="mb-1 flex min-w-0 items-center justify-between gap-1"><p className="min-w-0 truncate text-[10px] font-bold md:text-xs" title={team.name}>{team.name}</p>{shownPhase === "reveal" && teams.length > 3 ? <span className={`shrink-0 text-[9px] font-bold md:text-[10px] ${answer?.points ? "text-success" : "text-muted-foreground"}`} title={answer?.points ? `+${answer.points.toLocaleString()} points` : "No points"}>{answer?.points ? `+${answer.points}` : "0"}</span> : answer && <Badge variant="secondary" className="shrink-0 px-1 text-[9px]" aria-label={`Locked ${answer.option}`} title={`Locked ${answer.option}`}>{answer.option}</Badge>}</div>
+              <div className={`grid gap-1 ${teams.length > 3 ? "grid-cols-2 md:grid-cols-4" : "grid-cols-4"}`}>{OPTIONS.map((option) => {
+                const selected = answer?.option === option;
+                const correct = shownPhase === "reveal" && shownQuestion?.correct_answer === option;
+                const wrong = shownPhase === "reveal" && selected && !correct;
+                return <Button key={option} variant={correct ? "default" : wrong ? "destructive" : selected ? "secondary" : "outline"} className={`${teams.length > 3 ? "h-7 text-xs md:h-8 md:text-base" : "h-9 text-sm md:h-10 md:text-lg"} px-0 font-black ${correct ? "bg-success text-success-foreground" : ""}`} disabled={shownPhase !== "question" || !!answer} aria-label={`${team.name} option ${option}`} aria-pressed={selected} onClick={() => recordAnswer(team.id, option)}>{option}</Button>;
+              })}</div>
+              {shownPhase === "reveal" && teams.length <= 3 && <p className={`mt-1 text-right text-[10px] font-bold md:text-xs ${answer?.points ? "text-success" : "text-muted-foreground"}`}>{answer?.points ? `+${answer.points.toLocaleString()} points` : "No points"}</p>}
+            </div>;
+          })}
+        </div>
+        <div className="shrink-0 space-y-2">
+          <p className="text-center text-[10px] text-muted-foreground md:text-xs">{Object.keys(answers).length}/{teams.length} teams locked</p>
+          {shownPhase === "reveal" && <div className="flex items-center justify-center gap-1 rounded-lg border border-success/40 bg-success/10 p-2 text-center text-xs font-bold text-success md:text-sm"><Check className="hidden h-4 w-4 shrink-0 md:block" />Correct answer: {shownQuestion?.correct_answer}</div>}
+          {shownPhase === "reveal" && <Button variant="outline" className="h-auto min-h-10 w-full gap-1 whitespace-normal px-2 text-xs md:text-sm" onClick={() => shownQuestion && explanation.openExplanation(shownQuestion.question_number)}><Lightbulb className="hidden h-4 w-4 md:block" />View explanation</Button>}
+          {reviewing
+            ? <Button className="h-auto min-h-10 w-full gap-1 whitespace-normal px-2 text-xs md:text-sm" onClick={() => setViewIndex(shownIndex + 1 >= current ? null : shownIndex + 1)}>{shownIndex + 1 >= current ? "Back to live" : "Next reviewed"}<ChevronRight className="h-4 w-4 shrink-0" /></Button>
+            : phase === "reveal" ? <Button className="h-auto min-h-10 w-full gap-1 whitespace-normal px-2 text-xs md:text-sm" onClick={nextQuestion}>{current >= questions.length - 1 ? "Show final results" : "Next question"}<ChevronRight className="h-4 w-4 shrink-0" /></Button>
+              : <Button variant="outline" className="h-auto min-h-10 w-full whitespace-normal px-2 text-xs md:text-sm" onClick={reveal}>End answering now</Button>}
+        </div>
       </aside>
     </main>
+
+    <nav aria-label="Quiz questions" className="shrink-0 border-t border-border/40 bg-background/90 px-2 py-2 backdrop-blur-xl sm:px-4">
+      <div className="mx-auto flex max-w-[1500px] items-center gap-2">
+        <Button variant="outline" size="icon" className="h-9 w-9 shrink-0" aria-label="Previous question" disabled={shownIndex === 0} onClick={() => setViewIndex(shownIndex - 1)}><ArrowLeft className="h-4 w-4" /></Button>
+        <h2 className="hidden text-xs font-bold sm:block">Questions</h2>
+        <div ref={questionNavRef} className="flex min-w-0 flex-1 gap-2 overflow-x-auto px-1 py-1">{questions.map((_, i) => {
+          const done = i < current || (i === current && phase === "reveal");
+          return <button key={i} type="button" disabled={i > current} onClick={() => setViewIndex(i === current ? null : i)} aria-label={`Go to question ${i + 1}`} aria-current={i === shownIndex ? "step" : undefined}
+            className={`h-9 w-9 shrink-0 rounded-lg border text-xs font-semibold tabular-nums ${i === shownIndex ? "ring-2 ring-primary" : ""} ${done ? "border-primary/40 bg-primary/20 text-foreground" : i === current ? "border-primary/60 text-primary" : "border-border/40 bg-muted/20 text-muted-foreground opacity-50"}`}>{i + 1}</button>;
+        })}</div>
+      </div>
+    </nav>
     <ExplanationDialog open={explanation.open} onOpenChange={explanation.setOpen} question={explanation.question} isLoading={explanation.isLoading} data={explanation.data} />
   </div>;
+
 };
 
 export default ClassroomQuizPage;

@@ -1,4 +1,4 @@
-import { GlassIcon } from "@/components/ui/glass-icon";
+import GlassIcon from "@/components/GlassIcon";
 import { Link, useNavigate } from "react-router-dom";
 import { useTileTransition } from "@/hooks/use-tile-transition";
 import { useQuery } from "@tanstack/react-query";
@@ -102,7 +102,7 @@ const TopicalMcqPage = () => {
                 {...tileProps(`/topical-mcq/${encodeURIComponent(level)}`)}
                 className="glass-card-hover group rounded-2xl p-6 text-left"
               >
-                <GlassIcon className="mb-4 h-12 w-12 text-primary"><Icon className="h-6 w-6" /></GlassIcon>
+                <GlassIcon icon={Icon} tone={level === "IGCSE" ? "blue" : "amber"} className="mb-4" size="lg" />
                 <h2 className="text-xl font-bold">{label}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">{blurb}</p>
                 <div className="mt-4 flex flex-wrap gap-2">

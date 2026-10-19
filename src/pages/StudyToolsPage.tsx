@@ -1,5 +1,6 @@
-import { GlassIcon } from "@/components/ui/glass-icon";
-import { Link, useSearchParams } from "react-router-dom";
+import GlassIcon from "@/components/GlassIcon";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Timer as TimerIcon, Brain, CalendarDays, ArrowLeft } from "lucide-react";
 import MultiTimers from "@/components/study/MultiTimers";
 import FocusMode from "@/components/study/FocusMode";
@@ -14,13 +15,10 @@ const TABS = [
 type TabKey = (typeof TABS)[number]["key"];
 
 const StudyToolsPage = () => {
-  const [params, setParams] = useSearchParams();
-  const requestedTab = params.get("tab");
-  const tab: TabKey = TABS.some((item) => item.key === requestedTab) ? requestedTab as TabKey : "timers";
-  const setTab = (next: TabKey) => setParams((current) => { const result = new URLSearchParams(current); result.set("tab", next); return result; });
+  const [tab, setTab] = useState<TabKey>("timers");
 
   return (
-    <div className="min-h-screen bg-background page-transition">
+    <div className="min-h-screen bg-background">
       <header className="relative overflow-hidden border-b border-border/40 bg-radial-glow">
         <div className="container relative py-10">
           <Link
@@ -29,6 +27,7 @@ const StudyToolsPage = () => {
           >
             <ArrowLeft className="h-3.5 w-3.5" /> Home
           </Link>
+          <GlassIcon name="timer" tone="cyan" className="mb-4" />
           <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
             Study <span className="gradient-text">Tools</span>
           </h1>
@@ -45,14 +44,14 @@ const StudyToolsPage = () => {
                   key={t.key}
                   onClick={() => setTab(t.key)}
                   aria-pressed={active}
-                  className="glass-study-tab inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all"
+                  className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-[color,background-color,border-color]"
                   style={{
-                    backgroundColor: active ? `hsl(${t.color} / 0.15)` : "transparent",
+                    background: active ? `hsl(${t.color} / 0.15)` : "transparent",
                     borderColor: active ? `hsl(${t.color} / 0.45)` : "hsl(var(--border))",
                     color: active ? `hsl(${t.color})` : "hsl(var(--muted-foreground))",
                   }}
                 >
-                  <GlassIcon icon={t.icon} className="h-7 w-7 rounded-lg text-current [&>svg]:h-4 [&>svg]:w-4" />
+                  <t.icon className="h-4 w-4" />
                   {t.label}
                 </button>
               );
@@ -62,9 +61,11 @@ const StudyToolsPage = () => {
       </header>
 
       <main className="container py-10">
+        <div className="glass-panel p-4 sm:p-6">
         {tab === "timers" && <MultiTimers />}
         {tab === "focus" && <FocusMode />}
         {tab === "timetable" && <TimetableScheduler />}
+        </div>
       </main>
     </div>
   );

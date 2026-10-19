@@ -33,7 +33,7 @@ const FullscreenStage = ({ open, onClose, children }: Props) => {
         type="button"
         onClick={onClose}
         aria-label="Exit full screen"
-        className="glass-button glass-button-neutral absolute right-5 top-5 inline-flex items-center gap-2 rounded-full border border-border/60 bg-muted/40 px-4 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
+        className="absolute right-5 top-5 inline-flex items-center gap-2 rounded-full border border-border/60 bg-muted/40 px-4 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
       >
         <Minimize2 className="h-4 w-4" /> Exit
       </button>

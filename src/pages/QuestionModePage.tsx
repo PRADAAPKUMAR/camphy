@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import ThemeToggle from "@/components/ThemeToggle";
+import SplitFlapDisplay from "@/components/SplitFlapDisplay";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, ChevronLeft, ChevronRight, Lightbulb, Timer as TimerIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lightbulb, Timer as TimerIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,6 +27,9 @@ import { savePerformanceRecord } from "@/lib/performance-history";
 import { syllabusVersionForLevel } from "@/lib/syllabus";
 import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
+import { useQuestionPacing } from "@/hooks/use-question-pacing";
+import { paperDurationMinutes } from "@/lib/question-pacing";
+import { useMcqKeyboard } from "@/hooks/use-mcq-keyboard";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
@@ -46,7 +51,6 @@ const QuestionModePage = () => {
   const [current, setCurrent] = useState(0);
   const [finished, setFinished] = useState(false);
   const [elapsed, setElapsed] = useState(0);
-  const shownAt = useRef<number>(Date.now());
 
   const explanation = useExplanation(paperId ? { paper_id: paperId } : null);
 
@@ -63,7 +67,7 @@ const QuestionModePage = () => {
   });
   useSyncGrade(paper?.level);
 
-  const { data: images, isLoading: imagesLoading } = useQuestionImages(paperId);
+  const { data: images, isLoading: imagesLoading, isFetching: imagesFetching, refetch: reloadImages } = useQuestionImages(paperId);
 
   const { data: answerKeyMap } = useQuery({
     queryKey: ["answer-key", paperId],
@@ -98,10 +102,7 @@ const QuestionModePage = () => {
   const currentQuestion = questions[Math.min(current, questions.length - 1)] ?? 1;
   const answeredCount = Object.keys(answers).length;
   const isRetrySet = !!searchParams.get("qs");
-
-  useEffect(() => {
-    shownAt.current = Date.now();
-  }, [currentQuestion]);
+  const { commit: commitQuestionTime, finish: finishPacing } = useQuestionPacing(currentQuestion, !!paper && !paperLoading && !imagesLoading && !!images?.[currentQuestion] && !finished && !answers[currentQuestion] && !explanation.open);
 
   useEffect(() => {
     if (finished) return;
@@ -120,9 +121,8 @@ const QuestionModePage = () => {
   const handleSelect = useCallback(
     (option: string) => {
       const q = currentQuestion;
-      if (finished || answers[q]) return;
-      const spent = Math.max(1, Math.round((Date.now() - shownAt.current) / 1000));
-      setTimes((prev) => ({ ...prev, [q]: spent }));
+      if (finished || answers[q] || !images?.[q]) return;
+      commitQuestionTime(q);
       setAnswers((prev) => ({ ...prev, [q]: option }));
 
       const known = answerKeyMap?.[q];
@@ -145,11 +145,13 @@ const QuestionModePage = () => {
         }
       })();
     },
-    [currentQuestion, finished, answers, answerKeyMap, paperId],
+    [currentQuestion, finished, answers, answerKeyMap, paperId, commitQuestionTime, images],
   );
 
   const finish = useCallback(() => {
     if (finished) return;
+    const finalTimes = finishPacing();
+    setTimes(finalTimes);
     setFinished(true);
     const key = { ...answerKeyMap, ...correctAnswers };
     let score = 0;
@@ -176,11 +178,19 @@ const QuestionModePage = () => {
         questionResults: Object.fromEntries(
           Object.entries(answers).map(([q, a]) => [Number(q), key[Number(q)] === a]),
         ),
-        questionTimes: times,
+        questionTimes: finalTimes,
+        timingMeasurement: "active-question",
       });
     }
     toast.success(`Score: ${score}/${questions.length}`);
-  }, [finished, answerKeyMap, correctAnswers, answers, paper, paperId, questions, times, answeredCount]);
+  }, [finished, answerKeyMap, correctAnswers, answers, paper, paperId, questions, answeredCount, finishPacing]);
+
+  useMcqKeyboard({
+    enabled: !finished && !!paper && !imagesLoading && Object.keys(images ?? {}).length > 0 && !explanation.open,
+    onSelect: handleSelect,
+    onNext: () => setCurrent((c) => Math.min(questions.length - 1, c + 1)),
+    onPrev: () => setCurrent((c) => Math.max(0, c - 1)),
+  });
 
   if (paperLoading || imagesLoading) {
     return (
@@ -203,11 +213,24 @@ const QuestionModePage = () => {
     );
   }
 
+  if (!images || !Object.keys(images).length) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background p-6 text-center">
+        <h1 className="text-xl font-semibold">Question images are not available yet</h1>
+        <p className="text-sm text-muted-foreground">This paper needs individual question images before you can practise it.</p>
+        <div className="flex flex-wrap justify-center gap-2">
+          <Button variant="outline" onClick={() => reloadImages()} disabled={imagesFetching}>Try again</Button>
+          <Button asChild><Link to={`/papers/${encodeURIComponent(paper.level)}`}>Back to papers</Link></Button>
+        </div>
+      </main>
+    );
+  }
+
   const score = Object.entries(answers).filter(([q, a]) => correctAnswers[Number(q)] === a).length;
 
   return (
     <div className="min-h-screen bg-background bg-grid">
-      <header className="glass-nav border-b border-border/40">
+      <header className="border-b border-border/40">
         <div className="flex w-full flex-wrap items-center justify-between gap-3 px-2 py-3 sm:px-4">
           <div className="min-w-0">
             <Breadcrumb className="mb-1">
@@ -237,14 +260,10 @@ const QuestionModePage = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Badge variant="outline" className="gap-1 border-border/40 font-mono text-xs">
-              <TimerIcon className="h-3.5 w-3.5" /> {fmtSeconds(elapsed)}
+              <TimerIcon className="h-3.5 w-3.5" /> <SplitFlapDisplay value={fmtSeconds(elapsed)} label="Elapsed time" />
             </Badge>
-            <Button variant="ghost" size="sm" asChild className="gap-1 text-muted-foreground">
-              <Link to={`/exam/${paper.id}`}>
-                <ArrowLeft className="h-4 w-4" /> PDF exam
-              </Link>
-            </Button>
           </div>
         </div>
       </header>
@@ -260,6 +279,9 @@ const QuestionModePage = () => {
                   answers={answers}
                   correctAnswers={correctAnswers}
                   onExplain={explanation.openExplanation}
+                  questionTimes={times}
+                  questionNumbers={questions}
+                  durationMinutes={paperDurationMinutes(paper.level)}
                   paper={!isRetrySet && questions.length === TOTAL_QUESTIONS && Array.from({ length: TOTAL_QUESTIONS }, (_, i) => i + 1).every((q) => questions.includes(q) && ["A", "B", "C", "D"].includes(correctAnswers[q])) ? paper : undefined}
                 />
               </div>
@@ -314,6 +336,7 @@ const QuestionModePage = () => {
                 userAnswer={answers[currentQuestion]}
                 correctAnswer={correctAnswers[currentQuestion]}
                 onSelect={handleSelect}
+                disabled={!images[currentQuestion]}
               />
 
               <div className="flex flex-wrap items-center justify-between gap-2">

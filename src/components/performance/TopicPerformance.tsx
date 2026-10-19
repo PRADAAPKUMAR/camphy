@@ -29,8 +29,8 @@ const QuestionChips = ({ questions }: { questions: SubtopicNode["questions"] }) 
         title={`${paperLabel(q)} · Q${q.questionNumber} · ${q.correct ? "Correct" : "Wrong"}`}
         className={`inline-flex items-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-semibold ${
           q.correct
-            ? "border-emerald-400/40 bg-emerald-500/15 text-emerald-300"
-            : "border-rose-400/40 bg-rose-500/15 text-rose-300"
+            ? "border-success/40 bg-success/15 text-success"
+            : "border-destructive/40 bg-destructive/15 text-destructive"
         }`}
       >
         <span className="font-mono font-normal opacity-80">{paperLabel(q)}</span>
@@ -76,7 +76,7 @@ const SubtopicRow = ({ sub }: { sub: SubtopicNode }) => {
 const TopicRow = ({ topic }: { topic: TopicNodeStats }) => {
   const [open, setOpen] = useState(false);
   return (
-    <div className="glass-card tile-lift rounded-xl">
+    <div className="glass-card rounded-xl">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}

@@ -1,3 +1,4 @@
+import McqKeyboardHint from "@/components/McqKeyboardHint";
 const OPTIONS = ["A", "B", "C", "D"] as const;
 
 interface OptionButtonsProps {
@@ -20,14 +21,15 @@ const OptionButtons = ({
   const hasResult = !!userAnswer && correctAnswer !== undefined;
 
   return (
+    <div className="space-y-2">
     <div className="grid grid-cols-4 gap-2 sm:gap-3">
-      {OPTIONS.map((opt) => {
+      {OPTIONS.map((opt, i) => {
         const selected = userAnswer === opt;
         const isCorrectOpt = hasResult && opt === correctAnswer;
         const isWrongSel = selected && hasResult && userAnswer !== correctAnswer;
 
         let cls =
-          "flex h-14 items-center justify-center rounded-xl border text-lg font-bold transition-colors sm:h-16 sm:text-xl ";
+          "relative flex h-14 items-center justify-center rounded-xl border text-lg font-bold transition-[color,background-color,border-color,transform] duration-100 ease-out enabled:active:scale-[0.96] motion-reduce:active:scale-100 sm:h-16 sm:text-xl ";
         if (hasResult) {
           if (isCorrectOpt) cls += "border-success/50 bg-success text-success-foreground";
           else if (isWrongSel)
@@ -45,13 +47,19 @@ const OptionButtons = ({
             type="button"
             className={cls}
             aria-label={`Question ${question} option ${opt}`}
+            aria-pressed={selected}
+            data-answer-option={opt}
+            aria-keyshortcuts={`${opt} ${i + 1}`}
             disabled={locked}
             onClick={() => onSelect(opt)}
           >
             {opt}
+            <span className="absolute right-2 top-1 hidden font-mono text-[10px] font-normal opacity-60 sm:block">{i + 1}</span>
           </button>
         );
       })}
+    </div>
+    <McqKeyboardHint />
     </div>
   );
 };

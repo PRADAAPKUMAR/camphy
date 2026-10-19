@@ -1,7 +1,8 @@
+import GlassIcon from "@/components/GlassIcon";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDown, ArrowLeft, ArrowUp, ChevronDown, FileStack, Loader2, TriangleAlert, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, ChevronDown, FileStack, TriangleAlert, X } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,8 @@ import { addTheoryQuestionIds, groupTheoryTopics } from "@/lib/theory-topic-sele
 import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
 import { useTopicsByIds } from "@/hooks/use-syllabus";
+import { usePdfProgress } from "@/hooks/use-pdf-progress";
+import { PdfGenerationProgress, PdfProgressButton } from "@/components/PdfGenerationProgress";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((module) => module.supabase);
 
@@ -24,6 +27,7 @@ const TheoryTopicalPdfPage = () => {
   const [subtopicId, setSubtopicId] = useState("all");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
+  const pdfProgress = usePdfProgress();
   useSyncGrade(decodedLevel);
 
   // A new level has a different question bank; topic changes within it do not clear the basket.
@@ -67,19 +71,19 @@ const TheoryTopicalPdfPage = () => {
   const generate = async () => {
     if (!selected.length) return toast.error("Select at least one mapped question");
     setGenerating(true);
-    try { await createTheoryTopicalPdf(selected); } catch (error) { toast.error(error instanceof Error ? error.message : "PDF generation failed"); } finally { setGenerating(false); }
+    try { await pdfProgress.run("theory", async (report) => { await createTheoryTopicalPdf(selected, report); }); } catch (error) { toast.error(error instanceof Error ? error.message : "PDF generation failed"); } finally { setGenerating(false); }
   };
 
-  return <div className="min-h-screen bg-background bg-grid">
+  return <div data-grade={grade ?? undefined} className="min-h-screen bg-background bg-grid">
     <header className="border-b border-border/40"><div className="container py-6">
       <Button variant="ghost" size="sm" onClick={() => navigate(`/theory-papers/${encodeURIComponent(decodedLevel)}`)} className="mb-3 gap-1 text-muted-foreground"><ArrowLeft className="h-4 w-4" /> Theory papers</Button>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-extrabold sm:text-3xl">{normalizeGradeLabel(decodedLevel)} — Topical Theory PDF</h1>
+        <GlassIcon name="theory" tone="violet" /><h1 className="flex-1 text-2xl font-extrabold sm:text-3xl">{normalizeGradeLabel(decodedLevel)} — Topical Theory PDF</h1>
         {grade && <Button variant="link" asChild><Link to={gradePath(grade)}>Grade Home</Link></Button>}
       </div>
     </div></header>
     <main className="container grid items-start gap-6 py-6 md:grid-cols-[minmax(220px,300px)_minmax(0,1fr)]">
-      <section className="min-w-0 md:sticky md:top-20" aria-label="Topic browser">
+      <section className="glass-panel min-w-0 p-4 md:sticky md:top-20" aria-label="Topic browser">
         <h2 className="mb-3 font-semibold">Topics</h2>
         {isLoading || loadingHierarchy ? <div className="space-y-2">{[1, 2, 3, 4].map((item) => <Skeleton key={item} className="h-12" />)}</div>
           : isError ? <div className="space-y-3"><p className="text-sm text-destructive">Questions could not be loaded.</p><Button variant="outline" size="sm" onClick={() => refetch()}>Try again</Button></div>
@@ -102,14 +106,12 @@ const TheoryTopicalPdfPage = () => {
           </div>)}</div>}
       </section>
       <div className="grid h-[calc(100dvh-6rem)] min-h-[24rem] min-w-0 grid-rows-[auto_minmax(0,1fr)] gap-6 overflow-hidden md:sticky md:top-20">
-        <section aria-label="Selected questions" className="min-w-0 border-y border-border bg-background py-4">
+        <section aria-label="Selected questions" className="glass-reading min-w-0 p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="flex items-center gap-2 font-semibold">Your PDF <Badge>{selected.length} selected</Badge></h2>
-            <Button className="w-full gap-2 sm:w-auto" onClick={generate} disabled={!selected.length || generating}>
-              {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileStack className="h-4 w-4" />}
-              {generating ? "Creating PDF…" : "Create theory PDF"}
-            </Button>
+            <div className="w-full sm:w-52"><PdfProgressButton state={pdfProgress.state} action="theory" label="Create theory PDF" icon={FileStack} onClick={generate} disabled={!selected.length || generating} /></div>
           </div>
+          <PdfGenerationProgress state={pdfProgress.state} />
           {selected.length > 0 && <div className="mt-3 max-h-[min(12rem,25dvh)] space-y-1 overflow-y-auto overscroll-contain" aria-label="PDF question order">{selected.map((question, index) => <div key={question.mapping_id} className="flex items-center gap-2 border-b border-border/40 py-2 text-xs">
             <span className="w-5 shrink-0 font-bold text-primary">{index + 1}</span>
             <span className="min-w-0 flex-1 break-words">{question.paper_code} · {question.session} {question.year} · Q{question.question_number}</span>
@@ -124,7 +126,7 @@ const TheoryTopicalPdfPage = () => {
             <h2 className="font-semibold">{activeGroup?.topic.topic_name ?? "Questions"}{activeGroup && <span className="ml-2 text-sm font-normal text-muted-foreground">({matching.length})</span>}</h2>
             {matching.length > 0 && <Button variant="outline" size="sm" onClick={() => setSelectedIds((current) => addTheoryQuestionIds(current, matching.map((question) => question.mapping_id)))}>Select all {matching.length}</Button>}
           </div>
-          {!activeGroup ? <p className="text-sm text-muted-foreground">Select a topic to view its questions.</p> : !matching.length ? <p className="text-sm text-muted-foreground">No reviewed questions match this subtopic.</p> : <div className="space-y-2">{matching.map((question) => <label key={question.mapping_id} className="tile-surface tile-lift flex cursor-pointer items-start gap-3 p-3">
+          {!activeGroup ? <p className="text-sm text-muted-foreground">Select a topic to view its questions.</p> : !matching.length ? <p className="text-sm text-muted-foreground">No reviewed questions match this subtopic.</p> : <div className="space-y-2">{matching.map((question) => <label key={question.mapping_id} className="flex cursor-pointer items-start gap-3 rounded-lg border border-border/40 p-3 hover:border-primary/40">
             <Checkbox aria-label={`Select ${question.paper_code} Q${question.question_number}`} checked={selectedIds.includes(question.mapping_id)} onCheckedChange={(checked) => setSelectedIds((current) => checked === true ? addTheoryQuestionIds(current, [question.mapping_id]) : current.filter((id) => id !== question.mapping_id))} />
             <span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold">{question.paper_code} · {question.session} {question.year} · Q{question.question_number}</span><span className="mt-1 flex flex-wrap gap-1">{question.topics.map((topic) => <Badge key={topic.id} variant="outline" className="whitespace-normal text-[10px]">{topic.topic_name}</Badge>)}</span><span className="mt-2 block text-xs text-muted-foreground">Pages {question.start_page}–{question.end_page}</span></span>
             {question.shared_page_warning && <TriangleAlert aria-label="Shared pages" className="h-4 w-4 shrink-0 text-warning" />}

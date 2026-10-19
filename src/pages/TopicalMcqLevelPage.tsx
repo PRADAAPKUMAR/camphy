@@ -1,7 +1,7 @@
-import { GlassIcon } from "@/components/ui/glass-icon";
+import GlassIcon from "@/components/GlassIcon";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, LayoutGrid, Target } from "lucide-react";
+import { ArrowLeft, Target } from "lucide-react";
 import PhysicsBackground from "@/components/PhysicsBackground";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -81,7 +81,7 @@ const TopicalMcqLevelPage = () => {
           </div>
         ) : !topics?.length ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <GlassIcon className="mb-4 h-14 w-14 text-muted-foreground"><Target className="h-7 w-7" /></GlassIcon>
+            <Target className="mb-4 h-12 w-12 text-muted-foreground/40" />
             <p className="font-medium text-muted-foreground">
               No mapped MCQ questions for this level yet.
             </p>
@@ -100,7 +100,7 @@ const TopicalMcqLevelPage = () => {
                 }
               >
                 <div className="mb-3 flex items-center gap-3">
-                  <GlassIcon className="h-9 w-9 shrink-0 text-primary"><LayoutGrid className="h-4 w-4" /></GlassIcon>
+                  <GlassIcon name="practice" tone="cyan" size="sm" />
                   <h3 className="text-base font-semibold">{topic.name}</h3>
                 </div>
                 <div className="flex flex-wrap gap-2">

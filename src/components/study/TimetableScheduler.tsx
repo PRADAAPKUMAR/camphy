@@ -1,4 +1,3 @@
-import { GlassIcon } from "@/components/ui/glass-icon";
 import { useMemo, useState } from "react";
 import { Plus, Trash2, Download, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -163,7 +162,7 @@ const TimetableScheduler = () => {
           <select
             value={draft.day}
             onChange={(e) => setDraft((d) => ({ ...d, day: e.target.value }))}
-            className="glass-field h-10 rounded-md border border-input bg-background px-3 text-sm"
+            className="h-10 rounded-md border border-input bg-background px-3 text-sm"
             aria-label="Day"
           >
             {DAYS.map((d) => (
@@ -238,7 +237,7 @@ const TimetableScheduler = () => {
       {/* Week grid */}
       {slots.length === 0 ? (
         <div className="glass-card rounded-2xl p-10 text-center">
-          <GlassIcon className="mx-auto mb-3 h-14 w-14 text-muted-foreground"><CalendarDays className="h-7 w-7" /></GlassIcon>
+          <CalendarDays className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">
             Your week is empty. Add study slots above to build a colourful timetable you can download.
           </p>

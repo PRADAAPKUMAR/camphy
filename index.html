@@ -1,7 +1,15 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      // Paint the saved theme before CSS and the deferred application load.
+      try {
+        const theme = localStorage.getItem("physicshq:theme") === "light" ? "light" : "dark";
+        document.documentElement.className = theme;
+        document.documentElement.style.colorScheme = theme;
+      } catch { document.documentElement.style.colorScheme = "dark"; }
+    </script>
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="preconnect" href="https://xnoqlggqrdwfrumibiak.supabase.co" crossorigin />
     <link rel="preconnect" href="https://cdn.gpteng.co" crossorigin />

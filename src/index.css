@@ -72,6 +72,9 @@
     --grade-accent-border: var(--grade-accent) / 0.25;
     --grade-foreground: var(--background);
     --grade-glow: 0 8px 28px -12px hsl(var(--grade-accent) / 0.3);
+    --pdf-progress-surface: var(--card) / 0.75;
+    --pdf-progress-beam: linear-gradient(90deg, hsl(var(--grade-accent) / 0.55), hsl(var(--grade-accent)));
+    --pdf-progress-button-fill: linear-gradient(90deg, hsl(var(--grade-accent) / 0.14), hsl(var(--grade-accent) / 0.35));
   }
 }
 
@@ -96,10 +99,23 @@
     --grade-accent-subtle: var(--grade-accent) / 0.1;
     --grade-accent-border: var(--grade-accent) / 0.25;
     --grade-glow: 0 8px 28px -12px hsl(var(--grade-accent) / 0.3);
+    --pdf-progress-beam: linear-gradient(90deg, hsl(var(--grade-accent) / 0.55), hsl(var(--grade-accent)));
+    --pdf-progress-button-fill: linear-gradient(90deg, hsl(var(--grade-accent) / 0.14), hsl(var(--grade-accent) / 0.35));
   }
 }
 
 @layer utilities {
+  .pdf-progress-hud { background: hsl(var(--pdf-progress-surface)); backdrop-filter: blur(16px); box-shadow: var(--grade-glow); }
+  .pdf-action { transition: border-radius 240ms, background 240ms; }
+  .pdf-action-active { border-radius: 999px; background: hsl(var(--card)); color: hsl(var(--foreground)); border: 1px solid hsl(var(--grade-accent-border)); }
+  .pdf-action-fill { background: var(--pdf-progress-button-fill); transition: transform 240ms ease-out; }
+  .pdf-progress-beam { background: var(--pdf-progress-beam); box-shadow: var(--grade-glow); transition: transform 240ms ease-out; }
+  .pdf-complete-check { animation: pdfCheck 240ms cubic-bezier(0.2, 1.6, 0.5, 1); }
+  @keyframes pdfCheck { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .pdf-action, .pdf-action-fill, .pdf-progress-beam { transition: none; }
+    .pdf-complete-check { animation: none; }
+  }
   .glass-card {
     @apply backdrop-blur-xl border shadow-lg;
     -webkit-backdrop-filter: blur(24px);
@@ -109,8 +125,15 @@
   }
 
   .glass-card-hover {
-    @apply glass-card;
+    @apply glass-card transition-all duration-300;
     -webkit-backdrop-filter: blur(24px);
+  }
+  .glass-card-hover:hover {
+    background: hsl(222 30% 20% / 0.7);
+    border-color: hsl(217 91% 60% / 0.25);
+    box-shadow: 0 12px 40px -8px hsl(217 91% 60% / 0.15), inset 0 1px 0 0 hsl(210 40% 96% / 0.08);
+    -webkit-transform: translateY(-2px);
+    transform: translateY(-2px);
   }
 
   .level-card-igcse { --level-accent: var(--primary); }
@@ -128,6 +151,11 @@
     box-shadow: var(--grade-glow);
     transition: border-color 200ms, background 200ms, transform 200ms;
   }
+  .grade-tile:hover {
+    border-color: hsl(var(--grade-accent) / 0.6);
+    background: hsl(var(--card) / 0.9);
+    transform: translateY(-2px);
+  }
   .grade-crest {
     color: hsl(var(--grade-accent));
     background: hsl(var(--grade-accent-subtle));
@@ -137,11 +165,51 @@
   [data-grade] .glass-card-hover {
     border-color: hsl(var(--grade-accent-border));
   }
+  [data-grade] .glass-card-hover:hover {
+    border-color: hsl(var(--grade-accent) / 0.55);
+    box-shadow: var(--grade-glow);
+  }
   [data-grade] [aria-current="page"] { color: hsl(var(--grade-accent)); }
-  @media (prefers-reduced-motion: reduce) {
-    .grade-tile:hover { transform: none; }
+  /* Tactile press + ambient light sweep on glass tiles */
+  .grade-tile, .glass-card-hover { position: relative; overflow: hidden; isolation: isolate; }
+  .grade-tile:active, .glass-card-hover:active { transform: scale(0.985); transition-duration: 100ms; }
+  .grade-tile::before, .glass-card-hover::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(105deg, transparent 25%, hsl(var(--foreground) / 0.07) 50%, transparent 75%);
+    transform: translateX(-110%);
+    transition: transform 800ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .grade-tile:hover::before, .glass-card-hover:hover::before { transform: translateX(110%); }
+  .grade-tile > *, .glass-card-hover > * { position: relative; z-index: 1; }
+
+  /* Level-themed glow for selected chips/filters */
+  .grade-glow-active {
+    border-color: hsl(var(--grade-accent) / 0.55) !important;
+    background: hsl(var(--grade-accent) / 0.12);
+    box-shadow: 0 0 18px -4px hsl(var(--grade-accent) / 0.45), inset 0 0 0 1px hsl(var(--grade-accent) / 0.15);
+    transition: box-shadow 200ms, border-color 200ms, background 200ms;
+  }
+  [data-state="active"][role="tab"], [data-state="on"] {
+    box-shadow: 0 0 16px -4px hsl(var(--grade-accent) / 0.45);
+  }
+  [role="checkbox"][data-state="checked"] {
+    box-shadow: 0 0 10px -1px hsl(var(--grade-accent) / 0.5);
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .grade-tile:hover, .grade-tile:active, .glass-card-hover:active { transform: none; }
+    .grade-tile::before, .glass-card-hover::before { display: none; }
+  }
+
+  .level-card:hover {
+    border-color: hsl(var(--level-accent) / 0.6);
+    box-shadow: 0 12px 40px -8px hsl(var(--level-accent) / 0.2), inset 0 1px 0 hsl(var(--foreground) / 0.08);
+  }
 
   .level-card:focus-visible {
     outline-color: hsl(var(--level-accent));
@@ -158,6 +226,10 @@
     background: hsl(var(--level-accent) / 0.1);
   }
 
+  .level-card:hover .level-card-icon {
+    background: hsl(var(--level-accent) / 0.2);
+    border-color: hsl(var(--level-accent) / 0.5);
+  }
 
   .gradient-text {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
@@ -224,282 +296,4 @@
     }
   }
 
-}
-
-/* Quiet study workspace: solid surfaces, clear hierarchy, and immediate navigation. */
-@layer components {
-  .workspace-panel {
-    border: 1px solid hsl(var(--border) / 0.65);
-    border-radius: 14px;
-    background: hsl(var(--card) / 0.45);
-    box-shadow: 0 2px 4px hsl(0 0% 0% / 0.04);
-  }
-  .workspace-resource {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    min-height: 84px;
-    padding: 18px 20px;
-    border-radius: 10px;
-    transition: background-color 140ms ease, color 140ms ease;
-  }
-  .workspace-resource + .workspace-resource { border-top: 1px solid hsl(var(--border) / 0.4); }
-  .workspace-resource-icon { flex-shrink: 0; color: hsl(var(--muted-foreground)); }
-  .workspace-section-label {
-    padding: 16px 20px 4px;
-    color: hsl(var(--muted-foreground));
-    font-family: var(--font-mono);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-  }
-  .workspace-primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    min-height: 44px;
-    padding: 11px 16px;
-    border-radius: 8px;
-    background: hsl(var(--grade-accent));
-    color: hsl(var(--grade-foreground));
-    font-size: 13px;
-    font-weight: 600;
-    transition: transform 140ms cubic-bezier(0.23, 1, 0.32, 1), background-color 140ms ease;
-  }
-  .workspace-text-link { display: inline-flex; align-items: center; gap: 6px; color: hsl(var(--muted-foreground)); }
-  .workspace-nav-link {
-    position: relative;
-    display: inline-flex;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    min-height: 46px;
-    padding: 0 10px;
-    color: hsl(var(--muted-foreground));
-    font-size: 12px;
-    white-space: nowrap;
-    transition: color 140ms ease;
-  }
-  .workspace-nav-active { color: hsl(var(--foreground)); }
-  .workspace-nav-active::after { content: ''; position: absolute; bottom: 0; left: 10px; right: 10px; height: 2px; background: hsl(var(--grade-accent)); border-radius: 2px 2px 0 0; }
-  .workspace-menu-link { display: flex; min-height: 44px; align-items: center; padding: 10px 12px; border-radius: 8px; font-size: 13px; color: hsl(var(--muted-foreground)); }
-  .study-workspace a:focus-visible, .workspace-nav a:focus-visible, .workspace-nav button:focus-visible { outline: 2px solid hsl(var(--grade-accent, var(--primary))); outline-offset: 3px; border-radius: 6px; }
-  @media (hover: hover) and (pointer: fine) {
-    .workspace-resource:hover, .workspace-menu-link:hover { background: hsl(var(--muted) / 0.35); }
-    .workspace-resource:hover .workspace-resource-icon { color: hsl(var(--grade-accent)); }
-    .workspace-text-link:hover, .workspace-nav-link:hover { color: hsl(var(--foreground)); }
-    .workspace-primary:hover { background: hsl(var(--grade-accent) / 0.9); }
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    .workspace-primary:active { transform: scale(0.97); }
-  }
-  @media (min-width: 640px) { .workspace-nav-link { font-size: 13px; padding-inline: 14px; } }
-}
-@layer components {
-  .workspace-teacher-links > .workspace-resource + .workspace-resource { border-top: 0; }
-  @media (min-width: 640px) {
-    .workspace-tools > .workspace-resource + .workspace-resource { border-top: 0; border-left: 1px solid hsl(var(--border) / 0.4); }
-  }
-  @media (max-width: 369px) {
-    .workspace-nav-link { min-width: 44px; padding-inline: 6px; font-size: 11px; }
-    .workspace-nav-active::after { left: 6px; right: 6px; }
-  }
-}
-
-/* Shared glass tile treatment inspired by the supplied StatsCard reference.
-   Form/scroll containers share the surface; only individual tiles lift. */
-@layer utilities {
-  :is(.glass-card, .glass-card-hover, .grade-tile, .level-card, .workspace-panel, .workspace-resource, .tile-surface) {
-    --tile-accent: var(--grade-accent, var(--primary));
-    border: 1px solid hsl(var(--tile-accent) / 0.18);
-    border-radius: 1rem;
-    background: linear-gradient(135deg, hsl(var(--card) / 0.78), hsl(var(--background) / 0.62));
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
-    box-shadow: 0 8px 28px -12px hsl(var(--tile-accent) / 0.14), inset 0 1px 0 hsl(var(--foreground) / 0.06);
-    transition: transform 220ms cubic-bezier(0.23, 1, 0.32, 1), border-color 180ms ease, box-shadow 220ms ease;
-  }
-  .level-card { --tile-accent: var(--level-accent, var(--primary)); }
-  :is(.glass-card-hover, .grade-tile, .level-card, .workspace-resource, .tile-lift):focus-visible {
-    outline: 2px solid hsl(var(--tile-accent, var(--grade-accent)));
-    outline-offset: 3px;
-  }
-  @media (hover: hover) and (pointer: fine) {
-    :is(.glass-card-hover, .grade-tile, .level-card, .workspace-resource, .tile-lift, a.glass-card, button.glass-card):hover {
-      border-color: hsl(var(--tile-accent, var(--grade-accent)) / 0.45);
-      box-shadow: 0 16px 36px -14px hsl(var(--tile-accent, var(--grade-accent)) / 0.25), inset 0 1px 0 hsl(var(--foreground) / 0.09);
-    }
-    .level-card:hover .level-card-icon {
-      background: hsl(var(--level-accent) / 0.2);
-      border-color: hsl(var(--level-accent) / 0.5);
-    }
-  }
-  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-    :is(.glass-card-hover, .grade-tile, .level-card, .workspace-resource, .tile-lift, a.glass-card, button.glass-card):hover { transform: translateY(-5px); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    :is(.glass-card, .glass-card-hover, .grade-tile, .level-card, .workspace-panel, .workspace-resource, .tile-surface, .tile-lift) { transition: border-color 180ms ease; }
-  }
-}
-
-/* Shared glass language. Small controls use highlights rather than another
-   backdrop blur, keeping dense question lists and mobile pages inexpensive. */
-@layer utilities {
-  .glass-canvas > .bg-background:not(.bg-grid) {
-    background-image:
-      radial-gradient(ellipse at 5% 0%, hsl(var(--grade-accent) / 0.1), transparent 48rem),
-      radial-gradient(ellipse at 95% 40%, hsl(var(--study-4) / 0.06), transparent 44rem);
-  }
-
-  .glass-nav,
-  .glass-menu-panel {
-    background: linear-gradient(120deg, hsl(var(--card) / 0.88), hsl(var(--background) / 0.92));
-    border-color: hsl(var(--foreground) / 0.1);
-    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.05);
-  }
-  .glass-nav {
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
-  }
-  .glass-nav .workspace-nav-link {
-    border-radius: 0.75rem 0.75rem 0 0;
-  }
-  .glass-nav .workspace-nav-active {
-    background: linear-gradient(to bottom, hsl(var(--grade-accent) / 0.13), transparent);
-  }
-
-  .glass-overlay {
-    background: linear-gradient(145deg, hsl(var(--popover) / 0.97), hsl(var(--background) / 0.95));
-    border-color: hsl(var(--foreground) / 0.16);
-    -webkit-backdrop-filter: blur(20px);
-    backdrop-filter: blur(20px);
-    box-shadow: 0 20px 60px -20px hsl(222 47% 3% / 0.7), inset 0 1px 0 hsl(var(--foreground) / 0.1);
-  }
-  .glass-overlay:not([data-vaul-drawer]):not([role="dialog"]) { border-radius: 0.75rem; }
-
-  /* Buttons that serve as tiles retain the larger tile surface and hover. */
-  .glass-button:where(:not(.grade-tile, .glass-card, .glass-card-hover)) {
-    border: 1px solid hsl(var(--foreground) / 0.16);
-    border-radius: 0.75rem;
-    background-image: linear-gradient(150deg, hsl(var(--foreground) / 0.16), transparent 65%);
-    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.12), 0 3px 8px -4px hsl(222 47% 3% / 0.5);
-    transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
-  }
-  .glass-button-primary { border-color: hsl(var(--primary) / 0.6); }
-  .glass-button-danger { border-color: hsl(var(--destructive) / 0.7); }
-  .glass-button-neutral {
-    background-color: hsl(var(--card) / 0.65);
-    background-image: linear-gradient(145deg, hsl(var(--foreground) / 0.06), transparent 65%);
-  }
-  .glass-button-ghost:where(:not(.grade-tile, .glass-card, .glass-card-hover)) { border-color: transparent; background-image: none; box-shadow: none; }
-  .glass-button-icon {
-    border-color: hsl(var(--foreground) / 0.12);
-    background-image: linear-gradient(145deg, hsl(var(--foreground) / 0.07), transparent);
-    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.06);
-  }
-  .glass-control,
-  .glass-field {
-    border: 1px solid hsl(var(--foreground) / 0.14);
-    border-radius: 0.75rem;
-    background: linear-gradient(145deg, hsl(var(--card) / 0.7), hsl(var(--background) / 0.6));
-    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.05);
-  }
-  .glass-field {
-    background: linear-gradient(145deg, hsl(var(--background) / 0.7), hsl(var(--card) / 0.45));
-    box-shadow: inset 0 2px 4px hsl(222 47% 3% / 0.15), 0 1px 0 hsl(var(--foreground) / 0.04);
-  }
-  /* Native select options need their own opaque background in system popups. */
-  select.glass-field option { background: hsl(var(--popover)); color: hsl(var(--foreground)); }
-  .glass-tab { border: 1px solid transparent; border-radius: 0.5rem; }
-  .glass-tab[data-state="active"] {
-    border-color: hsl(var(--foreground) / 0.15);
-    background-image: linear-gradient(145deg, hsl(var(--foreground) / 0.1), transparent);
-    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.08), 0 2px 6px hsl(222 47% 3% / 0.2);
-  }
-  .glass-badge,
-  .glass-check,
-  .glass-toggle,
-  .glass-avatar {
-    background-image: linear-gradient(145deg, hsl(var(--foreground) / 0.1), transparent 65%);
-    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.12);
-  }
-  .glass-study-tab {
-    background-image: linear-gradient(145deg, hsl(var(--foreground) / 0.07), transparent);
-    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.06);
-  }
-  .glass-study-tab:focus-visible {
-    outline: 2px solid hsl(var(--ring));
-    outline-offset: 3px;
-  }
-  .glass-dial {
-    background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--background) / 0.96));
-    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.12), inset 0 -4px 16px hsl(222 47% 3% / 0.2);
-  }
-  .glass-pane {
-    background: linear-gradient(145deg, hsl(var(--card) / 0.9), hsl(var(--background) / 0.85));
-    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.08);
-  }
-  .glass-track,
-  .glass-feedback {
-    background-image: linear-gradient(to bottom, hsl(var(--foreground) / 0.06), transparent);
-    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.1);
-  }
-
-  .glass-icon {
-    border: 1px solid hsl(var(--grade-accent) / 0.3);
-    border-color: color-mix(in srgb, currentColor 30%, transparent);
-    background:
-      linear-gradient(145deg, hsl(var(--foreground) / 0.16), transparent 55%),
-      linear-gradient(135deg, hsl(var(--grade-accent) / 0.16), hsl(var(--card) / 0.7));
-    background:
-      linear-gradient(145deg, hsl(var(--foreground) / 0.16), transparent 55%),
-      linear-gradient(135deg, color-mix(in srgb, currentColor 16%, transparent), hsl(var(--card) / 0.7));
-    box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.2), inset 0 -1px 0 hsl(var(--background) / 0.2), 0 5px 12px -6px hsl(222 47% 3% / 0.5);
-  }
-  .glass-icon > svg {
-    flex-shrink: 0;
-    stroke-width: 1.75;
-    filter: drop-shadow(0 1px 2px hsl(var(--background) / 0.4));
-  }
-  .glass-icon.workspace-resource-icon { color: hsl(var(--grade-accent)); }
-
-  @media (hover: hover) and (pointer: fine) {
-    .glass-button:where(:not(.grade-tile, .glass-card, .glass-card-hover)):not(:disabled):hover {
-      border-color: hsl(var(--foreground) / 0.35);
-      box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.2), 0 5px 16px -6px hsl(222 47% 3% / 0.5);
-    }
-    .glass-button-ghost:where(:not(.grade-tile, .glass-card, .glass-card-hover)):not(:disabled):hover { background-color: hsl(var(--foreground) / 0.06); }
-    .glass-field:not(:disabled):hover { border-color: hsl(var(--foreground) / 0.25); }
-  }
-  @media (max-width: 639px) {
-    :is(.glass-card, .glass-card-hover, .grade-tile, .level-card, .workspace-panel, .workspace-resource, .tile-surface, .glass-nav) {
-      -webkit-backdrop-filter: blur(8px);
-      backdrop-filter: blur(8px);
-    }
-  }
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    :is(.glass-overlay, .glass-nav, .glass-menu-panel, .glass-card, .glass-card-hover, .grade-tile, .level-card, .workspace-panel, .workspace-resource, .tile-surface) {
-      background-color: hsl(var(--card));
-    }
-  }
-  @media (prefers-reduced-transparency: reduce) {
-    :is(.glass-overlay, .glass-nav, .glass-menu-panel, .glass-control, .glass-field, .glass-icon, .glass-pane, .glass-dial, .glass-card, .glass-card-hover, .grade-tile, .level-card, .workspace-panel, .workspace-resource, .tile-surface) {
-      background: hsl(var(--card));
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-    }
-  }
-  @media (forced-colors: active) {
-    :is(.glass-overlay, .glass-nav, .glass-menu-panel, .glass-control, .glass-field, .glass-button, .glass-icon, .glass-pane, .glass-dial, .glass-card, .glass-card-hover, .grade-tile, .level-card, .workspace-panel, .workspace-resource, .tile-surface) {
-      border-color: ButtonText;
-      background: Canvas;
-      color: CanvasText;
-      box-shadow: none;
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-    }
-    .glass-icon > svg { filter: none; }
-  }
 }

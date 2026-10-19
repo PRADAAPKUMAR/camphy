@@ -1,4 +1,4 @@
-import { GlassIcon } from "@/components/ui/glass-icon";
+import GlassIcon from "@/components/GlassIcon";
 import { lazy, Suspense, useMemo, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, BarChart3, Target, ListChecks, Trophy, Trash2, TrendingUp, FileText, Layers, ChevronRight } from "lucide-react";
@@ -32,12 +32,12 @@ const WeakestSubtopics = lazy(() => import("@/components/performance/WeakestSubt
 const RetryMistakes = lazy(() => import("@/components/performance/RetryMistakes"));
 
 const StatCard = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-  <div className="glass-card tile-lift flex items-center justify-between gap-3 p-5 sm:p-6">
-    <div className="min-w-0">
-      <p className="text-xs leading-snug text-muted-foreground">{label}</p>
-      <p className="mt-2 text-2xl font-bold tabular-nums">{value}</p>
+  <div className="glass-card rounded-2xl p-4 sm:p-5">
+    <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary sm:h-10 sm:w-10">
+      {icon}
     </div>
-    <GlassIcon className="h-10 w-10 shrink-0 text-grade">{icon}</GlassIcon>
+    <p className="text-xl font-bold sm:text-2xl">{value}</p>
+    <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">{label}</p>
   </div>
 );
 
@@ -161,7 +161,7 @@ const PerformancePage = () => {
           </Button>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <GlassIcon className="h-10 w-10 text-primary"><BarChart3 className="h-5 w-5 text-primary" /></GlassIcon>
+              <GlassIcon name="performance" tone="amber" />
               <div>
                 <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{gradeDetails ? `${gradeDetails.label} Performance` : "Physics Performance"}</h1>
                 <p className="text-xs text-muted-foreground sm:text-sm">
@@ -197,7 +197,9 @@ const PerformancePage = () => {
       <main className="container relative py-10">
         {history.length === 0 ? (
           <div className="glass-card mx-auto max-w-lg rounded-2xl p-8 text-center">
-            <GlassIcon className="mx-auto mb-5 h-14 w-14 text-primary"><Target className="h-7 w-7" /></GlassIcon>
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+              <Target className="h-7 w-7" />
+            </div>
             <h2 className="mb-2 text-xl font-bold">Your Physics performance dashboard is ready.</h2>
             <p className="mb-6 text-sm text-muted-foreground">
               Complete your first practice paper to start tracking your progress.
@@ -219,7 +221,7 @@ const PerformancePage = () => {
 
               {showSplit && (
                 <div className="mt-4 grid gap-3 sm:grid-cols-2 sm:gap-4">
-                  <div className="glass-card tile-lift rounded-2xl p-4 sm:p-5">
+                  <div className="glass-card rounded-2xl p-4 sm:p-5">
                     <div className="mb-2 flex items-center gap-2 text-sm font-bold">
                       <FileText className="h-4 w-4 text-primary" /> Past Paper Performance
                     </div>
@@ -229,7 +231,7 @@ const PerformancePage = () => {
                       {paperSummary.questions} questions
                     </p>
                   </div>
-                  <div className="glass-card tile-lift rounded-2xl p-4 sm:p-5">
+                  <div className="glass-card rounded-2xl p-4 sm:p-5">
                     <div className="mb-2 flex items-center gap-2 text-sm font-bold">
                       <Layers className="h-4 w-4 text-primary" /> Topic Practice Performance
                     </div>
@@ -259,7 +261,7 @@ const PerformancePage = () => {
                   {byLevel.map((l) => {
                     const pct = l.total ? Math.round((l.score / l.total) * 100) : 0;
                     return (
-                      <div key={l.level} className="glass-card tile-lift rounded-2xl p-5">
+                      <div key={l.level} className="glass-card rounded-2xl p-5">
                         <div className="mb-3 flex items-center justify-between">
                           <h3 className="font-bold">{normalizeGradeLabel(l.level)}</h3>
                           <Badge variant="secondary" className="bg-secondary/60 text-xs">

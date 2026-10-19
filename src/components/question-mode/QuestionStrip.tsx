@@ -23,8 +23,8 @@ const QuestionStrip = ({
       if (answer && correct !== undefined) {
         cls +=
           answer === correct
-            ? "border-emerald-400/40 bg-emerald-500/20 text-emerald-300"
-            : "border-rose-400/40 bg-rose-500/20 text-rose-300";
+            ? "border-success/40 bg-success/15 text-success"
+            : "border-destructive/40 bg-destructive/15 text-destructive";
       } else if (answer) {
         cls += "border-primary/40 bg-primary/20 text-foreground";
       } else {

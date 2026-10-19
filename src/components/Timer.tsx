@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback, memo } from "react";
+import SplitFlapDisplay from "@/components/SplitFlapDisplay";
+import { useEffect, useState, memo } from "react";
 import { Timer as TimerIcon } from "lucide-react";
 
 interface TimerProps {
@@ -42,9 +43,7 @@ const Timer = memo(({ durationMinutes, onTimeUp, isRunning }: TimerProps) => {
       }`}
     >
       <TimerIcon className="h-4 w-4" />
-      <span>
-        {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
-      </span>
+      <SplitFlapDisplay value={`${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`} label="Time remaining" />
     </div>
   );
 });

@@ -1,4 +1,3 @@
-import { GlassIcon } from "@/components/ui/glass-icon";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -110,7 +109,9 @@ const PaperSelector = () => {
             <ArrowLeft className="h-4 w-4" /> Home
           </Button>
           <div className="flex items-center gap-3 mb-2">
-            <GlassIcon className="h-10 w-10 text-primary"><Zap className="h-5 w-5 text-primary" /></GlassIcon>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
+              <Zap className="h-5 w-5 text-primary" />
+            </div>
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">Physics — MCQ Practice</h1>
               <p className="text-muted-foreground text-sm">Select your level to browse past papers</p>
@@ -122,7 +123,7 @@ const PaperSelector = () => {
       <main className="container relative py-10">
         {levels.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <GlassIcon className="mb-4 h-14 w-14 text-muted-foreground"><Atom className="h-7 w-7" /></GlassIcon>
+            <Atom className="h-12 w-12 text-muted-foreground/40 mb-4" />
             <p className="text-muted-foreground font-medium">No papers available yet.</p>
           </div>
         ) : (
@@ -133,7 +134,9 @@ const PaperSelector = () => {
                 className="glass-card-hover group cursor-pointer rounded-2xl p-7 flex flex-col gap-4"
                 onClick={() => navigate(`/papers/${encodeURIComponent(l.level)}`)}
               >
-                <GlassIcon className="h-14 w-14 shrink-0 text-primary">{levelIcons[normalizeGradeLabel(l.level)] || <Zap className="h-6 w-6" />}</GlassIcon>
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
+                  {levelIcons[normalizeGradeLabel(l.level)] || <Zap className="h-6 w-6" />}
+                </div>
                 <div>
                   <h3 className="text-xl font-bold mb-1">{normalizeGradeLabel(l.level)}</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">

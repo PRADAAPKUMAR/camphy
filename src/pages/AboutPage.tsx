@@ -1,4 +1,4 @@
-import { GlassIcon } from "@/components/ui/glass-icon";
+import GlassIcon from "@/components/GlassIcon";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -71,7 +71,7 @@ const AboutPage = () => {
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary mb-2">
                 About the Educator
               </p>
-              <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-2">
+              <GlassIcon name="atom" tone="violet" className="mx-auto mb-5" /><h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-2">
                 S. Pradaap <span className="gradient-text">Kumar</span>
               </h1>
               <p className="text-muted-foreground">
@@ -113,7 +113,9 @@ const AboutPage = () => {
         {/* Qualifications + Curricula */}
         <div className="grid gap-6 md:grid-cols-2">
           <section className="glass-card rounded-2xl p-7">
-            <GlassIcon className="h-11 w-11 text-primary mb-5"><GraduationCap className="h-5 w-5" /></GlassIcon>
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary mb-5">
+              <GraduationCap className="h-5 w-5" />
+            </div>
             <h3 className="text-lg font-bold mb-4">Academic Background</h3>
             <ul className="space-y-3">
               {qualifications.map((q) => (
@@ -126,7 +128,9 @@ const AboutPage = () => {
           </section>
 
           <section className="glass-card rounded-2xl p-7">
-            <GlassIcon className="h-11 w-11 text-success mb-5"><BookOpen className="h-5 w-5" /></GlassIcon>
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-success/10 border border-success/20 text-success mb-5">
+              <BookOpen className="h-5 w-5" />
+            </div>
             <h3 className="text-lg font-bold mb-4">Curricula Taught</h3>
             <ul className="space-y-3">
               {curricula.map((c) => (
@@ -147,7 +151,9 @@ const AboutPage = () => {
         {/* Technology */}
         <section className="glass-card rounded-2xl p-7">
           <div className="flex items-center gap-3 mb-5">
-            <GlassIcon className="h-11 w-11 text-accent"><Cpu className="h-5 w-5" /></GlassIcon>
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/10 border border-accent/20 text-accent">
+              <Cpu className="h-5 w-5" />
+            </div>
             <div>
               <h3 className="text-lg font-bold">Technology in Education</h3>
               <p className="text-xs text-muted-foreground">
@@ -176,7 +182,9 @@ const AboutPage = () => {
         {/* Achievements */}
         <section className="glass-card rounded-2xl p-7">
           <div className="flex items-center gap-3 mb-5">
-            <GlassIcon className="h-11 w-11 text-primary"><Award className="h-5 w-5" /></GlassIcon>
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary">
+              <Award className="h-5 w-5" />
+            </div>
             <h3 className="text-lg font-bold">Achievements</h3>
           </div>
           <ul className="space-y-3">
@@ -207,7 +215,9 @@ const AboutPage = () => {
                 key={label}
                 className="glass-card-hover rounded-xl p-4 flex items-center gap-3"
               >
-                <GlassIcon className="h-9 w-9 text-primary shrink-0"><Icon className="h-4 w-4" /></GlassIcon>
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 border border-primary/20 text-primary shrink-0">
+                  <Icon className="h-4 w-4" />
+                </div>
                 <span className="text-sm font-medium text-foreground">{label}</span>
               </div>
             ))}

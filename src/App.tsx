@@ -1,3 +1,4 @@
+import { ThemeProvider } from "next-themes";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
@@ -23,13 +24,12 @@ const Sonner = lazy(() => import("@/components/ui/sonner").then(m => ({ default:
 const HomePage = lazy(() => import("./pages/HomePage"));
 const Index = lazy(() => import("./pages/Index"));
 const SubjectPage = lazy(() => import("./pages/SubjectPage"));
-const ExamPage = lazy(() => import("./pages/ExamPage"));
+const McqSessionRedirect = lazy(() => import("./pages/McqSessionRedirect"));
 const MaterialsPage = lazy(() => import("./pages/MaterialsPage"));
 const MaterialsLevelPage = lazy(() => import("./pages/MaterialsLevelPage"));
 const DriveViewerPage = lazy(() => import("./pages/DriveViewerPage"));
 const TopicPracticePage = lazy(() => import("./pages/TopicPracticePage"));
 const TopicLevelPage = lazy(() => import("./pages/TopicLevelPage"));
-const TopicExamPage = lazy(() => import("./pages/TopicExamPage"));
 const TopicalMcqPage = lazy(() => import("./pages/TopicalMcqPage"));
 const TopicalMcqLevelPage = lazy(() => import("./pages/TopicalMcqLevelPage"));
 const TopicalMcqSessionPage = lazy(() => import("./pages/TopicalMcqSessionPage"));
@@ -105,12 +105,13 @@ const RouterContent = () => {
     pathname.startsWith("/topic-theory/");
 
   return (
-    <>
+    <div className={`glass-app${navExcluded || pathname.startsWith("/theory-paper/") ? " glass-focus" : ""}`}>
+    <div className="glass-atmosphere" aria-hidden="true" />
     <PageMetadata />
     <a href="#page-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-3 focus:text-primary-foreground">Skip to content</a>
     {user && profile && !profile.setup_completed && pathname !== "/profile" && !pathname.startsWith("/auth") && <Navigate to="/profile" replace />}
     {!navExcluded && <SiteNav />}
-    <div id="page-content" className="glass-canvas" tabIndex={-1} data-grade={pageGrade ?? undefined}>
+    <div id="page-content" tabIndex={-1} data-grade={pageGrade ?? undefined}>
     <Suspense fallback={
       <div className="min-h-screen bg-background">
         <div className="border-b border-border/40">
@@ -144,7 +145,7 @@ const RouterContent = () => {
         <Route path="/grade/:grade" element={<GradeDashboardPage />} />
         <Route path="/papers" element={<GradeSectionRedirect section="mcq" />} />
         <Route path="/papers/:level" element={<SubjectPage />} />
-        <Route path="/exam/:paperId" element={<ExamPage />} />
+        <Route path="/exam/:paperId" element={<McqSessionRedirect />} />
         <Route path="/question-mode/:paperId" element={<QuestionModePage />} />
         <Route path="/admin/upload" element={<AdminUploadPage />} />
         <Route path="/worksheet-generator" element={<GradeSectionRedirect section="worksheet" />} />
@@ -160,7 +161,7 @@ const RouterContent = () => {
         <Route path="/view-drive" element={<DriveViewerPage />} />
         <Route path="/topic-practice" element={<GradeSectionRedirect section="practice" />} />
         <Route path="/topic-practice/:level" element={<TopicLevelPage />} />
-        <Route path="/topic-exam/:paperId" element={<TopicExamPage />} />
+        <Route path="/topic-exam/:paperId" element={<McqSessionRedirect topical />} />
         <Route path="/topical-mcq" element={<TopicalMcqPage />} />
         <Route path="/topical-mcq/:level" element={<TopicalMcqLevelPage />} />
         <Route path="/topical-mcq/:level/:topicSlug" element={<TopicalMcqSessionPage />} />
@@ -178,12 +179,13 @@ const RouterContent = () => {
     </Suspense>
     </div>
       <RunningTimerBar />
-    </>
+    </div>
   );
 };
 
 const App = () => (
   <AppErrorBoundary>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} themes={["light", "dark"]} storageKey="physicshq:theme" disableTransitionOnChange>
     <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -199,6 +201,7 @@ const App = () => (
       </TooltipProvider>
     </QueryClientProvider>
     </HelmetProvider>
+    </ThemeProvider>
   </AppErrorBoundary>
 );
 

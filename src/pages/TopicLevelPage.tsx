@@ -1,14 +1,16 @@
-import { GlassIcon } from "@/components/ui/glass-icon";
+import GlassIcon from "@/components/GlassIcon";
 import { useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Target, ScrollText, FileText, ArrowLeft, LayoutGrid, ChevronRight } from "lucide-react";
+import { Target, ScrollText, FileText, ArrowLeft } from "lucide-react";
 import PhysicsBackground from "@/components/PhysicsBackground";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { gradeFromLevel, gradePath, GRADES } from "@/lib/grades";
+import { useTileTransition } from "@/hooks/use-tile-transition";
+import { fetchBankTopics, slugifyTopic } from "@/lib/topical-bank";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
 import {
   Breadcrumb,
@@ -24,24 +26,18 @@ const getSupabase = () => import("@/integrations/supabase/client").then(m => m.s
 const TopicLevelPage = () => {
   const { level } = useParams<{ level: string }>();
   const navigate = useNavigate();
+  const { tileProps } = useTileTransition();
   const decodedLevel = decodeURIComponent(level || "");
   const grade = gradeFromLevel(decodedLevel);
   const contentLevel = grade ? GRADES[grade].practiceLevel : decodedLevel;
   useSyncGrade(decodedLevel);
 
-  const { data: mcqPapers, isLoading: mcqLoading } = useQuery({
-    queryKey: ["topicwise_mcq", contentLevel],
-    queryFn: async () => {
-      const supabase = await getSupabase();
-      const { data, error } = await supabase
-        .from("topicwise_mcq_papers")
-        .select("*")
-        .eq("level", contentLevel)
-        .order("topic");
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!contentLevel,
+  const mcqLevel = grade ? GRADES[grade].mappedTopicalLevel : undefined;
+  const { data: mcqTopics = [], isLoading: mcqLoading } = useQuery({
+    queryKey: ["topical-bank-topics", mcqLevel],
+    queryFn: () => fetchBankTopics(mcqLevel!),
+    enabled: !!mcqLevel,
+    staleTime: 30 * 60 * 1000,
   });
 
   const { data: theoryQuestions, isLoading: theoryLoading } = useQuery({
@@ -60,11 +56,6 @@ const TopicLevelPage = () => {
   });
 
   const isLoading = mcqLoading || theoryLoading;
-
-  const mcqTopics = useMemo(() => {
-    if (!mcqPapers) return [];
-    return [...new Set(mcqPapers.map((p) => p.topic))].sort();
-  }, [mcqPapers]);
 
   const theoryTopics = useMemo(() => {
     if (!theoryQuestions) return [];
@@ -132,21 +123,9 @@ const TopicLevelPage = () => {
       </header>
 
       <main className="container relative py-8">
-        {grade && GRADES[grade].mappedTopicalLevel && (
-          <Link
-            to={`/topical-mcq/${encodeURIComponent(GRADES[grade].mappedTopicalLevel ?? "")}`}
-            className="glass-card-hover mb-6 flex items-center justify-between gap-4 rounded-xl p-5"
-          >
-            <span className="flex items-center gap-3">
-              <GlassIcon className="h-10 w-10 text-grade"><LayoutGrid className="h-5 w-5" /></GlassIcon>
-              <span><span className="block font-bold">Mapped Past-Paper Topical MCQ</span><span className="block text-xs text-muted-foreground">Practice individual questions grouped by syllabus topic and subtopic.</span></span>
-            </span>
-            <ChevronRight className="h-5 w-5 text-muted-foreground" />
-          </Link>
-        )}
         {!hasMCQ && !hasTheory ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <GlassIcon className="mb-4 h-14 w-14 text-muted-foreground"><Target className="h-7 w-7" /></GlassIcon>
+            <Target className="h-12 w-12 text-muted-foreground/40 mb-4" />
             <p className="text-muted-foreground font-medium">No topics available for this level yet.</p>
           </div>
         ) : (
@@ -167,25 +146,28 @@ const TopicLevelPage = () => {
             {hasMCQ && (
               <TabsContent value="mcq">
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {mcqPapers?.map((paper) => (
-                    <div
-                      key={paper.id}
-                      className="glass-card-hover group cursor-pointer rounded-xl p-5"
-                      onClick={() => navigate(`/topic-exam/${paper.id}`)}
+                  {mcqTopics.map((topic) => (
+                    <button
+                      key={topic.id}
+                      type="button"
+                      className="glass-card-hover group rounded-xl p-5 text-left"
+                      {...tileProps(`/topical-mcq/${encodeURIComponent(mcqLevel!)}/${slugifyTopic(topic.name)}`)}
                     >
                       <div className="flex items-center gap-3 mb-3">
-                        <GlassIcon className="h-9 w-9 shrink-0 text-grade"><ScrollText className="h-4 w-4" /></GlassIcon>
-                        <h3 className="text-base font-semibold">{paper.topic}</h3>
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-grade/10 border border-grade/20 text-grade transition-all group-hover:bg-grade group-hover:text-grade-foreground">
+                          <ScrollText className="h-4 w-4" />
+                        </div>
+                        <h3 className="text-base font-semibold">{topic.name}</h3>
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <Badge variant="secondary" className="font-medium text-xs bg-secondary/60">
-                          {paper.total_questions} Qs
+                          {topic.questions.length} Qs
                         </Badge>
                         <Badge variant="secondary" className="font-medium text-xs bg-secondary/60">
-                          {paper.timer_minutes} min
+                          Question mode
                         </Badge>
                       </div>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </TabsContent>
@@ -201,7 +183,9 @@ const TopicLevelPage = () => {
                       onClick={() => navigate(`/topic-theory/${q.id}`)}
                     >
                       <div className="flex items-center gap-3 mb-3">
-                        <GlassIcon className="h-9 w-9 shrink-0 text-grade"><FileText className="h-4 w-4" /></GlassIcon>
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-grade/10 border border-grade/20 text-grade transition-all group-hover:bg-grade group-hover:text-grade-foreground">
+                          <FileText className="h-4 w-4" />
+                        </div>
                         <h3 className="text-base font-semibold">{q.topic}</h3>
                       </div>
                     </div>
