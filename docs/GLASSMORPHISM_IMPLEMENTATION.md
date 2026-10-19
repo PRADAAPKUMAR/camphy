@@ -69,8 +69,8 @@ Across exam sheets, topic exam sheets, question mode, and topical MCQ sessions:
 Answer sheets highlight the active row, keep it in view, and provide Previous/Next
 buttons. Answers lock after selection; movement is explicit so an arrow never
 accidentally skips a question following an automatic advance. Classroom quizzes
-show a keyboard team selector; answers go to that selected team. Right advances
-once the live answers are revealed; Left reviews earlier questions.
+use their on-screen answer and navigation buttons; custom answer keys, arrow-key
+navigation, and shortcut hints are disabled.
 
 ## Validation
 
@@ -140,12 +140,13 @@ and preservation of theory PDF viewers.
 
 The active quiz fits the viewport: a live scoreboard stays above the question,
 timer and answer controls stay on the right, and the numbered question selector
-stays along the bottom. Question images scroll independently; large team lists
-scroll within the right panel without moving the timer. On narrow screens, an
-answering-team selector shows one team's options at a time. The global study
-timer pill is hidden on classroom routes so it cannot cover quiz navigation;
+stays along the bottom. Question images scroll independently. Every team appears
+together in compact cards, with no scrollbar or team selector in the answering
+section. Four to six teams use two columns; smaller games use one column. The
+global study timer pill is hidden on classroom routes so it cannot cover navigation;
 background timers retain their state.
 
 The classroom browser suite uses long synthetic questions and checks four screen
 sizes (320–1440px), score updates, answer locking, paused review, bottom navigation,
-and six-team controls. It intercepts every non-local request.
+six-team cards without scrolling, and removal of custom keyboard shortcuts. It
+intercepts every non-local request.

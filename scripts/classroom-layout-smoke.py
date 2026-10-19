@@ -1,4 +1,4 @@
-"""Classroom quiz scrolling, responsive controls, scores, and review; no live requests."""
+"""Classroom quiz fixed controls, compact teams, pointer answers, and review; no live requests."""
 import asyncio
 import base64
 import importlib.util
@@ -51,6 +51,37 @@ async def geometry(page):
     return pane
 
 
+async def compact_teams(page, count):
+    region = page.get_by_role("region", name="Team answers", exact=True)
+    metrics = await region.evaluate("e => ({scroll:e.scrollHeight, height:e.clientHeight})")
+    assert metrics["scroll"] <= metrics["height"] + 1, (page.viewport_size, metrics)
+    assert await region.evaluate("e => e.scrollWidth <= e.clientWidth + 1")
+    assert await region.evaluate("e => !['auto', 'scroll'].includes(getComputedStyle(e).overflowY)")
+    bounds = await region.bounding_box()
+    for i in range(1, count + 1):
+        group = page.get_by_role("group", name=f"Team {i} answers", exact=True)
+        assert await group.is_visible()
+        for option in "ABCD":
+            button = await group.get_by_role("button", name=f"Team {i} option {option}", exact=True).bounding_box()
+            assert button["x"] >= bounds["x"] - 1
+            assert button["y"] >= bounds["y"] - 1
+            assert button["x"] + button["width"] <= bounds["x"] + bounds["width"] + 1
+            assert button["y"] + button["height"] <= bounds["y"] + bounds["height"] + 1
+    assert await page.locator("[aria-keyshortcuts]").count() == 0
+    assert await page.get_by_label("Answering team", exact=True).count() == 0
+
+
+async def no_shortcuts(page):
+    await page.get_by_role("heading", name="Classroom Quiz", exact=True).click()
+    active = page.get_by_role("navigation", name="Quiz questions").locator('[aria-current="step"]')
+    question = await active.get_attribute("aria-label")
+    selected = await page.locator('button[aria-pressed="true"]').count()
+    for key in ["a", "b", "c", "d", "1", "2", "3", "4", "ArrowLeft", "ArrowRight", "Space"]:
+        await page.keyboard.press(key)
+    assert await active.get_attribute("aria-label") == question
+    assert await page.locator('button[aria-pressed="true"]').count() == selected
+
+
 async def main():
     async with fixtures.async_playwright() as playwright:
         browser = await playwright.chromium.launch(executable_path="/usr/bin/chromium")
@@ -66,15 +97,17 @@ async def main():
             await page.get_by_role("button", name="Start quiz", exact=True).click()
             await page.get_by_role("img", name="Question 1", exact=True).wait_for()
             pane = await geometry(page)
+            await compact_teams(page, 2)
+            await no_shortcuts(page)
             if width == 1440:
                 await page.add_script_tag(path=str(Path("node_modules/axe-core/axe.min.js").resolve()))
                 violations = await page.evaluate('async () => (await axe.run(document, {runOnly:{type:"tag",values:["wcag2a","wcag2aa","wcag21aa"]}})).violations.map(v => ({id:v.id,targets:v.nodes.map(n=>n.target)}))')
                 assert not violations, violations
             await page.get_by_role("button", name="Team 1 option A", exact=True).click()
-            await page.get_by_label("Answering team", exact=True).select_option("team-2")
-            await page.get_by_label("Answering team", exact=True).evaluate("e => e.blur()")
-            await page.keyboard.press("b")
+            await page.get_by_role("button", name="Team 2 option B", exact=True).click()
             await page.get_by_text("Correct answer: A", exact=True).wait_for()
+            await compact_teams(page, 2)
+            await no_shortcuts(page)
             assert await pane.evaluate("e => e.scrollTop") > 100
             leaderboard = page.get_by_role("region", name="Live leaderboard", exact=True)
             assert await leaderboard.locator("li").first.locator("strong").inner_text() != "0"
@@ -83,6 +116,7 @@ async def main():
             await page.get_by_role("button", name="Next question", exact=True).click()
             await page.get_by_role("img", name="Question 2", exact=True).wait_for()
             assert await pane.evaluate("e => e.scrollTop") == 0
+            await no_shortcuts(page)
             await page.get_by_role("button", name="Go to question 1", exact=True).click()
             await page.get_by_text("Reviewing question 1 — timer paused", exact=True).wait_for()
             timer = page.get_by_role("timer")
@@ -97,22 +131,28 @@ async def main():
             await page.get_by_role("button", name="Show results", exact=True).click()
             await page.get_by_role("heading", name="Team 1 wins!", exact=True).wait_for()
 
-        # Six teams retain accessible options in their own scroll area.
-        await page.set_viewport_size({"width":1440, "height":768})
-        await page.goto(fixtures.BASE + "/classroom-quiz/as", wait_until="networkidle")
-        for _ in range(4):
-            await page.get_by_role("button", name="Add team", exact=True).click()
-        await page.get_by_role("button", name="Start quiz", exact=True).click()
-        await page.get_by_role("img", name="Question 1", exact=True).wait_for()
-        await geometry(page)
-        await page.get_by_role("button", name="Team 6 option D", exact=True).click()
-        assert await page.get_by_role("button", name="Team 6 option D", exact=True).get_attribute("aria-pressed") == "true"
-        assert await page.get_by_role("timer").is_visible()
-        await page.screenshot(path=str(OUT / "quiz-six-teams.png"))
+        # Every team and every option fits without a team scrollbar, including reveal.
+        for width, height in [(1440, 768), (768, 800), (390, 844), (320, 720)]:
+            await page.set_viewport_size({"width":width, "height":height})
+            await page.goto(fixtures.BASE + "/classroom-quiz/as", wait_until="networkidle")
+            for _ in range(4):
+                await page.get_by_role("button", name="Add team", exact=True).click()
+            await page.get_by_role("button", name="Start quiz", exact=True).click()
+            await page.get_by_role("img", name="Question 1", exact=True).wait_for()
+            await geometry(page)
+            await compact_teams(page, 6)
+            await no_shortcuts(page)
+            await page.get_by_role("button", name="Team 6 option D", exact=True).click()
+            assert await page.get_by_role("button", name="Team 6 option D", exact=True).get_attribute("aria-pressed") == "true"
+            await page.get_by_role("button", name="End answering now", exact=True).click()
+            await page.get_by_text("Correct answer: A", exact=True).wait_for()
+            await compact_teams(page, 6)
+            assert await page.get_by_role("timer").is_visible()
+            await page.screenshot(path=str(OUT / f"quiz-six-teams-{width}.png"))
         await page.goto(fixtures.BASE + "/grade/as", wait_until="networkidle")
         await page.get_by_role("timer", name="Background timer remaining:", exact=False).wait_for()
         assert not errors, errors
-        print(json.dumps({"viewports":4, "fixedRightControls":"passed", "topScoreboard":"passed", "bottomQuestionNavigation":"passed", "scoringAndReview":"passed", "sixTeams":"passed", "accessibility":"passed", "backgroundTimerPreserved":"passed", "pageErrors":errors}))
+        print(json.dumps({"viewports":4, "fixedRightControls":"passed", "topScoreboard":"passed", "bottomQuestionNavigation":"passed", "scoringAndReview":"passed", "sixTeamsWithoutScrolling":"passed", "noCustomShortcuts":"passed", "accessibility":"passed", "backgroundTimerPreserved":"passed", "pageErrors":errors}))
         await browser.close()
 
 

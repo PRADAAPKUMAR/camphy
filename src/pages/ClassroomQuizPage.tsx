@@ -1,5 +1,3 @@
-import { useMcqKeyboard } from "@/hooks/use-mcq-keyboard";
-import McqKeyboardHint from "@/components/McqKeyboardHint";
 import SplitFlapDisplay from "@/components/SplitFlapDisplay";
 import GlassIcon from "@/components/GlassIcon";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -107,7 +105,6 @@ const ClassroomQuizPage = () => {
   const [loadingGame, setLoadingGame] = useState(false);
   const revealGuard = useRef(false);
   const [history, setHistory] = useState<Record<number, Record<string, TeamAnswer>>>({});
-  const [keyboardTeamId, setKeyboardTeamId] = useState<string | null>(null);
   const [viewIndex, setViewIndex] = useState<number | null>(null);
   const questionNavRef = useRef<HTMLDivElement>(null);
   const questionContentRef = useRef<HTMLElement>(null);
@@ -256,17 +253,6 @@ const ClassroomQuizPage = () => {
     setPhase("question");
   };
 
-  const keyboardTeam = teams.find(team => team.id === keyboardTeamId) ?? teams[0];
-  useMcqKeyboard({
-    enabled: phase === "question" || phase === "reveal",
-    onSelect: (option) => { if (!reviewing && keyboardTeam) recordAnswer(keyboardTeam.id, option); },
-    onPrev: () => { if (shownIndex > 0) setViewIndex(shownIndex - 1); },
-    onNext: () => {
-      if (reviewing) setViewIndex(shownIndex + 1 >= current ? null : shownIndex + 1);
-      else if (phase === "reveal") nextQuestion();
-    },
-  });
-
   useEffect(() => {
     questionContentRef.current?.scrollTo({ top: 0 });
     questionNavRef.current?.querySelector<HTMLElement>('[aria-current="step"]')?.scrollIntoView({ block: "nearest", inline: "nearest" });
@@ -411,26 +397,18 @@ const ClassroomQuizPage = () => {
           <Clock3 className="hidden h-5 w-5 sm:block" /><SplitFlapDisplay value={fmtTime(secondsLeft)} label="Quiz time remaining" />
           {reviewing && <span className="w-full text-center text-[10px] font-normal">Paused for review</span>}
         </div>
-        <div className="shrink-0 space-y-1">
-          <Label htmlFor="quiz-answering-team" className="text-[11px] md:text-xs">Answering team</Label>
-          <select id="quiz-answering-team" value={keyboardTeam?.id ?? ""} onChange={(event) => setKeyboardTeamId(event.target.value)} className="glass-control h-9 w-full min-w-0 border px-2 text-xs text-foreground md:text-sm">
-            {teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
-          </select>
-          <div className="hidden md:block"><McqKeyboardHint /></div>
-          <p className="text-[10px] text-muted-foreground md:hidden">Keys: A–D / 1–4</p>
-        </div>
-        <div role="region" aria-label="Team answers" tabIndex={0} className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain rounded-xl p-0.5 focus-visible:outline-offset-[-2px]">
+        <div role="region" aria-label="Team answers" className={`grid min-h-0 flex-1 content-start gap-1.5 rounded-xl p-0.5 md:gap-2 ${teams.length > 3 ? "grid-cols-2" : "grid-cols-1"}`}>
           {teams.map((team, index) => {
             const answer = shownAnswers[team.id];
-            return <div key={team.id} role="group" aria-label={`${team.name} answers`} className={`rounded-xl border p-2 md:p-3 ${team.id === keyboardTeam?.id ? "" : "hidden md:block"}`} style={teamTone(index)}>
-              <div className="mb-2 flex flex-wrap items-center justify-between gap-1"><p className="min-w-0 truncate text-xs font-bold md:text-sm" title={team.name}>{team.name}</p>{answer ? <Badge variant="secondary" className="px-1.5 text-[10px]">Locked {answer.option}</Badge> : <span className="text-[10px] text-muted-foreground md:text-xs">{shownPhase === "reveal" ? "No answer" : "Choose answer"}</span>}</div>
-              <div className="grid grid-cols-2 gap-1.5 md:grid-cols-4">{OPTIONS.map((option) => {
+            return <div key={team.id} role="group" aria-label={`${team.name} answers`} className="min-w-0 rounded-xl border p-1 md:p-2" style={teamTone(index)}>
+              <div className="mb-1 flex min-w-0 items-center justify-between gap-1"><p className="min-w-0 truncate text-[10px] font-bold md:text-xs" title={team.name}>{team.name}</p>{shownPhase === "reveal" && teams.length > 3 ? <span className={`shrink-0 text-[9px] font-bold md:text-[10px] ${answer?.points ? "text-success" : "text-muted-foreground"}`} title={answer?.points ? `+${answer.points.toLocaleString()} points` : "No points"}>{answer?.points ? `+${answer.points}` : "0"}</span> : answer && <Badge variant="secondary" className="shrink-0 px-1 text-[9px]" aria-label={`Locked ${answer.option}`} title={`Locked ${answer.option}`}>{answer.option}</Badge>}</div>
+              <div className={`grid gap-1 ${teams.length > 3 ? "grid-cols-2 md:grid-cols-4" : "grid-cols-4"}`}>{OPTIONS.map((option) => {
                 const selected = answer?.option === option;
                 const correct = shownPhase === "reveal" && shownQuestion?.correct_answer === option;
                 const wrong = shownPhase === "reveal" && selected && !correct;
-                return <Button key={option} variant={correct ? "default" : wrong ? "destructive" : selected ? "secondary" : "outline"} className={`h-10 px-0 text-base font-black md:h-11 md:text-lg ${correct ? "bg-success text-success-foreground" : ""}`} disabled={shownPhase !== "question" || !!answer} aria-label={`${team.name} option ${option}`} aria-pressed={selected} data-answer-option={option} aria-keyshortcuts={team.id === keyboardTeam?.id ? `${option} ${OPTIONS.indexOf(option) + 1}` : undefined} onClick={() => recordAnswer(team.id, option)}>{option}</Button>;
+                return <Button key={option} variant={correct ? "default" : wrong ? "destructive" : selected ? "secondary" : "outline"} className={`${teams.length > 3 ? "h-7 text-xs md:h-8 md:text-base" : "h-9 text-sm md:h-10 md:text-lg"} px-0 font-black ${correct ? "bg-success text-success-foreground" : ""}`} disabled={shownPhase !== "question" || !!answer} aria-label={`${team.name} option ${option}`} aria-pressed={selected} onClick={() => recordAnswer(team.id, option)}>{option}</Button>;
               })}</div>
-              {shownPhase === "reveal" && <p className={`mt-2 text-right text-[10px] font-bold md:text-sm ${answer?.points ? "text-success" : "text-muted-foreground"}`}>{answer?.points ? `+${answer.points.toLocaleString()} points` : "No points"}</p>}
+              {shownPhase === "reveal" && teams.length <= 3 && <p className={`mt-1 text-right text-[10px] font-bold md:text-xs ${answer?.points ? "text-success" : "text-muted-foreground"}`}>{answer?.points ? `+${answer.points.toLocaleString()} points` : "No points"}</p>}
             </div>;
           })}
         </div>
