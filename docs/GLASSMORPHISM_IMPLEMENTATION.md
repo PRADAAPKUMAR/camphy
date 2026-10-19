@@ -48,10 +48,11 @@ use a translucent tint and 7px backdrop blur (6px on mobile),
 so particle halos transmit as diffused light while foreground text stays sharp.
 Utility/reading cards retain denser surfaces; nested panels avoid redundant blur.
 
-## Tactile controls, clocks, and keyboard controls
+## Glass buttons, clocks, and keyboard controls
 
-Buttons and answer options have a raised edge that sinks on press. Selected MCQ
-answers retain an inset pressed appearance without changing correctness colors.
+Buttons use their original glass highlights and translucent surfaces, with gentle
+scale feedback on press. The raised keycap edge and persistent inset appearance
+have been removed. MCQ answer selection retains its correctness colors.
 Split-flap displays style real countdowns, elapsed times, study/focus timers,
 classroom timers, and the India clock. Only changed characters animate; reduced
 motion shows the current value immediately and suppresses decorative transforms.
@@ -83,7 +84,7 @@ once the live answers are revealed; Left reviews earlier questions.
 - Desktop (1440px) and mobile (390px) pixel comparisons verify that a controlled
   particle behind a tile remains visible as diffused light through its backdrop.
 - The keyboard UI suite verifies answer locking, letter/number controls, arrow
-  navigation, native Space behavior, physical press styling, real timer updates,
+  navigation, native Space behavior, button press feedback, real timer updates,
   mobile answering, focus layout, and reduced-motion clock rendering. Isolated
   classroom checks verify team selection, answers, reveal, and question review.
 - The motion browser suite verifies continuous orbits, moving canvas particles,

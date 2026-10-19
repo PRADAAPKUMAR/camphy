@@ -214,18 +214,6 @@
 
 [data-tile-transition] #root > .glass-app { background-color: hsl(var(--background)); }
 
-/* Raised keycaps sink onto their base on touch, mouse, and native keyboard press. */
-:is(button, .glass-button, [role="button"]):where(:not(.grade-tile):not(.glass-card-hover):not([role="switch"])) {
-  --keycap-edge: hsl(230 55% 3% / .7);
-  box-shadow: inset 0 1px 0 hsl(0 0% 100% / .13), 0 3px 0 var(--keycap-edge), 0 5px 10px -5px hsl(230 60% 2% / .65);
-  transition-property: color, background-color, border-color, box-shadow, transform;
-  transition-duration: 120ms;
-}
-:is(button, .glass-button, [role="button"]):not(:disabled):not([aria-disabled="true"]):active,
-button[data-keyboard-press="true"], button[data-answer-option][aria-pressed="true"] {
-  transform: translateY(3px) scale(.98);
-  box-shadow: inset 0 2px 5px hsl(230 60% 2% / .32), 0 0 0 hsl(230 55% 3% / .7);
-}
 .mcq-active-row { background: hsl(var(--primary) / .065); box-shadow: inset 3px 0 0 hsl(var(--primary)); border-radius: .7rem; }
 .mcq-keyboard-hint kbd { display: inline-block; min-width: 1.35em; padding: .05em .3em; border: 1px solid var(--glass-edge); border-radius: .25rem; background: hsl(var(--muted) / .55); font-family: var(--font-mono); text-align: center; }
 
@@ -248,7 +236,6 @@ button[data-keyboard-press="true"], button[data-answer-option][aria-pressed="tru
 @keyframes flapBottom { to { transform: rotateX(0deg); } }
 @media (prefers-reduced-motion: reduce) {
   .split-flap__change { display: none; }
-  :is(button, .glass-button, [role="button"]):not(:disabled):not([aria-disabled="true"]):active, button[data-keyboard-press="true"], button[data-answer-option][aria-pressed="true"] { transform: none; }
 }
 @media (forced-colors: active) {
   .split-flap__cell { background: Canvas; border-color: CanvasText; box-shadow: none; }

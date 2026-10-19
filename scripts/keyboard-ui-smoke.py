@@ -1,4 +1,4 @@
-"""Keyboard, tactile buttons, and real split-flap timer checks with isolated fixtures."""
+"""Keyboard, glass buttons, and real split-flap timer checks with isolated fixtures."""
 import asyncio,importlib.util,json
 from pathlib import Path
 spec=importlib.util.spec_from_file_location('fixtures',str(Path(__file__).with_name('glass-ui-smoke.py')));f=importlib.util.module_from_spec(spec);spec.loader.exec_module(f)
@@ -26,7 +26,7 @@ async def main():
     await next_button.focus();await page.keyboard.press('Space')
     await page.get_by_role('img',name='Question 2',exact=True).wait_for()
     await page.keyboard.press('ArrowLeft')
-    # Hold a real pointer press: the key sinks onto its base before release.
+    # Hold a real pointer press: the glass button keeps its gentle scale feedback.
     rect=await next_button.bounding_box();await page.mouse.move(rect['x']+rect['width']/2,rect['y']+rect['height']/2);await page.mouse.down();await page.wait_for_timeout(150)
     transform=await next_button.evaluate('e=>getComputedStyle(e).transform')
     assert transform!='none',transform
@@ -52,7 +52,7 @@ async def main():
   await page.wait_for_timeout(1200)
   assert await page.locator('.split-flap__change').first.evaluate('e=>getComputedStyle(e).display')=='none'
   assert not errors,errors
-  print(json.dumps({'keyboardQuestionModeAndTopical':'passed','legacyExamRedirect':'passed','keyboardMobile':'passed','lockedAnswers':'passed','nativeSpace':'passed','physicalPress':'passed','realTimerUpdates':'passed','focusLayout':'passed','pageErrors':errors}))
+  print(json.dumps({'keyboardQuestionModeAndTopical':'passed','legacyExamRedirect':'passed','keyboardMobile':'passed','lockedAnswers':'passed','nativeSpace':'passed','buttonPressFeedback':'passed','realTimerUpdates':'passed','focusLayout':'passed','pageErrors':errors}))
   await b.close()
 if __name__ == "__main__":
  asyncio.run(main())
