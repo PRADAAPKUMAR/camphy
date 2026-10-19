@@ -49,7 +49,7 @@ async def main():
   await page.emulate_media(reduced_motion='reduce')
   await page.get_by_role('button',name='Start',exact=True).click()
   await page.wait_for_timeout(1200)
-  assert await page.locator('.split-flap__change').first.evaluate('e=>getComputedStyle(e).display')=='none' 
+  assert await page.locator('.split-flap__change').first.evaluate('e=>getComputedStyle(e).display')=='none'
   assert not errors,errors
   print(json.dumps({'keyboardExamAndTopic':'passed','keyboardQuestionMode':'passed','keyboardMobileDrawer':'passed','lockedAnswers':'passed','nativeSpace':'passed','physicalPress':'passed','realTimerUpdates':'passed','focusLayout':'passed','pageErrors':errors}))
   await b.close()
