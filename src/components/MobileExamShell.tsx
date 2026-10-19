@@ -1,3 +1,4 @@
+import McqKeyboardHint from "@/components/McqKeyboardHint";
 import { ReactNode, useEffect, useState } from "react";
 import {
   Drawer,
@@ -23,6 +24,7 @@ interface MobileExamShellProps {
   onExplain?: (question: number) => void;
   resultPanel?: ReactNode;
   onQuestionActivate?: (question: number) => void;
+  activeQuestion?: number;
 }
 
 const MobileExamShell = ({
@@ -38,9 +40,16 @@ const MobileExamShell = ({
   onExplain,
   resultPanel,
   onQuestionActivate,
+  activeQuestion,
 }: MobileExamShellProps) => {
   const [open, setOpen] = useState(false);
-  const [current, setCurrent] = useState(1);
+  const [localCurrent, setLocalCurrent] = useState(1);
+  const current = activeQuestion ?? localCurrent;
+  const setCurrent = (next: number | ((value: number) => number)) => {
+    const value = typeof next === "function" ? next(current) : next;
+    setLocalCurrent(value);
+    onQuestionActivate?.(value);
+  };
 
   const answeredCount = Object.keys(answers).length;
   const progress = Math.round((answeredCount / totalQuestions) * 100);
@@ -48,9 +57,6 @@ const MobileExamShell = ({
   useEffect(() => {
     if (isSubmitted) setOpen(true);
   }, [isSubmitted]);
-  useEffect(() => {
-    if (!isSubmitted) onQuestionActivate?.(current);
-  }, [current, isSubmitted, onQuestionActivate]);
 
   const userAnswer = answers[current];
   const correct = correctAnswers[current];
@@ -86,7 +92,7 @@ const MobileExamShell = ({
           </DrawerTrigger>
         </div>
 
-        <DrawerContent className="h-[88dvh] max-h-[88dvh] p-0">
+        <DrawerContent data-mcq-keyboard="true" className="h-[88dvh] max-h-[88dvh] p-0">
           <div className="flex h-full min-h-0 flex-col">
             {isSubmitted && resultPanel ? (
               <div className="min-h-0 flex-1 overflow-hidden">{resultPanel}</div>
@@ -141,11 +147,11 @@ const MobileExamShell = ({
                           className={cls}
                           aria-label={`Question ${current} option ${opt}`}
                           disabled={isSubmitted || !!userAnswer}
+                          aria-pressed={selected}
+                          data-answer-option={opt}
+                          aria-keyshortcuts={`${opt} ${OPTIONS.indexOf(opt) + 1}`}
                           onClick={() => {
                             onSelectAnswer(current, opt);
-                            if (current < totalQuestions) {
-                              setTimeout(() => setCurrent((c) => Math.min(totalQuestions, c + 1)), 250);
-                            }
                           }}
                         >
                           {opt}
@@ -155,9 +161,11 @@ const MobileExamShell = ({
                   </div>
                 </div>
 
+                <div className="px-3 py-2"><McqKeyboardHint /></div>
                 {/* Full answer sheet (reused component) */}
                 <div className="min-h-0 flex-1 overflow-hidden">
                   <MCQPanel
+                    showNavigation={false}
                     totalQuestions={totalQuestions}
                     answers={answers}
                     correctAnswers={correctAnswers}
@@ -165,7 +173,8 @@ const MobileExamShell = ({
                     onSubmit={onSubmit}
                     isSubmitted={isSubmitted}
                     onExplain={onExplain}
-                    onQuestionActivate={onQuestionActivate}
+                    onQuestionActivate={setCurrent}
+                    activeQuestion={current}
                   />
                 </div>
               </>

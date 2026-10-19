@@ -1,3 +1,4 @@
+import SplitFlapDisplay from "@/components/SplitFlapDisplay";
 import { useState, useSyncExternalStore } from "react";
 import { Play, Pause, RotateCcw, Coffee, Brain, Maximize2, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,9 +31,9 @@ const FocusMode = () => {
 
   return (
     <>
-      <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-        <div className="glass-card flex flex-col items-center rounded-2xl p-8">
-          <div className="mb-6 flex items-center gap-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.2fr_1fr]">
+        <div className="glass-card flex min-w-0 flex-col items-center rounded-2xl p-8">
+          <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
             <div
               className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold"
               style={{ background: `hsl(${ring} / 0.12)`, color: `hsl(${ring})` }}
@@ -58,7 +59,7 @@ const FocusMode = () => {
           >
             <div className="flex h-[13rem] w-[13rem] flex-col items-center justify-center rounded-full bg-card">
               <span className="font-mono text-5xl font-bold tabular-nums" style={{ color: `hsl(${ring})` }}>
-                {m}:{s}
+                <SplitFlapDisplay value={`${m}:${s}`} label={isFocus ? "Focus remaining" : "Break remaining"} />
               </span>
               <span className="mt-1 text-xs text-muted-foreground">
                 {sessions} session{sessions === 1 ? "" : "s"} done
@@ -68,7 +69,7 @@ const FocusMode = () => {
 
           <div className="mt-6">{adjust}</div>
 
-          <div className="mt-4 flex gap-3">
+          <div className="mt-4 flex flex-wrap justify-center gap-3">
             <Button className="gap-2" onClick={() => studyTimerStore.toggleFocus()}>
               {running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
               {running ? "Pause" : "Start"}
@@ -82,7 +83,7 @@ const FocusMode = () => {
           </div>
         </div>
 
-        <div className="glass-card rounded-2xl p-6">
+        <div className="glass-card min-w-0 rounded-2xl p-6">
           <h3 className="mb-4 text-lg font-bold">Session settings</h3>
           <div className="space-y-4">
             <div>
@@ -156,10 +157,10 @@ const FocusMode = () => {
         >
           <div className="flex h-[92%] w-[92%] flex-col items-center justify-center rounded-full bg-card">
             <span
-              className="font-mono text-[clamp(3rem,12vw,8rem)] font-bold leading-none tabular-nums"
+              className="font-mono text-[clamp(2.4rem,9vw,7rem)] font-bold leading-none tabular-nums"
               style={{ color: `hsl(${ring})` }}
             >
-              {m}:{s}
+              <SplitFlapDisplay value={`${m}:${s}`} label={isFocus ? "Focus remaining" : "Break remaining"} />
             </span>
             <span className="mt-3 text-sm text-muted-foreground">
               {sessions} session{sessions === 1 ? "" : "s"} done
@@ -167,7 +168,7 @@ const FocusMode = () => {
           </div>
         </div>
         <div className="mt-8">{adjust}</div>
-        <div className="mt-4 flex gap-3">
+        <div className="mt-4 flex flex-wrap justify-center gap-3">
           <Button size="lg" className="gap-2" onClick={() => studyTimerStore.toggleFocus()}>
             {running ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
             {running ? "Pause" : "Start"}

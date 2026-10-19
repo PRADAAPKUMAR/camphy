@@ -1,3 +1,4 @@
+import { useMcqKeyboard } from "@/hooks/use-mcq-keyboard";
 import { useState, useCallback, lazy, Suspense } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -143,8 +144,6 @@ const ExamPage = () => {
     if (isSubmitted || answers[question]) return;
     pacing.commit(question);
     setAnswers((prev) => ({ ...prev, [question]: option }));
-    const next = Array.from({ length: TOTAL_QUESTIONS }, (_, i) => i + 1).find((q) => q !== question && !answers[q]);
-    if (next) setActiveQuestion(next);
     const known = answerKeyMap?.[question];
     if (known) {
       setCorrectAnswers((prev) => ({ ...prev, [question]: known }));
@@ -210,6 +209,13 @@ const ExamPage = () => {
       }
     }
   }, [isSubmitted, answers, paperId, answerKeyMap, recordPerformance, pacing.finish]);
+
+  useMcqKeyboard({
+    enabled: !!paper && !paperLoading && !isSubmitted && !explanation.open,
+    onSelect: (option) => handleSelectAnswer(activeQuestion, option),
+    onNext: () => setActiveQuestion((q) => Math.min(TOTAL_QUESTIONS, q + 1)),
+    onPrev: () => setActiveQuestion((q) => Math.max(1, q - 1)),
+  });
 
   if (paperLoading) {
     return (
@@ -323,6 +329,7 @@ const ExamPage = () => {
           onExplain={explanation.openExplanation}
           resultPanel={resultPanel ?? undefined}
           onQuestionActivate={setActiveQuestion}
+          activeQuestion={activeQuestion}
         />
         {explanationDialog}
       </>
@@ -354,6 +361,7 @@ const ExamPage = () => {
               isSubmitted={isSubmitted}
               onExplain={explanation.openExplanation}
               onQuestionActivate={setActiveQuestion}
+              activeQuestion={activeQuestion}
             />
           )}
         </ResizablePanel>

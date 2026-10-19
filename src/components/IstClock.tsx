@@ -1,3 +1,4 @@
+import SplitFlapDisplay from "@/components/SplitFlapDisplay";
 import { useEffect, useState } from "react";
 
 const IST = "Asia/Kolkata";
@@ -13,6 +14,7 @@ const timeFmt = new Intl.DateTimeFormat("en-US", {
   timeZone: IST,
   hour: "2-digit",
   minute: "2-digit",
+  second: "2-digit",
   hour12: true,
 });
 
@@ -41,7 +43,7 @@ const IstClock = ({ compact = false }: { compact?: boolean }) => {
   if (compact) {
     return (
       <span className="whitespace-nowrap text-[11px] font-medium tabular-nums text-muted-foreground">
-        {now.time} IST
+        <SplitFlapDisplay value={now.time} label="India time" /> IST
       </span>
     );
   }
@@ -49,7 +51,7 @@ const IstClock = ({ compact = false }: { compact?: boolean }) => {
   return (
     <span className="whitespace-nowrap text-[12px] font-medium tabular-nums text-muted-foreground">
       <span className="hidden lg:inline">{now.date} · </span>
-      {now.time} IST
+      <SplitFlapDisplay value={now.time} label="India time" /> IST
     </span>
   );
 };

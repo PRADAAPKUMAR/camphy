@@ -1,3 +1,4 @@
+import McqKeyboardHint from "@/components/McqKeyboardHint";
 const OPTIONS = ["A", "B", "C", "D"] as const;
 
 interface OptionButtonsProps {
@@ -46,6 +47,8 @@ const OptionButtons = ({
             type="button"
             className={cls}
             aria-label={`Question ${question} option ${opt}`}
+            aria-pressed={selected}
+            data-answer-option={opt}
             aria-keyshortcuts={`${opt} ${i + 1}`}
             disabled={locked}
             onClick={() => onSelect(opt)}
@@ -56,9 +59,7 @@ const OptionButtons = ({
         );
       })}
     </div>
-    <p className="hidden text-center text-xs text-muted-foreground sm:block">
-      Keyboard: A–D or 1–4 to answer · ← / → or Space to move
-    </p>
+    <McqKeyboardHint />
     </div>
   );
 };

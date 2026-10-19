@@ -48,9 +48,32 @@ use a translucent tint and 7px backdrop blur (6px on mobile),
 so particle halos transmit as diffused light while foreground text stays sharp.
 Utility/reading cards retain denser surfaces; nested panels avoid redundant blur.
 
+## Tactile controls, clocks, and keyboard controls
+
+Buttons and answer options have a raised edge that sinks on press. Selected MCQ
+answers retain an inset pressed appearance without changing correctness colors.
+Split-flap displays style real countdowns, elapsed times, study/focus timers,
+classroom timers, and the India clock. Only changed characters animate; reduced
+motion shows the current value immediately and suppresses decorative transforms.
+The display never drives or delays timekeeping.
+
+Across exam sheets, topic exam sheets, question mode, and topical MCQ sessions:
+
+- **A–D** or **1–4** select an answer for the active question.
+- **Left / Right arrows** move to the previous / next question.
+- Space can move forward when the page itself is focused; focused buttons retain
+  their native Space activation. Typing, menus, explanation dialogs, and modifier
+  shortcuts retain their keys. The mobile answer drawer supports these shortcuts.
+
+Answer sheets highlight the active row, keep it in view, and provide Previous/Next
+buttons. Answers lock after selection; movement is explicit so an arrow never
+accidentally skips a question following an automatic advance. Classroom quizzes
+show a keyboard team selector; answers go to that selected team. Right advances
+once the live answers are revealed; Left reviews earlier questions.
+
 ## Validation
 
-- 71 unit tests pass, including edge/corner/resize and repeated particle rebounds.
+- 75 unit tests pass, including edge/corner/resize and repeated particle rebounds.
 - TypeScript and the production Vite build pass.
 - Existing browser smoke suite passes: eight desktop routes with accessibility
   and deep-link checks, mobile navigation/layout, and mocked login, recovery,
@@ -59,6 +82,10 @@ Utility/reading cards retain denser surfaces; nested panels avoid redundant blur
   screens, and redirect destinations. Reduced-motion and forced-colors checks pass.
 - Desktop (1440px) and mobile (390px) pixel comparisons verify that a controlled
   particle behind a tile remains visible as diffused light through its backdrop.
+- The keyboard UI suite verifies answer locking, letter/number controls, arrow
+  navigation, native Space behavior, physical press styling, real timer updates,
+  the mobile drawer, focus layout, and reduced-motion clock rendering. Isolated
+  classroom checks verify team selection, answers, reveal, and question review.
 - The motion browser suite verifies continuous orbits, moving canvas particles,
   expansion and reverse navigation, scroll restoration, pause/reduced motion,
   320px layout, concurrent lazy loading, and interruption with Escape.
@@ -77,6 +104,7 @@ npm test -- --maxWorkers=2
 python3 .cloud-setup/browser-smoke-offline.py
 python3 scripts/glass-ui-smoke.py
 python3 scripts/motion-smoke.py
+python3 scripts/keyboard-ui-smoke.py
 ```
 
 The route sweep uses synthetic fixtures and intercepts every non-local request;

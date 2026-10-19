@@ -1,3 +1,4 @@
+import { useMcqKeyboard } from "@/hooks/use-mcq-keyboard";
 import { useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -63,6 +64,7 @@ const TopicExamPage = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [activeQuestion, setActiveQuestion] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState<Record<number, string>>({});
@@ -197,6 +199,13 @@ const TopicExamPage = () => {
     }
   }, [isSubmitted, answers, paperId, totalQuestions, answerKeyMap, recordAttempt]);
 
+  useMcqKeyboard({
+    enabled: !!paper && !paperLoading && !isSubmitted && !explanation.open,
+    onSelect: (option) => handleSelectAnswer(activeQuestion, option),
+    onNext: () => setActiveQuestion((q) => Math.min(totalQuestions, q + 1)),
+    onPrev: () => setActiveQuestion((q) => Math.max(1, q - 1)),
+  });
+
   if (paperLoading) {
     return (
       <div className="flex h-screen flex-col bg-background">
@@ -304,6 +313,8 @@ const TopicExamPage = () => {
           breadcrumb={breadcrumb}
           timer={timerEl}
           pdf={pdfEl}
+          activeQuestion={activeQuestion}
+          onQuestionActivate={setActiveQuestion}
           totalQuestions={totalQuestions}
           answers={answers}
           correctAnswers={correctAnswers}
@@ -333,6 +344,8 @@ const TopicExamPage = () => {
         <ResizablePanel defaultSize={22} minSize={18}>
           {resultPanel ?? (
             <MCQPanel
+              activeQuestion={activeQuestion}
+              onQuestionActivate={setActiveQuestion}
               totalQuestions={totalQuestions}
               answers={answers}
               correctAnswers={correctAnswers}

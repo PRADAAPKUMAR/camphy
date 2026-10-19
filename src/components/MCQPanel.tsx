@@ -1,7 +1,8 @@
-import { memo, useCallback } from "react";
+import McqKeyboardHint from "@/components/McqKeyboardHint";
+import { memo, useCallback, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CircleCheck, CircleX, Lightbulb } from "lucide-react";
+import { ChevronLeft, ChevronRight, CircleCheck, CircleX, Lightbulb } from "lucide-react";
 
 const OPTIONS = ["A", "B", "C", "D"] as const;
 
@@ -14,6 +15,8 @@ interface MCQPanelProps {
   isSubmitted: boolean;
   onExplain?: (question: number) => void;
   onQuestionActivate?: (question: number) => void;
+  activeQuestion?: number;
+  showNavigation?: boolean;
 }
 
 interface QuestionRowProps {
@@ -24,9 +27,10 @@ interface QuestionRowProps {
   isSubmitted: boolean;
   onExplain?: (question: number) => void;
   onQuestionActivate?: (question: number) => void;
+  activeQuestion?: number;
 }
 
-const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubmitted, onExplain, onQuestionActivate }: QuestionRowProps) => {
+const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubmitted, onExplain, onQuestionActivate, activeQuestion }: QuestionRowProps) => {
   const isSelected = !!userAnswer;
   const hasResult = correctAnswer !== undefined;
   const isCorrect = isSelected && hasResult && userAnswer === correctAnswer;
@@ -36,9 +40,11 @@ const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubm
     <div
       role="group"
       aria-label={`Question ${q}`}
+      data-current-question={activeQuestion === q ? "true" : undefined}
+      aria-current={activeQuestion === q ? "step" : undefined}
       onFocus={() => onQuestionActivate?.(q)}
       onPointerDown={() => onQuestionActivate?.(q)}
-      className={`flex items-center justify-center gap-1 py-3 ${
+      className={`flex items-center justify-center gap-1 py-3 ${activeQuestion === q ? "mcq-active-row" : ""} ${
         hasResult
           ? isCorrect
             ? "bg-success/5 rounded-lg"
@@ -77,6 +83,8 @@ const QuestionRow = memo(({ q, userAnswer, correctAnswer, onSelectAnswer, isSubm
               key={opt}
                aria-label={`Question ${q}, option ${opt}`}
                aria-pressed={isThisSelected}
+               data-answer-option={opt}
+               aria-keyshortcuts={activeQuestion === q ? `${opt} ${OPTIONS.indexOf(opt) + 1}` : undefined}
               className={className}
               onClick={() => onSelectAnswer(q, opt)}
               disabled={isSubmitted || isSelected}
@@ -121,7 +129,13 @@ const MCQPanel = memo(({
   isSubmitted,
   onExplain,
   onQuestionActivate,
+  activeQuestion,
+  showNavigation = true,
 }: MCQPanelProps) => {
+  const rows = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    rows.current?.querySelector('[data-current-question="true"]')?.scrollIntoView?.({ block: "nearest" });
+  }, [activeQuestion]);
   const answeredCount = Object.keys(answers).length;
   const progress = Math.round((answeredCount / totalQuestions) * 100);
 
@@ -148,9 +162,17 @@ const MCQPanel = memo(({
         </div>
       </div>
 
+      {!isSubmitted && showNavigation && onQuestionActivate && activeQuestion && <div className="space-y-3 border-b px-4 py-3">
+        <div className="flex items-center justify-between gap-2">
+          <Button variant="outline" size="icon" aria-label="Previous question" aria-keyshortcuts="ArrowLeft" disabled={activeQuestion <= 1} onClick={() => onQuestionActivate(activeQuestion - 1)}><ChevronLeft /></Button>
+          <span className="text-xs font-semibold" aria-live="polite">Question {activeQuestion} of {totalQuestions}</span>
+          <Button variant="outline" size="icon" aria-label="Next question" aria-keyshortcuts="ArrowRight" disabled={activeQuestion >= totalQuestions} onClick={() => onQuestionActivate(activeQuestion + 1)}><ChevronRight /></Button>
+        </div>
+        <McqKeyboardHint />
+      </div>}
       {/* Questions */}
       <ScrollArea className="flex-1">
-        <div className="space-y-0.5 p-4">
+        <div ref={rows} className="space-y-0.5 p-4">
           {Array.from({ length: totalQuestions }, (_, i) => i + 1).map((q) => (
             <QuestionRow
               key={q}
@@ -161,6 +183,7 @@ const MCQPanel = memo(({
               isSubmitted={isSubmitted}
               onExplain={onExplain}
               onQuestionActivate={onQuestionActivate}
+              activeQuestion={activeQuestion}
             />
           ))}
         </div>

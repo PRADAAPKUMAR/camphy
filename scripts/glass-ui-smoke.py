@@ -12,7 +12,7 @@ SVG='data:image/svg+xml;base64,'+base64.b64encode(b'<svg xmlns="http://www.w3.or
 TABLES={
  'papers':[PAPER], 'theory_papers':[dict(PAPER,total_questions=1)],
  'study_materials':[{'id':'glass-material','level':'IGCSE','title':'Revision notes','subject':'Physics','file_type':'pdf','file_url':'about:blank','folder_path':'Revision','description':'Forces and motion'}],
- 'topicwise_mcq_papers':[dict(PAPER,id='glass-topic-paper')],
+ 'topicwise_mcq_papers':[dict(PAPER,id='glass-topic-paper',timer_minutes=30)],
  'topicwise_theory_questions':[dict(PAPER,id='glass-question',question_pdf_url='about:blank',answer_pdf_url='about:blank',question_number=1)],
  'syllabus_versions':[{'id':'glass-version','syllabus_code':'0625','syllabus_version':'2026-2028','is_current':True}],
  'syllabus_topics':[TOPIC],
@@ -34,7 +34,7 @@ async def intercept(route):
   function=url.path.rsplit('/',1)[-1]
   payload={
    'get-answer-key':{'total_questions':40,'correct_answers':{'1':'A'}},
-   'sign-question-images':{'images':{'1':SVG}},
+   'sign-question-images':{'images':{'1':SVG,'2':SVG}},
    'account-bootstrap':{'profile':PROFILE,'role':'admin'},
    'admin-table-editor':{'tables':[],'rows':[]},
    'admin-theory':{'papers':[]},

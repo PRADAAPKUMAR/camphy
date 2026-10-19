@@ -57,7 +57,7 @@ const SiteNav = () => {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        {switcher}{account}<AmbientMotionControl /><span className="ml-1 border-l border-border/40 pl-3"><IstClock /></span>
+        {switcher}{account}<AmbientMotionControl /><span className="ml-1 hidden border-l border-border/40 pl-3 xl:inline"><IstClock /></span>
       </div>
       <div className="flex min-w-0 items-center gap-1.5 lg:hidden">{switcher}{account}<span className="hidden sm:inline"><IstClock compact /></span><Button variant="ghost" size="icon" className="min-h-11 min-w-11" aria-expanded={menuOpen} aria-controls="mobile-navigation" aria-label={menuOpen ? "Close menu" : "Open menu"} onClick={() => setMenuOpen((v) => !v)}>{menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}</Button></div>
     </div>

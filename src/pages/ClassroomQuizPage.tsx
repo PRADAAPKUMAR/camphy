@@ -1,3 +1,6 @@
+import { useMcqKeyboard } from "@/hooks/use-mcq-keyboard";
+import McqKeyboardHint from "@/components/McqKeyboardHint";
+import SplitFlapDisplay from "@/components/SplitFlapDisplay";
 import GlassIcon from "@/components/GlassIcon";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
@@ -104,6 +107,7 @@ const ClassroomQuizPage = () => {
   const [loadingGame, setLoadingGame] = useState(false);
   const revealGuard = useRef(false);
   const [history, setHistory] = useState<Record<number, Record<string, TeamAnswer>>>({});
+  const [keyboardTeamId, setKeyboardTeamId] = useState<string | null>(null);
   const [viewIndex, setViewIndex] = useState<number | null>(null);
 
   const { data: topicGroups, isLoading: topicsLoading } = useQuery({
@@ -174,7 +178,6 @@ const ClassroomQuizPage = () => {
     return () => window.clearTimeout(timer);
   }, [allAnswered, phase, reveal, secondsLeft, viewIndex]);
 
-  if (!grade || !level) return <Navigate to={validGrade ? `/grade/${validGrade}` : "/"} replace />;
 
   const setTeamCount = (count: number) => {
     setTeams((previous) => {
@@ -251,6 +254,17 @@ const ClassroomQuizPage = () => {
     setPhase("question");
   };
 
+  const keyboardTeam = teams.find(team => team.id === keyboardTeamId) ?? teams[0];
+  useMcqKeyboard({
+    enabled: phase === "question" || phase === "reveal",
+    onSelect: (option) => { if (!reviewing && keyboardTeam) recordAnswer(keyboardTeam.id, option); },
+    onPrev: () => { if (shownIndex > 0) setViewIndex(shownIndex - 1); },
+    onNext: () => {
+      if (reviewing) setViewIndex(shownIndex + 1 >= current ? null : shownIndex + 1);
+      else if (phase === "reveal") nextQuestion();
+    },
+  });
+
   const restart = () => {
     setPhase("setup");
     setQuestions([]);
@@ -259,6 +273,8 @@ const ClassroomQuizPage = () => {
     setAnsweredQuestionCount(0);
     setTeams((previous) => previous.map((team) => ({ ...team, score: 0, correct: 0 })));
   };
+
+  if (!grade || !level) return <Navigate to={validGrade ? `/grade/${validGrade}` : "/"} replace />;
 
   if (phase === "setup") {
     return (
@@ -344,7 +360,7 @@ const ClassroomQuizPage = () => {
     <header className="border-b border-border/40 bg-background/90 px-3 py-3 backdrop-blur-xl">
       <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3">
         <div><p className="font-mono text-xs text-primary">QUESTION {current + 1} OF {questions.length}</p><h1 className="text-lg font-bold">Classroom Quiz</h1></div>
-        <div className={`flex min-w-32 items-center justify-center gap-2 rounded-lg border px-5 py-2 font-mono text-2xl font-black tabular-nums ${secondsLeft <= 5 && phase === "question" ? "border-destructive/50 bg-destructive/10 text-destructive animate-pulse" : "border-primary/30 bg-primary/10 text-primary"}`}><Clock3 className="h-5 w-5" />{fmtTime(secondsLeft)}</div>
+        <div className={`flex min-w-32 items-center justify-center gap-2 rounded-lg border px-5 py-2 font-mono text-2xl font-black tabular-nums ${secondsLeft <= 5 && phase === "question" ? "border-destructive/50 bg-destructive/10 text-destructive animate-pulse" : "border-primary/30 bg-primary/10 text-primary"}`}><Clock3 className="h-5 w-5" /><SplitFlapDisplay value={fmtTime(secondsLeft)} label="Quiz time remaining" /></div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="hidden text-sm sm:inline-flex">{Object.keys(answers).length}/{teams.length} locked</Badge>
           <AlertDialog>
@@ -374,6 +390,11 @@ const ClassroomQuizPage = () => {
           <span className="ml-auto font-mono text-xs text-muted-foreground">Quiz Q{shownIndex + 1} of {questions.length}</span>
         </div>
         <QuestionCard question={shownQuestion?.question_number ?? shownIndex + 1} imageUrl={shownQuestion?.image_url ?? undefined} />
+        <div className="glass-card space-y-3 rounded-xl p-4">
+          <p className="text-xs font-semibold">Keyboard answering for: {keyboardTeam?.name}</p>
+          <div className="flex flex-wrap gap-2">{teams.map(team => <Button key={team.id} size="sm" variant={team.id === keyboardTeam?.id ? "secondary" : "outline"} aria-pressed={team.id === keyboardTeam?.id} onClick={() => setKeyboardTeamId(team.id)}>{team.name}</Button>)}</div>
+          <McqKeyboardHint />
+        </div>
         {(() => {
           const shownPhase = reviewing ? "reveal" : phase;
           const shownAnswers = reviewing ? history[shownIndex] ?? {} : answers;
@@ -387,7 +408,7 @@ const ClassroomQuizPage = () => {
                   const selected = answer?.option === option;
                   const correct = shownPhase === "reveal" && shownQuestion?.correct_answer === option;
                   const wrong = shownPhase === "reveal" && selected && !correct;
-                  return <Button key={option} variant={correct ? "default" : wrong ? "destructive" : selected ? "secondary" : "outline"} className={`h-12 px-0 text-lg font-black ${correct ? "bg-success text-success-foreground" : ""}`} disabled={shownPhase !== "question" || !!answer} onClick={() => recordAnswer(team.id, option)}>{option}</Button>;
+                  return <Button key={option} variant={correct ? "default" : wrong ? "destructive" : selected ? "secondary" : "outline"} className={`h-12 px-0 text-lg font-black ${correct ? "bg-success text-success-foreground" : ""}`} disabled={shownPhase !== "question" || !!answer} aria-pressed={selected} data-answer-option={option} aria-keyshortcuts={team.id === keyboardTeam?.id ? `${option} ${["A", "B", "C", "D"].indexOf(option) + 1}` : undefined} onClick={() => recordAnswer(team.id, option)}>{option}</Button>;
                 })}</div>
                 {shownPhase === "reveal" && <p className={`mt-2 text-right text-sm font-bold ${answer?.points ? "text-success" : "text-muted-foreground"}`}>{answer?.points ? `+${answer.points.toLocaleString()} points` : "No points"}</p>}
               </div>;

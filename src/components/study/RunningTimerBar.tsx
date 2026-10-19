@@ -1,3 +1,4 @@
+import SplitFlapDisplay from "@/components/SplitFlapDisplay";
 import { useSyncExternalStore } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Pause, Play, Plus, Minus, Timer as TimerIcon } from "lucide-react";
@@ -40,7 +41,7 @@ const RunningTimerBar = () => {
               className="font-mono text-sm font-bold tabular-nums"
               style={{ color: `hsl(var(--study-1))` }}
             >
-              {fmt(state.focus.left)}
+              <SplitFlapDisplay value={fmt(state.focus.left)} label="Focus remaining" />
             </span>
             <button
               onClick={() => studyTimerStore.toggleFocus()}
@@ -60,7 +61,7 @@ const RunningTimerBar = () => {
                 color: t.left === 0 ? `hsl(var(--destructive))` : `hsl(${colorHsl(t.color)})`,
               }}
             >
-              {fmt(t.left)}
+              <SplitFlapDisplay value={fmt(t.left)} label={`${t.label} remaining`} />
             </span>
             <button
               onClick={() => studyTimerStore.adjustTimer(t.id, -1)}

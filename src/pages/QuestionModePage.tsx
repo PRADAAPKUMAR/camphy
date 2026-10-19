@@ -1,3 +1,4 @@
+import SplitFlapDisplay from "@/components/SplitFlapDisplay";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -246,7 +247,7 @@ const QuestionModePage = () => {
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="gap-1 border-border/40 font-mono text-xs">
-              <TimerIcon className="h-3.5 w-3.5" /> {fmtSeconds(elapsed)}
+              <TimerIcon className="h-3.5 w-3.5" /> <SplitFlapDisplay value={fmtSeconds(elapsed)} label="Elapsed time" />
             </Badge>
             <Button variant="ghost" size="sm" asChild className="gap-1 text-muted-foreground">
               <Link to={`/exam/${paper.id}`}>
