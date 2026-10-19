@@ -354,11 +354,16 @@ const ClassroomQuizPage = () => {
 
   return <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-background bg-grid page-transition">
     <header className="shrink-0 border-b border-border/40 bg-background/90 px-2 py-2 backdrop-blur-xl sm:px-4">
-      <div className="mx-auto max-w-[1500px] space-y-2">
-        <div className="flex items-center justify-between gap-2">
-          <div className="min-w-0"><p className="font-mono text-[10px] text-primary sm:text-xs">QUESTION {shownIndex + 1} OF {questions.length}</p><h1 className="text-base font-bold sm:text-lg">Classroom Quiz</h1></div>
+      <div className="mx-auto flex max-w-[1500px] items-center gap-2 sm:gap-4">
+          <div className="shrink-0"><p className="whitespace-nowrap font-mono text-[9px] text-primary sm:text-xs">QUESTION {shownIndex + 1} OF {questions.length}</p><h1 className="whitespace-nowrap text-xs font-bold sm:text-lg">Classroom Quiz</h1></div>
+          <section aria-labelledby="quiz-leaderboard-heading" className="flex min-w-0 flex-1 items-center gap-1.5">
+            <h2 id="quiz-leaderboard-heading" className="shrink-0"><Medal className="h-4 w-4 text-primary" /><span className="sr-only">Live leaderboard</span></h2>
+            <ol tabIndex={0} aria-label="Team scores" className="flex min-w-0 gap-1.5 overflow-x-auto rounded-lg py-1" aria-live="polite" aria-atomic="true">
+              {ranked.map((team) => <li key={team.id} className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border/40 bg-card/60 px-2 py-1.5 text-[10px] sm:text-xs"><span className="text-[9px] font-black text-muted-foreground">{team.rank}</span><span className="max-w-16 truncate font-semibold sm:max-w-24" title={team.name}>{team.name}</span><strong className="tabular-nums">{team.score.toLocaleString()}</strong></li>)}
+            </ol>
+          </section>
           <AlertDialog>
-            <AlertDialogTrigger asChild><Button variant="outline" size="sm" className="gap-2"><Flag className="h-4 w-4" /> End quiz</Button></AlertDialogTrigger>
+            <AlertDialogTrigger asChild><Button variant="outline" size="sm" aria-label="End quiz" className="h-9 w-9 shrink-0 gap-2 px-0 sm:w-auto sm:px-3"><Flag className="h-4 w-4" /><span className="hidden sm:inline">End quiz</span></Button></AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>End the quiz now?</AlertDialogTitle>
@@ -367,13 +372,6 @@ const ClassroomQuizPage = () => {
               <AlertDialogFooter><AlertDialogCancel>Continue quiz</AlertDialogCancel><AlertDialogAction onClick={() => setPhase("results")}>Show results</AlertDialogAction></AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-        </div>
-        <section aria-labelledby="quiz-leaderboard-heading" className="flex items-center gap-2 rounded-xl border border-border/40 bg-card/60 p-2">
-          <h2 id="quiz-leaderboard-heading" className="flex shrink-0 items-center gap-2 text-xs font-bold sm:text-sm"><Medal className="h-4 w-4 text-primary" /><span className="sr-only sm:not-sr-only">Live leaderboard</span></h2>
-          <ol className="flex min-w-0 flex-1 gap-2 overflow-x-auto" aria-live="polite" aria-atomic="true">
-            {ranked.map((team) => <li key={team.id} className="flex min-w-32 flex-1 items-center gap-2 rounded-lg bg-muted/20 px-3 py-2 text-xs sm:text-sm"><span className="font-black text-muted-foreground">{team.rank}</span><span className="min-w-0 flex-1 truncate font-semibold" title={team.name}>{team.name}</span><strong className="tabular-nums">{team.score.toLocaleString()}</strong></li>)}
-          </ol>
-        </section>
       </div>
     </header>
 

@@ -32,6 +32,13 @@ async def geometry(page):
     viewport = page.viewport_size
     assert right["x"] >= question["x"] + question["width"], boxes
     assert top["y"] + top["height"] <= question["y"], boxes
+    title = await page.get_by_role("heading", name="Classroom Quiz", exact=True).bounding_box()
+    end = await page.get_by_role("button", name="End quiz", exact=True).bounding_box()
+    # Live scores share one navigation row with the title and End quiz.
+    assert top["x"] >= title["x"] + title["width"], boxes
+    assert top["x"] + top["width"] <= end["x"], boxes
+    assert max(top["y"], end["y"]) < min(top["y"] + top["height"], end["y"] + end["height"]), boxes
+    assert await page.locator("header").evaluate("e => e.getBoundingClientRect().height") <= 80
     assert bottom["y"] >= question["y"] + question["height"], boxes
     assert bottom["y"] + bottom["height"] <= viewport["height"] + 1, boxes
     assert not await page.evaluate("document.documentElement.scrollWidth > innerWidth"), boxes
@@ -152,7 +159,7 @@ async def main():
         await page.goto(fixtures.BASE + "/grade/as", wait_until="networkidle")
         await page.get_by_role("timer", name="Background timer remaining:", exact=False).wait_for()
         assert not errors, errors
-        print(json.dumps({"viewports":4, "fixedRightControls":"passed", "topScoreboard":"passed", "bottomQuestionNavigation":"passed", "scoringAndReview":"passed", "sixTeamsWithoutScrolling":"passed", "noCustomShortcuts":"passed", "accessibility":"passed", "backgroundTimerPreserved":"passed", "pageErrors":errors}))
+        print(json.dumps({"viewports":4, "fixedRightControls":"passed", "compactScoresInNavigation":"passed", "bottomQuestionNavigation":"passed", "scoringAndReview":"passed", "sixTeamsWithoutScrolling":"passed", "noCustomShortcuts":"passed", "accessibility":"passed", "backgroundTimerPreserved":"passed", "pageErrors":errors}))
         await browser.close()
 
 

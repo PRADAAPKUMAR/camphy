@@ -138,7 +138,8 @@ and preservation of theory PDF viewers.
 
 ## Classroom quiz layout
 
-The active quiz fits the viewport: a live scoreboard stays above the question,
+The active quiz fits the viewport: compact team scores share the top navigation
+bar with the quiz title and End quiz button,
 timer and answer controls stay on the right, and the numbered question selector
 stays along the bottom. Question images scroll independently. Every team appears
 together in compact cards, with no scrollbar or team selector in the answering
@@ -148,5 +149,6 @@ background timers retain their state.
 
 The classroom browser suite uses long synthetic questions and checks four screen
 sizes (320–1440px), score updates, answer locking, paused review, bottom navigation,
-six-team cards without scrolling, and removal of custom keyboard shortcuts. It
+six-team cards without scrolling, compact scores in the navigation bar, and
+removal of custom keyboard shortcuts. It
 intercepts every non-local request.
