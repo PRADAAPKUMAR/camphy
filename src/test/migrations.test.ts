@@ -36,11 +36,10 @@ describe("isolated PostgreSQL migration replay", () => {
         INSERT INTO public.profiles (id) VALUES ('66666666-6666-4666-8666-666666666666');
         SET ROLE anon;`);
       const publicPaperCount = await db.query<{ count: string }>("SELECT count(*)::text AS count FROM public.papers WHERE id='33333333-3333-4333-8333-333333333333'");
-      const privateCounts = await db.query<{ table_name: string; visible_rows: string }>(`SELECT 'answer_keys' AS table_name, count(*)::text AS visible_rows FROM public.answer_keys
-        UNION ALL SELECT 'attempts', count(*)::text FROM public.attempts
-        UNION ALL SELECT 'profiles', count(*)::text FROM public.profiles`);
       expect(publicPaperCount.rows[0].count).toBe("1");
-      expect(privateCounts.rows.every((row) => row.visible_rows === "0")).toBe(true);
+      await expect(db.query("SELECT * FROM public.answer_keys")).rejects.toThrow();
+      await expect(db.query("SELECT * FROM public.attempts")).rejects.toThrow();
+      await expect(db.query("SELECT * FROM public.profiles")).rejects.toThrow();
       await db.exec("RESET ROLE");
       await db.exec(`INSERT INTO public.profiles (id) VALUES ('11111111-1111-4111-8111-111111111111');
         INSERT INTO public.user_activity (user_id, event_key, activity_type, payload) VALUES
