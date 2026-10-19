@@ -1,4 +1,14 @@
+import { gradeFromLevel } from "@/lib/grades";
+
 export const PERFORMANCE_KEY = "physicshq:performance-history";
+export const PERFORMANCE_UPDATED_EVENT = "physicshq:performance-updated";
+let accountId: string | null = null;
+const storageKey = () => accountId ? `${PERFORMANCE_KEY}:${accountId}` : PERFORMANCE_KEY;
+export const setPerformanceAccount = (id: string | null) => {
+  accountId = id;
+  window.dispatchEvent(new Event(PERFORMANCE_UPDATED_EVENT));
+};
+export const performanceAccount = () => accountId;
 
 export interface PerformanceRecord {
   paperId: string;
@@ -104,7 +114,7 @@ export { normalizeGradeLabel as normalizeLevel } from "@/lib/grades";
 
 export const readPerformanceHistory = (): PerformanceRecord[] => {
   try {
-    const raw = localStorage.getItem(PERFORMANCE_KEY);
+    const raw = localStorage.getItem(storageKey());
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
@@ -115,15 +125,21 @@ export const readPerformanceHistory = (): PerformanceRecord[] => {
 };
 
 export const savePerformanceRecord = (record: PerformanceRecord) => {
+  const owner = accountId;
   try {
     const history = readPerformanceHistory();
     history.push(record);
-    localStorage.setItem(PERFORMANCE_KEY, JSON.stringify(history.slice(-200)));
+    localStorage.setItem(storageKey(), JSON.stringify(history.slice(-200)));
+    window.dispatchEvent(new Event(PERFORMANCE_UPDATED_EVENT));
     import("@/integrations/supabase/client").then(({ supabase }) =>
       supabase.auth.getSession().then(({ data }) => {
-        if (data.session) void import("@/lib/account-progress").then(({ syncPerformanceRecord }) => syncPerformanceRecord(record));
+        if (owner && data.session?.user.id === owner && accountId === owner) {
+          return import("@/lib/account-progress").then(({ syncPerformanceRecord }) => {
+            if (accountId === owner) return syncPerformanceRecord(record);
+          });
+        }
       }),
-    );
+    ).catch(() => { /* The local record remains available to retry syncing. */ });
   } catch {
     // ignore quota / privacy-mode failures
   }
@@ -131,7 +147,8 @@ export const savePerformanceRecord = (record: PerformanceRecord) => {
 
 export const clearPerformanceHistory = () => {
   try {
-    localStorage.removeItem(PERFORMANCE_KEY);
+    localStorage.removeItem(storageKey());
+    window.dispatchEvent(new Event(PERFORMANCE_UPDATED_EVENT));
   } catch {
     // ignore
   }
@@ -140,11 +157,23 @@ export const clearPerformanceHistory = () => {
 export const clearPerformanceHistoryForLevel = (level: string) => {
   try {
     const normalized = level.trim().toUpperCase();
-    const kept = readPerformanceHistory().filter((record) =>
-      (record.level ?? "").trim().toUpperCase() !== normalized,
-    );
-    localStorage.setItem(PERFORMANCE_KEY, JSON.stringify(kept));
+    const grade = gradeFromLevel(level);
+    const kept = readPerformanceHistory().filter((record) => grade
+      ? gradeFromLevel(record.level) !== grade
+      : (record.level ?? "").trim().toUpperCase() !== normalized);
+    localStorage.setItem(storageKey(), JSON.stringify(kept));
+    window.dispatchEvent(new Event(PERFORMANCE_UPDATED_EVENT));
   } catch {
     // ignore
   }
+};
+
+export const restorePerformanceHistory = (id: string, records: PerformanceRecord[]) => {
+  if (accountId !== id) return; // A request from the previous account must never populate the next account's cache.
+  const byAttempt = new Map<string, PerformanceRecord>();
+  [...readPerformanceHistory(), ...records].forEach((record) => {
+    byAttempt.set(JSON.stringify([record.paperId, record.completedAt, record.attemptMode ?? null]), record);
+  });
+  localStorage.setItem(storageKey(), JSON.stringify([...byAttempt.values()].sort((a, b) => Date.parse(a.completedAt) - Date.parse(b.completedAt)).slice(-200)));
+  window.dispatchEvent(new Event(PERFORMANCE_UPDATED_EVENT));
 };

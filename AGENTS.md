@@ -1,5 +1,11 @@
 # Architecture rules
 
+- MCQ finalisation awaits a valid mark for every answered question; pending or failed checks never become incorrect outcomes or saved zero scores. Instant feedback and finalisation share retryable requests.
+
+- Account history uses per-user caches and one canonical activity key across automatic sync and guest import. Anonymous history requires explicit import; late account reads cannot populate another user’s cache.
+
+- Both application migration streams must replay on isolated PostgreSQL; historical compatibility markers preserve deployed versions, while forward repairs reconcile existing data and permissions.
+
 - PDF creators report awaited work milestones through a shared progress reporter and reusable action/HUD; percentages never advance on simulated timers, and a brief completion paint precedes the existing open/save fallback.
 
 - Past-paper pacing accumulates visible, unanswered question visits in a shared monotonic clock, pauses for explanations, and freezes on answer/finish; PDF answer-sheet attribution is explicitly estimated because PDF reading focus cannot be measured reliably. Timing snapshots travel in existing performance payloads without schema changes.

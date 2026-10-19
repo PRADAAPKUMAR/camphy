@@ -8,13 +8,13 @@ import SiteNav from "@/components/SiteNav";
 import { GradeProvider } from "@/contexts/GradeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProgressMergePrompt from "@/components/ProgressMergePrompt";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth-context";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AppErrorBoundary from "@/components/AppErrorBoundary";
 import { HelmetProvider } from "react-helmet-async";
 import PageMetadata from "@/components/PageMetadata";
 import { gradeFromLevel, isGradeKey } from "@/lib/grades";
-import { useSelectedGrade } from "@/contexts/GradeContext";
+import { useSelectedGrade } from "@/contexts/grade-context";
 
 const SpeedInsights = lazy(() => import("@vercel/speed-insights/react").then(m => ({ default: m.SpeedInsights })));
 const Analytics = lazy(() => import("@vercel/analytics/react").then(m => ({ default: m.Analytics })));

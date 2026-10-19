@@ -1,3 +1,4 @@
+import { useAnswerChecks } from "@/hooks/use-answer-checks";
 import ThemeToggle from "@/components/ThemeToggle";
 import SplitFlapDisplay from "@/components/SplitFlapDisplay";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -50,6 +51,7 @@ const QuestionModePage = () => {
   const [times, setTimes] = useState<Record<number, number>>({});
   const [current, setCurrent] = useState(0);
   const [finished, setFinished] = useState(false);
+  const [finishing, setFinishing] = useState(false);
   const [elapsed, setElapsed] = useState(0);
 
   const explanation = useExplanation(paperId ? { paper_id: paperId } : null);
@@ -102,7 +104,7 @@ const QuestionModePage = () => {
   const currentQuestion = questions[Math.min(current, questions.length - 1)] ?? 1;
   const answeredCount = Object.keys(answers).length;
   const isRetrySet = !!searchParams.get("qs");
-  const { commit: commitQuestionTime, finish: finishPacing } = useQuestionPacing(currentQuestion, !!paper && !paperLoading && !imagesLoading && !!images?.[currentQuestion] && !finished && !answers[currentQuestion] && !explanation.open);
+  const { commit: commitQuestionTime, finish: finishPacing } = useQuestionPacing(currentQuestion, !!paper && !paperLoading && !imagesLoading && !!images?.[currentQuestion] && !finished && !finishing && !answers[currentQuestion] && !explanation.open);
 
   useEffect(() => {
     if (finished) return;
@@ -118,10 +120,17 @@ const QuestionModePage = () => {
     [questions],
   );
 
+  const { check: checkAnswer, complete: completeAnswers } = useAnswerChecks(async (question, answer) => {
+    const supabase = await getSupabase();
+    const { data, error } = await supabase.functions.invoke("check-answer", { body: { paper_id: paperId, question, answer } });
+    if (error) throw error;
+    return data?.correct_answer;
+  });
+
   const handleSelect = useCallback(
     (option: string) => {
       const q = currentQuestion;
-      if (finished || answers[q] || !images?.[q]) return;
+      if (finished || finishing || answers[q] || !images?.[q]) return;
       commitQuestionTime(q);
       setAnswers((prev) => ({ ...prev, [q]: option }));
 
@@ -130,63 +139,57 @@ const QuestionModePage = () => {
         setCorrectAnswers((prev) => ({ ...prev, [q]: known }));
         return;
       }
-      (async () => {
-        try {
-          const supabase = await getSupabase();
-          const { data, error } = await supabase.functions.invoke("check-answer", {
-            body: { paper_id: paperId, question: q, answer: option },
-          });
-          if (error) throw error;
-          if (data?.correct_answer) {
-            setCorrectAnswers((prev) => ({ ...prev, [q]: data.correct_answer }));
-          }
-        } catch {
-          toast.error("Could not check that answer");
-        }
-      })();
+      void checkAnswer(q, option).then((correct) => {
+        setCorrectAnswers((prev) => ({ ...prev, [q]: correct }));
+      }).catch(() => toast.error("Could not check that answer. Finish will retry."));
     },
-    [currentQuestion, finished, answers, answerKeyMap, paperId, commitQuestionTime, images],
+    [currentQuestion, finished, answers, answerKeyMap, commitQuestionTime, images, finishing, checkAnswer],
   );
 
-  const finish = useCallback(() => {
-    if (finished) return;
-    const finalTimes = finishPacing();
-    setTimes(finalTimes);
-    setFinished(true);
-    const key = { ...answerKeyMap, ...correctAnswers };
-    let score = 0;
-    Object.entries(answers).forEach(([q, a]) => {
-      if (key[Number(q)] === a) score++;
-    });
-    setCorrectAnswers((prev) => ({ ...prev, ...key }));
-
-    if (paper && paperId && answeredCount > 0) {
-      const total = questions.length;
-      savePerformanceRecord({
-        paperId,
-        paperCode: paper.paper_code ?? "Paper",
-        level: paper.level ?? "",
-        year: paper.year ?? null,
-        session: paper.session ?? null,
-        score,
-        totalQuestions: total,
-        percentage: Math.round((score / total) * 100),
-        completedAt: new Date().toISOString(),
-        practiceType: "paper",
-        attemptMode: "question",
-        syllabusVersion: syllabusVersionForLevel(paper.level),
-        questionResults: Object.fromEntries(
-          Object.entries(answers).map(([q, a]) => [Number(q), key[Number(q)] === a]),
-        ),
-        questionTimes: finalTimes,
-        timingMeasurement: "active-question",
+  const finish = useCallback(async () => {
+    if (finished || finishing) return;
+    setFinishing(true);
+    try {
+      const key = await completeAnswers(answers, { ...answerKeyMap, ...correctAnswers });
+      const finalTimes = finishPacing();
+      setTimes(finalTimes);
+      setFinished(true);
+      let score = 0;
+      Object.entries(answers).forEach(([q, a]) => {
+        if (key[Number(q)] === a) score++;
       });
-    }
-    toast.success(`Score: ${score}/${questions.length}`);
-  }, [finished, answerKeyMap, correctAnswers, answers, paper, paperId, questions, answeredCount, finishPacing]);
+      setCorrectAnswers((prev) => ({ ...prev, ...key }));
+
+      if (paper && paperId && answeredCount > 0) {
+        const total = questions.length;
+        savePerformanceRecord({
+          paperId,
+          paperCode: paper.paper_code ?? "Paper",
+          level: paper.level ?? "",
+          year: paper.year ?? null,
+          session: paper.session ?? null,
+          score,
+          totalQuestions: total,
+          percentage: Math.round((score / total) * 100),
+          completedAt: new Date().toISOString(),
+          practiceType: "paper",
+          attemptMode: "question",
+          syllabusVersion: syllabusVersionForLevel(paper.level),
+          questionResults: Object.fromEntries(
+            Object.entries(answers).map(([q, a]) => [Number(q), key[Number(q)] === a]),
+          ),
+          questionTimes: finalTimes,
+          timingMeasurement: "active-question",
+        });
+      }
+      toast.success(`Score: ${score}/${questions.length}`);
+    } catch {
+      toast.error("Answers could not be checked. No result was saved. Try finishing again.");
+    } finally { setFinishing(false); }
+  }, [finished, answerKeyMap, correctAnswers, answers, paper, paperId, questions, answeredCount, finishPacing, finishing, completeAnswers]);
 
   useMcqKeyboard({
-    enabled: !finished && !!paper && !imagesLoading && Object.keys(images ?? {}).length > 0 && !explanation.open,
+    enabled: !finished && !finishing && !!paper && !imagesLoading && Object.keys(images ?? {}).length > 0 && !explanation.open,
     onSelect: handleSelect,
     onNext: () => setCurrent((c) => Math.min(questions.length - 1, c + 1)),
     onPrev: () => setCurrent((c) => Math.max(0, c - 1)),
@@ -336,7 +339,7 @@ const QuestionModePage = () => {
                 userAnswer={answers[currentQuestion]}
                 correctAnswer={correctAnswers[currentQuestion]}
                 onSelect={handleSelect}
-                disabled={!images[currentQuestion]}
+                disabled={finishing || !images[currentQuestion]}
               />
 
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -353,8 +356,8 @@ const QuestionModePage = () => {
                     Next <ChevronRight className="h-4 w-4" />
                   </Button>
                 ) : (
-                  <Button className="gap-2" onClick={finish}>
-                    Finish & see results
+                  <Button className="gap-2" onClick={finish} disabled={finishing}>
+                    {finishing ? "Checking answers…" : "Finish & see results"}
                   </Button>
                 )}
               </div>
@@ -372,8 +375,8 @@ const QuestionModePage = () => {
                   correctAnswers={correctAnswers}
                   onJump={goTo}
                 />
-                <Button className="mt-4 w-full" variant="secondary" onClick={finish}>
-                  Finish now
+                <Button className="mt-4 w-full" variant="secondary" onClick={finish} disabled={finishing}>
+                  {finishing ? "Checking answers…" : "Finish now"}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">

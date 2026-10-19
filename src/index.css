@@ -1,3 +1,6 @@
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+
 /* The supplied face is already oblique; expose it as the default face
    without adding browser-synthesized slant or bold. */
 @font-face {
@@ -8,9 +11,6 @@
   font-display: swap;
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 @layer base {
   :root {
@@ -125,7 +125,7 @@
   }
 
   .glass-card-hover {
-    @apply glass-card transition-all duration-300;
+    @apply backdrop-blur-xl border shadow-lg transition-all duration-300;
     -webkit-backdrop-filter: blur(24px);
   }
   .glass-card-hover:hover {

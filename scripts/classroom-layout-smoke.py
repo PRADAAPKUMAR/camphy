@@ -99,6 +99,7 @@ async def main():
         errors = []
         page.on("pageerror", lambda error: errors.append(str(error)))
         for width, height in [(1440, 900), (768, 800), (390, 844), (320, 720)]:
+            print(json.dumps({"viewport":width,"stage":"classroom layout"}), flush=True)
             await page.set_viewport_size({"width":width, "height":height})
             await page.goto(fixtures.BASE + "/classroom-quiz/igcse", wait_until="networkidle")
             await page.get_by_role("button", name="Start quiz", exact=True).click()
@@ -140,6 +141,7 @@ async def main():
 
         # Every team and every option fits without a team scrollbar, including reveal.
         for width, height in [(1440, 768), (768, 800), (390, 844), (320, 720)]:
+            print(json.dumps({"viewport":width,"stage":"classroom layout"}), flush=True)
             await page.set_viewport_size({"width":width, "height":height})
             await page.goto(fixtures.BASE + "/classroom-quiz/as", wait_until="networkidle")
             for _ in range(4):

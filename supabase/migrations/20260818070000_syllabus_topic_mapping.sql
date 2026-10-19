@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS public.question_topic_mapping (
   question_number INTEGER NOT NULL,
   syllabus_topic_id UUID NOT NULL REFERENCES public.syllabus_topics(id) ON DELETE CASCADE,
   mapping_type TEXT NOT NULL DEFAULT 'primary',
-  verified BOOLEAN NOT NULL DEFAULT true,
+  verified BOOLEAN NOT NULL DEFAULT false,
   notes TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),

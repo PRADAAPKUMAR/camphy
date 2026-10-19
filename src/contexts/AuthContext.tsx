@@ -1,13 +1,30 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import type { Session, User } from "@supabase/supabase-js";
+import { AuthContext, type UserProfile } from "./auth-context";
+import { fetchAccountHistory } from "@/lib/account-progress";
+import { restorePerformanceHistory, setPerformanceAccount } from "@/lib/performance-history";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-
-export interface UserProfile { id: string; full_name: string; display_name: string; avatar_url: string | null; account_type: "student" | "teacher"; grade: "igcse" | "as" | "a2" | null; school: string | null; country: string | null; preferences: Record<string, unknown>; usage_summary: Record<string, unknown>; setup_completed: boolean }
-interface AuthValue { loading: boolean; session: Session | null; user: User | null; profile: UserProfile | null; role: "user" | "admin"; refreshProfile: () => Promise<void>; signOut: () => Promise<void> }
-const AuthContext = createContext<AuthValue | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null); const [profile, setProfile] = useState<UserProfile | null>(null); const [role, setRole] = useState<"user" | "admin">("user"); const [loading, setLoading] = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [historyRevision, setHistoryRevision] = useState(0);
+  const refreshHistory = useCallback(() => setHistoryRevision((value) => value + 1), []);
+  const userId = session?.user.id ?? null;
+  useEffect(() => {
+    let active = true;
+    setPerformanceAccount(userId);
+    setHistoryError(null);
+    setHistoryLoading(!!userId);
+    if (userId) {
+      fetchAccountHistory(userId).then((records) => {
+        if (active) restorePerformanceHistory(userId, records);
+      }).catch(() => { if (active) setHistoryError("Cloud progress could not be loaded. Your saved device history is still available."); })
+        .finally(() => { if (active) setHistoryLoading(false); });
+    }
+    return () => { active = false; };
+  }, [userId, historyRevision]);
   const refreshProfile = useCallback(async () => {
     const { data, error } = await supabase.functions.invoke("account-bootstrap", { body: {} });
     if (!error && data?.profile) { setProfile(data.profile as UserProfile); setRole(data.role === "admin" ? "admin" : "user"); }
@@ -19,7 +36,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => { active = false; listener.subscription.unsubscribe(); };
   }, [refreshProfile]);
   const signOut = useCallback(async () => { await supabase.auth.signOut(); }, []);
-  const value = useMemo(() => ({ loading, session, user: session?.user ?? null, profile, role, refreshProfile, signOut }), [loading, session, profile, role, refreshProfile, signOut]);
+  const value = useMemo(() => ({ loading, session, user: session?.user ?? null, profile, role, refreshProfile, historyLoading, historyError, refreshHistory, signOut }), [loading, session, profile, role, refreshProfile, historyLoading, historyError, refreshHistory, signOut]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-export const useAuth = () => { const value = useContext(AuthContext); if (!value) throw new Error("useAuth must be inside AuthProvider"); return value; };

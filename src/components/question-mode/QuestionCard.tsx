@@ -9,16 +9,10 @@ interface QuestionCardProps {
 }
 
 /** The question image itself, on a light plate so scanned JPGs stay readable. */
-const QuestionCard = ({ question, imageUrl }: QuestionCardProps) => {
+const QuestionImage = ({ question, imageUrl }: QuestionCardProps) => {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
-
-  useEffect(() => {
-    setLoaded(false);
-    setFailed(false);
-    setAttempt(0);
-  }, [imageUrl]);
 
   // Auto-retry once on failure (covers transient network drops / token races).
   useEffect(() => {
@@ -80,5 +74,9 @@ const QuestionCard = ({ question, imageUrl }: QuestionCardProps) => {
     </div>
   );
 };
+
+// Each source owns its loading state. Resetting it in a passive effect can hide
+// an already-loaded cached image after onLoad has fired.
+const QuestionCard = (props: QuestionCardProps) => <QuestionImage key={props.imageUrl ?? "missing"} {...props} />;
 
 export default QuestionCard;

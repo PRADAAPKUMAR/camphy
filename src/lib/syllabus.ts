@@ -51,11 +51,7 @@ export const SYLLABUS_VERSION_LABEL: Record<SyllabusCode, string> = {
 export const syllabusVersionForLevel = (level?: string | null) =>
   SYLLABUS_VERSION_LABEL[syllabusCodeForLevel(level)];
 
-// The syllabus tables are managed via SQL; the generated types may not know
-// them yet, so these queries use an untyped client and fail soft.
-const db = supabase as unknown as {
-  from: (table: string) => any;
-};
+const db = supabase;
 
 export const fetchSyllabusVersions = async (): Promise<SyllabusVersion[]> => {
   const { data, error } = await db.from("syllabus_versions").select("*").order("syllabus_code");
@@ -125,7 +121,7 @@ export const fetchQuestionTopics = async (
   const versions = await fetchSyllabusVersions();
   let primary: SyllabusTopic | null = null;
   const secondary: SyllabusTopic[] = [];
-  for (const row of data as any[]) {
+  for (const row of data) {
     const topic = row.syllabus_topics as SyllabusTopic | null;
     if (!topic) continue;
     if (row.mapping_type === "primary") primary = topic;

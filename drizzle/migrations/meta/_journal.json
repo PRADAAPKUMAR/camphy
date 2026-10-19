@@ -15,6 +15,13 @@
       "when": 1791169287041,
       "tag": "0001_secure_accounts",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792368000000,
+      "tag": "0002_canonical_progress_keys",
+      "breakpoints": true
     }
   ]
 }

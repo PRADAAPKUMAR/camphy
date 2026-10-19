@@ -33,9 +33,9 @@ const shuffled = <T>(arr: T[]): T[] => {
 };
 
 /** PostgREST caps rows at 1000 — page through everything. */
-const fetchAll = async (build: (from: number, to: number) => any): Promise<any[]> => {
+const fetchAll = async <T>(build: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>): Promise<T[]> => {
   const PAGE = 1000;
-  const out: any[] = [];
+  const out: T[] = [];
   for (let from = 0; ; from += PAGE) {
     const { data, error } = await build(from, from + PAGE - 1);
     if (error) throw new Error(error.message);
@@ -47,11 +47,11 @@ const fetchAll = async (build: (from: number, to: number) => any): Promise<any[]
 };
 
 /** Topics that actually have worksheet-ready questions, merged across syllabus versions. */
-const availableTopics = async (supabase: any, level: string | null) => {
+const availableTopics = async (supabase: ReturnType<typeof createClient>, level: string | null) => {
   let papersQuery = supabase.from("papers").select("id, level");
   if (level) papersQuery = papersQuery.eq("level", level);
   const { data: papers } = await papersQuery;
-  const paperIds = (papers ?? []).map((p: any) => p.id as string);
+  const paperIds = (papers ?? []).map((p) => p.id as string);
   if (!paperIds.length) return [];
 
   const images = await fetchAll((from, to) =>
@@ -63,7 +63,7 @@ const availableTopics = async (supabase: any, level: string | null) => {
       .order("question_number")
       .range(from, to),
   );
-  const hasImage = new Set(images.map((r: any) => `${r.paper_id}:${r.question_number}`));
+  const hasImage = new Set(images.map((r) => `${r.paper_id}:${r.question_number}`));
 
   const keys = await fetchAll((from, to) =>
     supabase.from("answer_keys").select("*").in("paper_id", paperIds).order("paper_id").range(from, to),
@@ -97,7 +97,7 @@ const availableTopics = async (supabase: any, level: string | null) => {
   if (!topicOf.size) return [];
 
   // resolve topics + ancestors
-  const topics = new Map<string, any>();
+  const topics = new Map<string, { id: string; parent_topic_id: string | null; topic_code: string; topic_name: string }>();
   let pending = Array.from(new Set(topicOf.values()));
   for (let depth = 0; depth < 4 && pending.length; depth++) {
     const { data } = await supabase
@@ -105,11 +105,11 @@ const availableTopics = async (supabase: any, level: string | null) => {
       .select("id, parent_topic_id, topic_code, topic_name")
       .in("id", pending);
     const rows = data ?? [];
-    rows.forEach((t: any) => topics.set(t.id, t));
+    rows.forEach((t) => topics.set(t.id, t));
     pending = Array.from(
       new Set(
         rows
-          .map((t: any) => t.parent_topic_id as string | null)
+          .map((t) => t.parent_topic_id as string | null)
           .filter((p: string | null): p is string => !!p && !topics.has(p)),
       ),
     );
@@ -186,10 +186,10 @@ Deno.serve(async (req) => {
     const refs: Ref[] = Array.isArray(body.refs)
       ? body.refs
           .filter(
-            (r: any) =>
+            (r: { paper_id?: unknown; question_number?: unknown }) =>
               r && typeof r.paper_id === "string" && Number.isInteger(Number(r.question_number)),
           )
-          .map((r: any) => ({ paper_id: r.paper_id, question_number: Number(r.question_number) }))
+          .map((r: { paper_id: string; question_number: unknown }) => ({ paper_id: r.paper_id, question_number: Number(r.question_number) }))
       : [];
     const requested = Math.min(MAX_COUNT, Math.max(1, Number(body.count) || 20));
     const shuffle = body.shuffle === true;
@@ -333,7 +333,7 @@ Deno.serve(async (req) => {
     });
 
     const poolSize = candidates.length;
-    let picked: Ref[] = shuffled(candidates).slice(0, requested);
+    const picked: Ref[] = shuffled(candidates).slice(0, requested);
     if (!shuffle) {
       picked.sort(
         (a, b) => a.paper_id.localeCompare(b.paper_id) || a.question_number - b.question_number,

@@ -26,7 +26,7 @@ import { compareSessions } from "@/lib/exam-sessions";
 
 import TableGridEditor, { type ColumnMeta } from "@/components/admin/TableGridEditor";
 import TheoryAdminPanel from "@/components/admin/TheoryAdminPanel";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth-context";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
@@ -234,12 +234,9 @@ const AdminUploadPage = () => {
     }
     const papersHit = new Set(pending.map((p) => p.targetPaperId).filter(Boolean)).size;
     return { total: pending.length, matched, unmatched, unparsed, invalidQ, duplicates, papersHit };
-  }, [pending, paperId, overrideUnmatched]);
+  }, [pending, paperId]);
 
-  const ready = useMemo(
-    () => pending.filter((p) => p.question && targetFor(p)),
-    [pending, paperId, overrideUnmatched],
-  );
+  const ready = pending.filter((p) => p.question && targetFor(p));
   const blocked = summary.unmatched > 0 && !overrideUnmatched;
 
   const uploadAll = async () => {

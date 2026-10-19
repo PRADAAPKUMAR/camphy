@@ -40,8 +40,8 @@ Deno.serve(async (req) => {
     const topicMap = new Map<string, { id: string; topic_code: string; topic_name: string }>();
     const questions = (mappings ?? []).flatMap((mapping) => {
       const paper = paperMap.get(mapping.theory_paper_id);
-      const topics = (mapping.theory_question_topics ?? []).flatMap((link: any) => link.syllabus_topics ? [link.syllabus_topics] : []);
-      topics.forEach((topic: any) => topicMap.set(topic.id, topic));
+      const topics = (mapping.theory_question_topics ?? []).flatMap((link: { syllabus_topics?: { id: string; topic_code: string; topic_name: string } }) => link.syllabus_topics ? [link.syllabus_topics] : []);
+      topics.forEach((topic: { id: string; topic_code: string; topic_name: string }) => topicMap.set(topic.id, topic));
       const question_url = paper?.question_storage_path ? urls.get(paper.question_storage_path) : null;
       return paper && question_url && topics.length ? [{
         mapping_id: mapping.id,

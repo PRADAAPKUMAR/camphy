@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { metadataForPath } from "@/components/PageMetadata";
+import { metadataForPath } from "@/lib/page-metadata";
 import pages from "@/lib/seo-routes.json";
 describe("search metadata", () => {
   it("uses the main domain and distinct titles for every public page", () => {

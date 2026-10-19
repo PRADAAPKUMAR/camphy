@@ -1,5 +1,9 @@
+import { useAuth } from "@/contexts/auth-context";
+import { deleteAccountHistory } from "@/lib/account-progress";
+import { PERFORMANCE_UPDATED_EVENT, performanceAccount } from "@/lib/performance-history";
+import { toast } from "sonner";
 import GlassIcon from "@/components/GlassIcon";
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, BarChart3, Target, ListChecks, Trophy, Trash2, TrendingUp, FileText, Layers, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -63,12 +67,20 @@ const fmtDate = (iso: string) => {
 const avg = (nums: number[]) => (nums.length ? Math.round(nums.reduce((a, b) => a + b, 0) / nums.length) : 0);
 
 const PerformancePage = () => {
+  const { user, historyLoading, historyError, refreshHistory } = useAuth();
+  const [clearing, setClearing] = useState(false);
   const { grade: rawGrade } = useParams<{ grade: string }>();
   const navigate = useNavigate();
   const invalidGrade = !!rawGrade && !isGradeKey(rawGrade);
   const grade = (rawGrade?.toLowerCase() as GradeKey | undefined) ?? null;
   const gradeDetails = grade ? GRADES[grade] : null;
   const [allHistory, setAllHistory] = useState<PerformanceRecord[]>(() => readPerformanceHistory());
+  useEffect(() => {
+    const update = () => setAllHistory(readPerformanceHistory());
+    update();
+    window.addEventListener(PERFORMANCE_UPDATED_EVENT, update);
+    return () => window.removeEventListener(PERFORMANCE_UPDATED_EVENT, update);
+  }, []);
   const history = useMemo(
     () => grade ? allHistory.filter((record) => gradeFromLevel(record.level) === grade) : allHistory,
     [allHistory, grade],
@@ -137,10 +149,16 @@ const PerformancePage = () => {
 
   if (invalidGrade) return <Navigate to="/" replace />;
 
-  const onClear = () => {
-    if (gradeDetails) clearPerformanceHistoryForLevel(gradeDetails.dbLevel);
-    else clearPerformanceHistory();
-    setAllHistory(readPerformanceHistory());
+  const onClear = async () => {
+    setClearing(true);
+    try {
+      if (user) await deleteAccountHistory(user.id, gradeDetails?.dbLevel);
+      if (user && performanceAccount() !== user.id) return;
+      if (gradeDetails) clearPerformanceHistoryForLevel(gradeDetails.dbLevel);
+      else clearPerformanceHistory();
+      setAllHistory(readPerformanceHistory());
+    } catch { toast.error("History could not be cleared. Please try again."); }
+    finally { setClearing(false); }
   };
 
   return (
@@ -149,6 +167,8 @@ const PerformancePage = () => {
         <PhysicsBackground />
       </Suspense>
 
+      {historyLoading && <p role="status" className="container pt-4 text-sm text-muted-foreground">Loading cloud progress…</p>}
+      {historyError && <div role="alert" className="container flex flex-wrap items-center gap-3 pt-4 text-sm text-destructive"><span>{historyError}</span><Button variant="outline" size="sm" onClick={refreshHistory}>Retry sync</Button></div>}
       <header className="relative border-b border-border/40">
         <div className="container py-8">
           <Button
@@ -185,7 +205,7 @@ const PerformancePage = () => {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={onClear}>Clear history</AlertDialogAction>
+                    <AlertDialogAction onClick={onClear} disabled={clearing || historyLoading}>Clear history</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>

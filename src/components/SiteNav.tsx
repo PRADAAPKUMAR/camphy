@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import IstClock from "@/components/IstClock";
 import { equivalentGradePath, gradeSectionPath, GRADES, GRADE_KEYS, type GradeKey } from "@/lib/grades";
-import { useSelectedGrade } from "@/contexts/GradeContext";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSelectedGrade } from "@/contexts/grade-context";
+import { useAuth } from "@/contexts/auth-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const isActive = (pathname: string, to: string) => pathname === to || (to !== "/" && pathname.startsWith(`${to}/`));

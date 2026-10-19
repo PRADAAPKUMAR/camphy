@@ -1,12 +1,10 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { GradeContext } from "./grade-context";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { gradeFromLevel, isGradeKey, type GradeKey } from "@/lib/grades";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth-context";
 
 const STORAGE_KEY = "physicshq:selected-grade";
-interface GradeContextValue { grade: GradeKey | null; setGrade: (grade: GradeKey) => void }
-const GradeContext = createContext<GradeContextValue | null>(null);
-
 const gradeFromPath = (pathname: string): GradeKey | null => {
   const parts = pathname.split("/").filter(Boolean);
   if (parts[0] === "grade" && isGradeKey(parts[1])) return parts[1].toLowerCase() as GradeKey;
@@ -39,10 +37,4 @@ export const GradeProvider = ({ children }: { children: React.ReactNode }) => {
   }, [grade, profile?.grade, setGrade]);
   const value = useMemo(() => ({ grade, setGrade }), [grade, setGrade]);
   return <GradeContext.Provider value={value}>{children}</GradeContext.Provider>;
-};
-
-export const useSelectedGrade = () => {
-  const value = useContext(GradeContext);
-  if (!value) throw new Error("useSelectedGrade must be used inside GradeProvider");
-  return value;
 };

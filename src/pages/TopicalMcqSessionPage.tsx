@@ -1,3 +1,4 @@
+import { useAnswerChecks } from "@/hooks/use-answer-checks";
 import ThemeToggle from "@/components/ThemeToggle";
 import SplitFlapDisplay from "@/components/SplitFlapDisplay";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -45,6 +46,7 @@ const TopicalMcqSessionPage = () => {
   const [times, setTimes] = useState<Record<number, number>>({});
   const [current, setCurrent] = useState(0);
   const [finished, setFinished] = useState(false);
+  const [finishing, setFinishing] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const shownAt = useRef<number>(Date.now());
 
@@ -104,10 +106,19 @@ const TopicalMcqSessionPage = () => {
     return () => window.clearInterval(id);
   }, [finished]);
 
+  const { check: checkAnswer, complete: completeAnswers } = useAnswerChecks(async (index, answer) => {
+    const item = items.find((question) => question.index === index);
+    if (!item) throw new Error("Question unavailable");
+    const supabase = await getSupabase();
+    const { data, error } = await supabase.functions.invoke("check-answer", { body: { paper_id: item.paperId, question: item.questionNumber, answer } });
+    if (error) throw error;
+    return data?.correct_answer;
+  });
+
   const handleSelect = useCallback(
     (option: string) => {
       const idx = currentItem?.index;
-      if (!idx || finished || answers[idx] || !images?.[currentItem.questionNumber]) return;
+      if (!idx || finished || finishing || answers[idx] || !images?.[currentItem.questionNumber]) return;
       const spent = Math.max(1, Math.round((Date.now() - shownAt.current) / 1000));
       setTimes((prev) => ({ ...prev, [idx]: spent }));
       setAnswers((prev) => ({ ...prev, [idx]: option }));
@@ -117,30 +128,15 @@ const TopicalMcqSessionPage = () => {
         setCorrectAnswers((prev) => ({ ...prev, [idx]: known }));
         return;
       }
-      (async () => {
-        try {
-          const supabase = await getSupabase();
-          const { data, error } = await supabase.functions.invoke("check-answer", {
-            body: {
-              paper_id: currentItem.paperId,
-              question: currentItem.questionNumber,
-              answer: option,
-            },
-          });
-          if (error) throw error;
-          if (data?.correct_answer) {
-            setCorrectAnswers((prev) => ({ ...prev, [idx]: data.correct_answer }));
-          }
-        } catch {
-          toast.error("Could not check that answer");
-        }
-      })();
+      void checkAnswer(idx, option).then((correct) => {
+        setCorrectAnswers((prev) => ({ ...prev, [idx]: correct }));
+      }).catch(() => toast.error("Could not check that answer. Finish will retry."));
     },
-    [currentItem, finished, answers, keyByIndex, images],
+    [currentItem, finished, answers, keyByIndex, images, finishing, checkAnswer],
   );
 
   useMcqKeyboard({
-    enabled: !finished && items.length > 0,
+    enabled: !finished && !finishing && items.length > 0,
     onSelect: handleSelect,
     onNext: () => setCurrent((c) => Math.min(items.length - 1, c + 1)),
     onPrev: () => setCurrent((c) => Math.max(0, c - 1)),
@@ -171,41 +167,48 @@ const TopicalMcqSessionPage = () => {
     [items],
   );
 
-  const finish = useCallback(() => {
-    if (finished || !items.length) return;
-    setFinished(true);
-    const key = { ...keyByIndex, ...correctAnswers };
-    let score = 0;
-    Object.entries(answers).forEach(([q, a]) => {
-      if (key[Number(q)] === a) score++;
-    });
-    setCorrectAnswers((prev) => ({ ...prev, ...key }));
-
-    if (answeredCount > 0) {
-      savePerformanceRecord({
-        paperId: `topical:${level}:${topicSlug}`,
-        paperCode: topicName,
-        level,
-        year: null,
-        session: null,
-        score,
-        totalQuestions: items.length,
-        percentage: Math.round((score / items.length) * 100),
-        completedAt: new Date().toISOString(),
-        practiceType: "topic",
-        topic: topicName,
-        attemptMode: "question",
-        syllabusVersion: syllabusVersionForLevel(level),
-        primaryTopicId: set?.topic?.id ?? null,
-        questionResults: Object.fromEntries(
-          Object.entries(answers).map(([q, a]) => [Number(q), key[Number(q)] === a]),
-        ),
-        questionTimes: times,
+  const finish = useCallback(async () => {
+    if (finished || finishing || !items.length) return;
+    setFinishing(true);
+    try {
+      const key = await completeAnswers(answers, { ...keyByIndex, ...correctAnswers });
+      setFinished(true);
+      let score = 0;
+      Object.entries(answers).forEach(([q, a]) => {
+        if (key[Number(q)] === a) score++;
       });
-    }
-    toast.success(`Score: ${score}/${items.length}`);
+      setCorrectAnswers((prev) => ({ ...prev, ...key }));
+
+      if (answeredCount > 0) {
+        savePerformanceRecord({
+          paperId: `topical:${level}:${topicSlug}`,
+          paperCode: topicName,
+          level,
+          year: null,
+          session: null,
+          score,
+          totalQuestions: items.length,
+          percentage: Math.round((score / items.length) * 100),
+          completedAt: new Date().toISOString(),
+          practiceType: "topic",
+          topic: topicName,
+          attemptMode: "question",
+          syllabusVersion: syllabusVersionForLevel(level),
+          primaryTopicId: set?.topic?.id ?? null,
+          questionResults: Object.fromEntries(
+            Object.entries(answers).map(([q, a]) => [Number(q), key[Number(q)] === a]),
+          ),
+          questionTimes: times,
+        });
+      }
+      toast.success(`Score: ${score}/${items.length}`);
+    } catch {
+      toast.error("Answers could not be checked. No result was saved. Try finishing again.");
+    } finally { setFinishing(false); }
   }, [
     finished,
+    finishing,
+    completeAnswers,
     items,
     keyByIndex,
     correctAnswers,
@@ -355,7 +358,7 @@ const TopicalMcqSessionPage = () => {
                 userAnswer={answers[currentItem.index]}
                 correctAnswer={correctAnswers[currentItem.index]}
                 onSelect={handleSelect}
-                disabled={!images?.[currentItem.questionNumber]}
+                disabled={finishing || !images?.[currentItem.questionNumber]}
               />
 
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -391,8 +394,8 @@ const TopicalMcqSessionPage = () => {
                   correctAnswers={correctAnswers}
                   onJump={(q) => setCurrent(Math.max(0, questions.indexOf(q)))}
                 />
-                <Button className="mt-4 w-full" variant="secondary" onClick={finish}>
-                  Finish now
+                <Button className="mt-4 w-full" variant="secondary" onClick={finish} disabled={finishing}>
+                  {finishing ? "Checking answers…" : "Finish now"}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">

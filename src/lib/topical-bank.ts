@@ -6,7 +6,7 @@ export const BANK_LEVELS = ["IGCSE", "AS LEVEL"] as const;
 export type BankLevel = (typeof BANK_LEVELS)[number];
 
 // question_topic_mapping / syllabus_topics are SQL-managed; generated types may lag.
-const db = supabase as unknown as { from: (table: string) => any };
+const db = supabase;
 
 export interface MappedQuestion {
   paperId: string;
@@ -35,7 +35,7 @@ export const fetchMappedQuestions = async (level: string): Promise<MappedQuestio
       .order("question_number")
       .range(from, from + PAGE - 1);
     if (error) break;
-    const rows = (data ?? []) as any[];
+    const rows = data ?? [];
     rows.forEach((r) =>
       out.push({
         paperId: r.paper_id,
@@ -132,7 +132,7 @@ export const fetchImageCoverage = async (paperIds: string[]): Promise<Set<string
       .in("paper_id", paperIds)
       .range(from, from + PAGE - 1);
     if (error) break;
-    const rows = (data ?? []) as any[];
+    const rows = data ?? [];
     rows.forEach((r) => set.add(`${r.paper_id}:${r.question_number}`));
     if (rows.length < PAGE) break;
   }

@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
     if (!parsed.success) return json({ error: parsed.error.flatten().fieldErrors }, 400);
     const admin = serviceClient(); let imported = 0;
     for (const record of parsed.data.records) {
-      const { data, error } = await admin.from("user_activity").upsert({ user_id: user.id, ...record }, { onConflict: "user_id,event_key", ignoreDuplicates: true }).select("id");
+      const { data, error } = await admin.from("user_activity").upsert({ user_id: user.id, ...record, event_key: record.event_key.replace(/^local-/, "activity-") }, { onConflict: "user_id,event_key", ignoreDuplicates: true }).select("id");
       if (error) return json({ error: error.message }, 400); if (data?.length) imported += 1;
     }
     const { data: rows } = await admin.from("user_activity").select("activity_type,payload,occurred_at").eq("user_id", user.id);

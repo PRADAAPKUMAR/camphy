@@ -19,7 +19,7 @@ type Row = Record<string, unknown>;
 interface Props {
   table: string;
   columns: ColumnMeta[];
-  call: (body: Record<string, unknown>) => Promise<any>;
+  call: (body: Record<string, unknown>) => Promise<{ rows?: Row[]; columns?: ColumnMeta[]; count?: number; primaryKey?: string; updated?: number; inserted?: number }>;
 }
 
 const cellText = (v: unknown) => {
@@ -305,7 +305,8 @@ const TableGridEditor = ({ table, columns, call }: Props) => {
                     onCheckedChange={(v) =>
                       setSelected((prev) => {
                         const next = new Set(prev);
-                        v ? next.add(i) : next.delete(i);
+                        if (v) next.add(i);
+                        else next.delete(i);
                         return next;
                       })
                     }

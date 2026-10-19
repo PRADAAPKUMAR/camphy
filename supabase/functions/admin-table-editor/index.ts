@@ -32,12 +32,12 @@ const introspect = async (): Promise<{ name: string; columns: ColumnMeta[] }[]> 
   });
   if (!res.ok) throw new Error("Could not read schema");
   const spec = await res.json();
-  const defs = (spec?.definitions ?? {}) as Record<string, any>;
+  const defs = (spec?.definitions ?? {}) as Record<string, { required?: string[]; properties?: Record<string, { description?: string; type?: string; format?: string; default?: unknown }> }>;
 
   return Object.entries(defs)
     .map(([name, def]) => {
       const required: string[] = def?.required ?? [];
-      const props = (def?.properties ?? {}) as Record<string, any>;
+      const props = (def?.properties ?? {}) as Record<string, { description?: string; type?: string; format?: string; default?: unknown }>;
       const columns: ColumnMeta[] = Object.entries(props).map(([col, p]) => {
         const description = String(p?.description ?? "");
         return {
@@ -116,7 +116,7 @@ Deno.serve(async (req) => {
     }
 
     if (action === "save") {
-      const rows = Array.isArray(body.rows) ? body.rows : [];
+      const rows: Record<string, unknown>[] = Array.isArray(body.rows) ? body.rows.filter((row: unknown) => row && typeof row === "object" && !Array.isArray(row)) : [];
       if (!rows.length) return json({ ok: true, updated: 0, inserted: 0 });
 
       const clean = (row: Record<string, unknown>, keepPk: boolean) => {
@@ -129,17 +129,17 @@ Deno.serve(async (req) => {
         return out;
       };
 
-      const withPk = rows.filter((r: any) => pk && r?.[pk] !== undefined && r?.[pk] !== null && r?.[pk] !== "");
-      const withoutPk = rows.filter((r: any) => !withPk.includes(r));
+      const withPk = rows.filter((r) => pk && r?.[pk] !== undefined && r?.[pk] !== null && r?.[pk] !== "");
+      const withoutPk = rows.filter((r) => !withPk.includes(r));
 
       if (withPk.length) {
         const { error } = await supabase
           .from(table)
-          .upsert(withPk.map((r: any) => clean(r, true)), { onConflict: pk! });
+          .upsert(withPk.map((r) => clean(r, true)), { onConflict: pk! });
         if (error) return json({ error: error.message }, 400);
       }
       if (withoutPk.length) {
-        const { error } = await supabase.from(table).insert(withoutPk.map((r: any) => clean(r, false)));
+        const { error } = await supabase.from(table).insert(withoutPk.map((r) => clean(r, false)));
         if (error) return json({ error: error.message }, 400);
       }
       return json({ ok: true, updated: withPk.length, inserted: withoutPk.length });

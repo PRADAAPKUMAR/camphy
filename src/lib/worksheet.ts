@@ -228,7 +228,7 @@ const loadLogoDataUrl = () => {
 };
 
 const drawBrand = (
-  doc: any,
+  doc: import("jspdf").jsPDF,
   logoDataUrl: string | null,
   y: number,
   compact = false,
@@ -253,7 +253,7 @@ const drawBrand = (
 
 /** Full school-style header used only on the first page of the student worksheet. */
 const drawWorksheetHeader = (
-  doc: any,
+  doc: import("jspdf").jsPDF,
   meta: WorksheetMeta,
   logoDataUrl: string | null,
 ) => {
@@ -295,7 +295,7 @@ const drawWorksheetHeader = (
 };
 
 const drawContinuationHeader = (
-  doc: any,
+  doc: import("jspdf").jsPDF,
   meta: WorksheetMeta,
   logoDataUrl: string | null,
 ) => {
@@ -313,7 +313,7 @@ const drawContinuationHeader = (
 };
 
 const drawAnswerKeyHeader = (
-  doc: any,
+  doc: import("jspdf").jsPDF,
   meta: WorksheetMeta,
   logoDataUrl: string | null,
 ) => {
@@ -339,7 +339,7 @@ const drawAnswerKeyHeader = (
 };
 
 /** Opens the finished PDF in a new browser tab instead of downloading it. */
-const openPdfInNewTab = async (doc: any, fileName: string, onProgress?: PdfProgressReporter) => {
+const openPdfInNewTab = async (doc: import("jspdf").jsPDF, fileName: string, onProgress?: PdfProgressReporter) => {
   let url: string | undefined;
   try {
     const blob: Blob | null = doc.output("blob");

@@ -1,3 +1,4 @@
+import type { MappingData } from "./TheoryMappingEditor";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, FileText, Loader2, Plus, Trash2, Upload } from "lucide-react";
@@ -42,7 +43,7 @@ interface ExplanationRow {
 }
 
 interface Props {
-  call: (body: Record<string, unknown>) => Promise<any>;
+  call: (body: Record<string, unknown>) => Promise<MappingData & { papers?: TheoryPaperRow[]; explanations?: ExplanationRow[] }>;
 }
 
 interface PendingFile {

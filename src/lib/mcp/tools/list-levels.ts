@@ -28,10 +28,10 @@ export default defineTool({
       entry[key] += 1;
       levels.set(row.level, entry);
     };
-    papers.data?.forEach((r) => bump(r as any, "papers"));
-    mcq.data?.forEach((r) => bump(r as any, "topic_mcq"));
-    theory.data?.forEach((r) => bump(r as any, "topic_theory"));
-    materials.data?.forEach((r) => bump(r as any, "materials"));
+    papers.data?.forEach((r) => bump(r, "papers"));
+    mcq.data?.forEach((r) => bump(r, "topic_mcq"));
+    theory.data?.forEach((r) => bump(r, "topic_theory"));
+    materials.data?.forEach((r) => bump(r, "materials"));
 
     const result = Array.from(levels.entries())
       .map(([level, counts]) => ({ level, ...counts }))

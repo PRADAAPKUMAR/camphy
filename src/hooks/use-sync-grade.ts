@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useSelectedGrade } from "@/contexts/GradeContext";
+import { useSelectedGrade } from "@/contexts/grade-context";
 import { gradeFromLevel } from "@/lib/grades";
 
 export const useSyncGrade = (level?: string | null) => {

@@ -10,7 +10,9 @@ interface Paper { id: string; syllabus_code: string; total_questions: number; pa
 interface Topic { id: string; topic_code: string; topic_name: string; level: string | null }
 interface Mapping { id?: string; question_number: number; start_page: number | string; end_page: number | string; verified: boolean; shared_page_warning: boolean; topic_ids: string[] }
 
-const TheoryMappingEditor = ({ paper, call }: { paper: Paper; call: (body: Record<string, unknown>) => Promise<any> }) => {
+export interface MappingData { topics?: Topic[]; mappings?: Mapping[] }
+
+const TheoryMappingEditor = ({ paper, call }: { paper: Paper; call: (body: Record<string, unknown>) => Promise<MappingData> }) => {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [rows, setRows] = useState<Mapping[]>([]);
   const [loading, setLoading] = useState(true);

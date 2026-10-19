@@ -36,16 +36,11 @@ responses. The suite also intercepts login, password reset, and exam submissions
 It does not validate live backend connectivity. Screenshots go under `/tmp/browser`.
 Do not run migrations or write to the shared backend during setup.
 
-Validated: 65 unit tests, TypeScript, production build, eight desktop routes,
-mobile layout, accessibility, and mocked authentication/exam flows. Live backend
-and font requests were blocked by network policy at validation time.
+The project uses one canonical npm lockfile. The installer runs `npm ci` and no
+longer installs an untracked compiler override. Vite and Vitest use the portable
+React/Babel plugin.
 
-Known repository issues: `npm ci` fails because package-lock.json is stale;
-the installer preserves it rather than updating dependency declarations.
-ESLint reports 51 errors and 20 warnings in the existing source. Direct Vite build
-avoids the npm prebuild hook, which writes tracked `public/sitemap.xml`.
-
-Environment installation/startup instructions and network additions were saved
-separately as a configuration draft. Review and save them in environment settings,
-then publish to activate the reusable environment snapshot. A Git commit does not
-publish that configuration.
+The isolated test suite also replays all application migrations in in-memory
+PostgreSQL. It never uses a live database. Run `npm run lint` and `npm audit` as
+part of validation. See `docs/PROJECT_RECTIFICATION.md` for database deployment
+steps and the regression checks for marking and cloud history.

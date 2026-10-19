@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useSelectedGrade } from "@/contexts/GradeContext";
+import { useSelectedGrade } from "@/contexts/grade-context";
 import { gradeSectionPath } from "@/lib/grades";
 
 type Section = "mcq" | "theory" | "practice" | "materials" | "worksheet" | "performance";

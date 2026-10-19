@@ -28,8 +28,8 @@ async def main():
     await page.keyboard.press('ArrowLeft')
     # Hold a real pointer press: the glass button keeps its gentle scale feedback.
     rect=await next_button.bounding_box();await page.mouse.move(rect['x']+rect['width']/2,rect['y']+rect['height']/2);await page.mouse.down();await page.wait_for_timeout(150)
-    transform=await next_button.evaluate('e=>getComputedStyle(e).transform')
-    assert transform!='none',transform
+    press=await next_button.evaluate('e=>({transform:getComputedStyle(e).transform,scale:getComputedStyle(e).scale})')
+    assert press['transform']!='none' or (press['scale']!='none' and float(press['scale'])<1),press
     await page.mouse.up()
    timer=page.get_by_role('timer',name='Elapsed time:',exact=False)
    initial=await timer.get_attribute('aria-label');await page.wait_for_timeout(1200)
