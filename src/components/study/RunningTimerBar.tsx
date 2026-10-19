@@ -17,7 +17,8 @@ const fmt = (s: number) => {
 const RunningTimerBar = () => {
   const state = useSyncExternalStore(studyTimerStore.subscribe, studyTimerStore.getSnapshot);
   const { pathname } = useLocation();
-  if (pathname === "/study-tools") return null;
+  // The classroom stage reserves the bottom edge for question navigation.
+  if (pathname === "/study-tools" || pathname.startsWith("/classroom-quiz/")) return null;
 
   const active = state.timers.filter((t) => t.running || t.left < t.total).slice(0, 3);
   const focusActive = state.focus.running;

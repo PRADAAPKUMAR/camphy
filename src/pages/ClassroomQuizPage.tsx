@@ -109,6 +109,8 @@ const ClassroomQuizPage = () => {
   const [history, setHistory] = useState<Record<number, Record<string, TeamAnswer>>>({});
   const [keyboardTeamId, setKeyboardTeamId] = useState<string | null>(null);
   const [viewIndex, setViewIndex] = useState<number | null>(null);
+  const questionNavRef = useRef<HTMLDivElement>(null);
+  const questionContentRef = useRef<HTMLElement>(null);
 
   const { data: topicGroups, isLoading: topicsLoading } = useQuery({
     queryKey: ["classroom-quiz-topics", level],
@@ -265,6 +267,11 @@ const ClassroomQuizPage = () => {
     },
   });
 
+  useEffect(() => {
+    questionContentRef.current?.scrollTo({ top: 0 });
+    questionNavRef.current?.querySelector<HTMLElement>('[aria-current="step"]')?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  }, [shownIndex]);
+
   const restart = () => {
     setPhase("setup");
     setQuestions([]);
@@ -356,13 +363,14 @@ const ClassroomQuizPage = () => {
     </div>;
   }
 
-  return <div className="min-h-screen bg-background bg-grid page-transition">
-    <header className="border-b border-border/40 bg-background/90 px-3 py-3 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3">
-        <div><p className="font-mono text-xs text-primary">QUESTION {current + 1} OF {questions.length}</p><h1 className="text-lg font-bold">Classroom Quiz</h1></div>
-        <div className={`flex min-w-32 items-center justify-center gap-2 rounded-lg border px-5 py-2 font-mono text-2xl font-black tabular-nums ${secondsLeft <= 5 && phase === "question" ? "border-destructive/50 bg-destructive/10 text-destructive animate-pulse" : "border-primary/30 bg-primary/10 text-primary"}`}><Clock3 className="h-5 w-5" /><SplitFlapDisplay value={fmtTime(secondsLeft)} label="Quiz time remaining" /></div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="hidden text-sm sm:inline-flex">{Object.keys(answers).length}/{teams.length} locked</Badge>
+  const shownPhase = reviewing ? "reveal" : phase;
+  const shownAnswers = reviewing ? history[shownIndex] ?? {} : answers;
+
+  return <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-background bg-grid page-transition">
+    <header className="shrink-0 border-b border-border/40 bg-background/90 px-2 py-2 backdrop-blur-xl sm:px-4">
+      <div className="mx-auto max-w-[1500px] space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0"><p className="font-mono text-[10px] text-primary sm:text-xs">QUESTION {shownIndex + 1} OF {questions.length}</p><h1 className="text-base font-bold sm:text-lg">Classroom Quiz</h1></div>
           <AlertDialog>
             <AlertDialogTrigger asChild><Button variant="outline" size="sm" className="gap-2"><Flag className="h-4 w-4" /> End quiz</Button></AlertDialogTrigger>
             <AlertDialogContent>
@@ -374,71 +382,84 @@ const ClassroomQuizPage = () => {
             </AlertDialogContent>
           </AlertDialog>
         </div>
+        <section aria-labelledby="quiz-leaderboard-heading" className="flex items-center gap-2 rounded-xl border border-border/40 bg-card/60 p-2">
+          <h2 id="quiz-leaderboard-heading" className="flex shrink-0 items-center gap-2 text-xs font-bold sm:text-sm"><Medal className="h-4 w-4 text-primary" /><span className="sr-only sm:not-sr-only">Live leaderboard</span></h2>
+          <ol className="flex min-w-0 flex-1 gap-2 overflow-x-auto" aria-live="polite" aria-atomic="true">
+            {ranked.map((team) => <li key={team.id} className="flex min-w-32 flex-1 items-center gap-2 rounded-lg bg-muted/20 px-3 py-2 text-xs sm:text-sm"><span className="font-black text-muted-foreground">{team.rank}</span><span className="min-w-0 flex-1 truncate font-semibold" title={team.name}>{team.name}</span><strong className="tabular-nums">{team.score.toLocaleString()}</strong></li>)}
+          </ol>
+        </section>
       </div>
     </header>
-    <main className="mx-auto grid max-w-[1500px] gap-4 p-3 lg:grid-cols-[minmax(0,1fr)_390px] lg:p-5">
-      <section className="space-y-4">
-        {reviewing && <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary/40 bg-primary/10 p-3 text-sm">
-          <span className="font-semibold">Reviewing question {shownIndex + 1} — timer paused</span>
-          <Button size="sm" onClick={() => setViewIndex(null)}>Back to live question {current + 1}</Button>
+
+    <main className="mx-auto grid min-h-0 w-full max-w-[1500px] flex-1 grid-cols-[minmax(0,1fr)_minmax(144px,38%)] gap-2 p-2 md:grid-cols-[minmax(0,1fr)_320px] md:gap-4 md:p-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+      <section ref={questionContentRef} aria-label="Question content" tabIndex={0} className="min-h-0 min-w-0 space-y-3 overflow-y-auto overscroll-contain rounded-xl pb-2 focus-visible:outline-offset-[-2px]">
+        {reviewing && <div className="space-y-2 rounded-xl border border-primary/40 bg-primary/10 p-3 text-xs sm:text-sm">
+          <p className="font-semibold">Reviewing question {shownIndex + 1} — timer paused</p>
+          <Button size="sm" className="h-auto min-h-9 whitespace-normal" onClick={() => setViewIndex(null)}>Back to live question {current + 1}</Button>
         </div>}
-        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border/50 bg-card/60 px-4 py-3">
-          <Badge className="font-mono text-sm">{shownQuestion?.paper_code ?? "—"}</Badge>
-          {(shownQuestion?.session || shownQuestion?.year) && <span className="text-sm text-muted-foreground">{[shownQuestion?.session, shownQuestion?.year].filter(Boolean).join(" ")}</span>}
-          <Badge variant="secondary" className="text-sm">Question {shownQuestion?.question_number}</Badge>
-          {shownQuestion?.topic_name && <Badge variant="outline" className="text-sm">{shownQuestion.topic_name}</Badge>}
-          <span className="ml-auto font-mono text-xs text-muted-foreground">Quiz Q{shownIndex + 1} of {questions.length}</span>
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border/50 bg-card/60 px-3 py-2 text-xs sm:text-sm">
+          <Badge className="max-w-full break-all font-mono text-[10px] sm:text-sm">{shownQuestion?.paper_code ?? "—"}</Badge>
+          {(shownQuestion?.session || shownQuestion?.year) && <span className="text-muted-foreground">{[shownQuestion?.session, shownQuestion?.year].filter(Boolean).join(" ")}</span>}
+          <Badge variant="secondary">Question {shownQuestion?.question_number}</Badge>
+          {shownQuestion?.topic_name && <Badge variant="outline">{shownQuestion.topic_name}</Badge>}
         </div>
         <QuestionCard question={shownQuestion?.question_number ?? shownIndex + 1} imageUrl={shownQuestion?.image_url ?? undefined} />
-        <div className="glass-card space-y-3 rounded-xl p-4">
-          <p className="text-xs font-semibold">Keyboard answering for: {keyboardTeam?.name}</p>
-          <div className="flex flex-wrap gap-2">{teams.map(team => <Button key={team.id} size="sm" variant={team.id === keyboardTeam?.id ? "secondary" : "outline"} aria-pressed={team.id === keyboardTeam?.id} onClick={() => setKeyboardTeamId(team.id)}>{team.name}</Button>)}</div>
-          <McqKeyboardHint />
-        </div>
-        {(() => {
-          const shownPhase = reviewing ? "reveal" : phase;
-          const shownAnswers = reviewing ? history[shownIndex] ?? {} : answers;
-          return <>
-            {shownPhase === "reveal" && <div className="flex items-center justify-center gap-3 rounded-xl border border-success/40 bg-success/10 p-4 text-lg font-bold text-success"><Check className="h-6 w-6" /> Correct answer: {shownQuestion?.correct_answer}</div>}
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{teams.map((team, index) => {
-              const answer = shownAnswers[team.id];
-              return <div key={team.id} className="rounded-xl border bg-card/70 p-3" style={teamTone(index)}>
-                <div className="mb-3 flex items-center justify-between gap-2"><p className="truncate font-bold">{team.name}</p>{answer ? <Badge variant="secondary">Locked {answer.option}</Badge> : <span className="text-xs text-muted-foreground">{shownPhase === "reveal" ? "No answer" : "Choose answer"}</span>}</div>
-                <div className="grid grid-cols-4 gap-2">{OPTIONS.map((option) => {
-                  const selected = answer?.option === option;
-                  const correct = shownPhase === "reveal" && shownQuestion?.correct_answer === option;
-                  const wrong = shownPhase === "reveal" && selected && !correct;
-                  return <Button key={option} variant={correct ? "default" : wrong ? "destructive" : selected ? "secondary" : "outline"} className={`h-12 px-0 text-lg font-black ${correct ? "bg-success text-success-foreground" : ""}`} disabled={shownPhase !== "question" || !!answer} aria-pressed={selected} data-answer-option={option} aria-keyshortcuts={team.id === keyboardTeam?.id ? `${option} ${["A", "B", "C", "D"].indexOf(option) + 1}` : undefined} onClick={() => recordAnswer(team.id, option)}>{option}</Button>;
-                })}</div>
-                {shownPhase === "reveal" && <p className={`mt-2 text-right text-sm font-bold ${answer?.points ? "text-success" : "text-muted-foreground"}`}>{answer?.points ? `+${answer.points.toLocaleString()} points` : "No points"}</p>}
-              </div>;
-            })}</div>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <Button size="lg" variant="outline" className="gap-2" disabled={shownIndex === 0} onClick={() => setViewIndex(shownIndex - 1)}><ArrowLeft className="h-5 w-5" /> Previous</Button>
-              {shownPhase === "reveal" ? <Button size="lg" variant="outline" className="gap-2" onClick={() => shownQuestion && explanation.openExplanation(shownQuestion.question_number)}><Lightbulb className="h-5 w-5" /> View explanation</Button> : <div />}
-              {reviewing
-                ? <Button size="lg" className="gap-2" onClick={() => setViewIndex(shownIndex + 1 >= current ? null : shownIndex + 1)}>{shownIndex + 1 >= current ? "Back to live" : "Next reviewed"}<ChevronRight className="h-5 w-5" /></Button>
-                : phase === "reveal" ? <Button size="lg" className="gap-2" onClick={nextQuestion}>{current >= questions.length - 1 ? "Show final results" : "Next question"}<ChevronRight className="h-5 w-5" /></Button> : <div />}
-            </div>
-          </>;
-        })()}
       </section>
-      <aside className="space-y-4">
-        <div className="glass-card rounded-xl p-4"><div className="mb-3 flex items-center gap-2"><Medal className="h-5 w-5 text-primary" /><h2 className="font-bold">Live leaderboard</h2></div><div className="space-y-2">{ranked.map((team) => <div key={team.id} className="flex items-center gap-3 rounded-lg bg-muted/20 p-3"><span className="w-6 text-center font-black text-muted-foreground">{team.rank}</span><span className="min-w-0 flex-1 truncate font-semibold">{team.name}</span><strong className="tabular-nums">{team.score.toLocaleString()}</strong></div>)}</div></div>
-        <div className="glass-card rounded-xl p-4">
-          <h2 className="mb-3 font-bold">Questions</h2>
-          <div className="grid grid-cols-5 gap-1.5">{questions.map((_, i) => {
-            const done = i < current || (i === current && phase === "reveal");
-            const reachable = i <= current;
-            return <button key={i} type="button" disabled={!reachable} onClick={() => setViewIndex(i === current ? null : i)} aria-label={`Go to question ${i + 1}`}
-              className={`h-8 rounded-lg border text-xs font-semibold tabular-nums ${i === shownIndex ? "ring-2 ring-primary" : ""} ${done ? "border-primary/40 bg-primary/20 text-foreground" : i === current ? "border-primary/60 text-primary" : "border-border/40 bg-muted/20 text-muted-foreground opacity-50"}`}>{i + 1}</button>;
-          })}</div>
+
+      <aside aria-label="Quiz controls" className="flex min-h-0 min-w-0 flex-col gap-2 md:gap-3">
+        <div className={`flex shrink-0 flex-wrap items-center justify-center gap-2 rounded-xl border px-2 py-3 font-mono text-xl font-black tabular-nums sm:text-3xl ${secondsLeft <= 5 && phase === "question" && !reviewing ? "border-destructive/50 bg-destructive/10 text-destructive animate-pulse" : "border-primary/30 bg-primary/10 text-primary"}`}>
+          <Clock3 className="hidden h-5 w-5 sm:block" /><SplitFlapDisplay value={fmtTime(secondsLeft)} label="Quiz time remaining" />
+          {reviewing && <span className="w-full text-center text-[10px] font-normal">Paused for review</span>}
         </div>
-        {phase === "question" && !reviewing && <Button variant="outline" className="w-full" onClick={reveal}>End answering now</Button>}
+        <div className="shrink-0 space-y-1">
+          <Label htmlFor="quiz-answering-team" className="text-[11px] md:text-xs">Answering team</Label>
+          <select id="quiz-answering-team" value={keyboardTeam?.id ?? ""} onChange={(event) => setKeyboardTeamId(event.target.value)} className="glass-control h-9 w-full min-w-0 border px-2 text-xs text-foreground md:text-sm">
+            {teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
+          </select>
+          <div className="hidden md:block"><McqKeyboardHint /></div>
+          <p className="text-[10px] text-muted-foreground md:hidden">Keys: A–D / 1–4</p>
+        </div>
+        <div role="region" aria-label="Team answers" tabIndex={0} className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain rounded-xl p-0.5 focus-visible:outline-offset-[-2px]">
+          {teams.map((team, index) => {
+            const answer = shownAnswers[team.id];
+            return <div key={team.id} role="group" aria-label={`${team.name} answers`} className={`rounded-xl border p-2 md:p-3 ${team.id === keyboardTeam?.id ? "" : "hidden md:block"}`} style={teamTone(index)}>
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-1"><p className="min-w-0 truncate text-xs font-bold md:text-sm" title={team.name}>{team.name}</p>{answer ? <Badge variant="secondary" className="px-1.5 text-[10px]">Locked {answer.option}</Badge> : <span className="text-[10px] text-muted-foreground md:text-xs">{shownPhase === "reveal" ? "No answer" : "Choose answer"}</span>}</div>
+              <div className="grid grid-cols-2 gap-1.5 md:grid-cols-4">{OPTIONS.map((option) => {
+                const selected = answer?.option === option;
+                const correct = shownPhase === "reveal" && shownQuestion?.correct_answer === option;
+                const wrong = shownPhase === "reveal" && selected && !correct;
+                return <Button key={option} variant={correct ? "default" : wrong ? "destructive" : selected ? "secondary" : "outline"} className={`h-10 px-0 text-base font-black md:h-11 md:text-lg ${correct ? "bg-success text-success-foreground" : ""}`} disabled={shownPhase !== "question" || !!answer} aria-label={`${team.name} option ${option}`} aria-pressed={selected} data-answer-option={option} aria-keyshortcuts={team.id === keyboardTeam?.id ? `${option} ${OPTIONS.indexOf(option) + 1}` : undefined} onClick={() => recordAnswer(team.id, option)}>{option}</Button>;
+              })}</div>
+              {shownPhase === "reveal" && <p className={`mt-2 text-right text-[10px] font-bold md:text-sm ${answer?.points ? "text-success" : "text-muted-foreground"}`}>{answer?.points ? `+${answer.points.toLocaleString()} points` : "No points"}</p>}
+            </div>;
+          })}
+        </div>
+        <div className="shrink-0 space-y-2">
+          <p className="text-center text-[10px] text-muted-foreground md:text-xs">{Object.keys(answers).length}/{teams.length} teams locked</p>
+          {shownPhase === "reveal" && <div className="flex items-center justify-center gap-1 rounded-lg border border-success/40 bg-success/10 p-2 text-center text-xs font-bold text-success md:text-sm"><Check className="hidden h-4 w-4 shrink-0 md:block" />Correct answer: {shownQuestion?.correct_answer}</div>}
+          {shownPhase === "reveal" && <Button variant="outline" className="h-auto min-h-10 w-full gap-1 whitespace-normal px-2 text-xs md:text-sm" onClick={() => shownQuestion && explanation.openExplanation(shownQuestion.question_number)}><Lightbulb className="hidden h-4 w-4 md:block" />View explanation</Button>}
+          {reviewing
+            ? <Button className="h-auto min-h-10 w-full gap-1 whitespace-normal px-2 text-xs md:text-sm" onClick={() => setViewIndex(shownIndex + 1 >= current ? null : shownIndex + 1)}>{shownIndex + 1 >= current ? "Back to live" : "Next reviewed"}<ChevronRight className="h-4 w-4 shrink-0" /></Button>
+            : phase === "reveal" ? <Button className="h-auto min-h-10 w-full gap-1 whitespace-normal px-2 text-xs md:text-sm" onClick={nextQuestion}>{current >= questions.length - 1 ? "Show final results" : "Next question"}<ChevronRight className="h-4 w-4 shrink-0" /></Button>
+              : <Button variant="outline" className="h-auto min-h-10 w-full whitespace-normal px-2 text-xs md:text-sm" onClick={reveal}>End answering now</Button>}
+        </div>
       </aside>
     </main>
+
+    <nav aria-label="Quiz questions" className="shrink-0 border-t border-border/40 bg-background/90 px-2 py-2 backdrop-blur-xl sm:px-4">
+      <div className="mx-auto flex max-w-[1500px] items-center gap-2">
+        <Button variant="outline" size="icon" className="h-9 w-9 shrink-0" aria-label="Previous question" disabled={shownIndex === 0} onClick={() => setViewIndex(shownIndex - 1)}><ArrowLeft className="h-4 w-4" /></Button>
+        <h2 className="hidden text-xs font-bold sm:block">Questions</h2>
+        <div ref={questionNavRef} className="flex min-w-0 flex-1 gap-2 overflow-x-auto px-1 py-1">{questions.map((_, i) => {
+          const done = i < current || (i === current && phase === "reveal");
+          return <button key={i} type="button" disabled={i > current} onClick={() => setViewIndex(i === current ? null : i)} aria-label={`Go to question ${i + 1}`} aria-current={i === shownIndex ? "step" : undefined}
+            className={`h-9 w-9 shrink-0 rounded-lg border text-xs font-semibold tabular-nums ${i === shownIndex ? "ring-2 ring-primary" : ""} ${done ? "border-primary/40 bg-primary/20 text-foreground" : i === current ? "border-primary/60 text-primary" : "border-border/40 bg-muted/20 text-muted-foreground opacity-50"}`}>{i + 1}</button>;
+        })}</div>
+      </div>
+    </nav>
     <ExplanationDialog open={explanation.open} onOpenChange={explanation.setOpen} question={explanation.question} isLoading={explanation.isLoading} data={explanation.data} />
   </div>;
+
 };
 
 export default ClassroomQuizPage;

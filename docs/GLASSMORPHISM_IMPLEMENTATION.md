@@ -107,6 +107,7 @@ python3 scripts/glass-ui-smoke.py
 python3 scripts/motion-smoke.py
 python3 scripts/keyboard-ui-smoke.py
 python3 scripts/mcq-question-mode-smoke.py
+python3 scripts/classroom-layout-smoke.py
 ```
 
 The route sweep uses synthetic fixtures and intercepts every non-local request;
@@ -134,3 +135,17 @@ actions. Missing images cannot accept answers or accumulate active-question
 pacing; navigation remains available for retry sets. The isolated MCQ browser
 suite checks desktop/mobile entry points, redirects and Back, missing content,
 and preservation of theory PDF viewers.
+
+## Classroom quiz layout
+
+The active quiz fits the viewport: a live scoreboard stays above the question,
+timer and answer controls stay on the right, and the numbered question selector
+stays along the bottom. Question images scroll independently; large team lists
+scroll within the right panel without moving the timer. On narrow screens, an
+answering-team selector shows one team's options at a time. The global study
+timer pill is hidden on classroom routes so it cannot cover quiz navigation;
+background timers retain their state.
+
+The classroom browser suite uses long synthetic questions and checks four screen
+sizes (320–1440px), score updates, answer locking, paused review, bottom navigation,
+and six-team controls. It intercepts every non-local request.
