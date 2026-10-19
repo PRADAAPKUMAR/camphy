@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, ChevronLeft, ChevronRight, Lightbulb, Timer as TimerIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lightbulb, Timer as TimerIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -66,7 +66,7 @@ const QuestionModePage = () => {
   });
   useSyncGrade(paper?.level);
 
-  const { data: images, isLoading: imagesLoading } = useQuestionImages(paperId);
+  const { data: images, isLoading: imagesLoading, isFetching: imagesFetching, refetch: reloadImages } = useQuestionImages(paperId);
 
   const { data: answerKeyMap } = useQuery({
     queryKey: ["answer-key", paperId],
@@ -101,7 +101,7 @@ const QuestionModePage = () => {
   const currentQuestion = questions[Math.min(current, questions.length - 1)] ?? 1;
   const answeredCount = Object.keys(answers).length;
   const isRetrySet = !!searchParams.get("qs");
-  const pacing = useQuestionPacing(currentQuestion, !!paper && !paperLoading && !imagesLoading && !finished && !answers[currentQuestion] && !explanation.open);
+  const { commit: commitQuestionTime, finish: finishPacing } = useQuestionPacing(currentQuestion, !!paper && !paperLoading && !imagesLoading && !!images?.[currentQuestion] && !finished && !answers[currentQuestion] && !explanation.open);
 
   useEffect(() => {
     if (finished) return;
@@ -120,8 +120,8 @@ const QuestionModePage = () => {
   const handleSelect = useCallback(
     (option: string) => {
       const q = currentQuestion;
-      if (finished || answers[q]) return;
-      pacing.commit(q);
+      if (finished || answers[q] || !images?.[q]) return;
+      commitQuestionTime(q);
       setAnswers((prev) => ({ ...prev, [q]: option }));
 
       const known = answerKeyMap?.[q];
@@ -144,12 +144,12 @@ const QuestionModePage = () => {
         }
       })();
     },
-    [currentQuestion, finished, answers, answerKeyMap, paperId, pacing.commit],
+    [currentQuestion, finished, answers, answerKeyMap, paperId, commitQuestionTime, images],
   );
 
   const finish = useCallback(() => {
     if (finished) return;
-    const finalTimes = pacing.finish();
+    const finalTimes = finishPacing();
     setTimes(finalTimes);
     setFinished(true);
     const key = { ...answerKeyMap, ...correctAnswers };
@@ -182,10 +182,10 @@ const QuestionModePage = () => {
       });
     }
     toast.success(`Score: ${score}/${questions.length}`);
-  }, [finished, answerKeyMap, correctAnswers, answers, paper, paperId, questions, answeredCount, pacing.finish]);
+  }, [finished, answerKeyMap, correctAnswers, answers, paper, paperId, questions, answeredCount, finishPacing]);
 
   useMcqKeyboard({
-    enabled: !finished && !!paper,
+    enabled: !finished && !!paper && !imagesLoading && Object.keys(images ?? {}).length > 0 && !explanation.open,
     onSelect: handleSelect,
     onNext: () => setCurrent((c) => Math.min(questions.length - 1, c + 1)),
     onPrev: () => setCurrent((c) => Math.max(0, c - 1)),
@@ -209,6 +209,19 @@ const QuestionModePage = () => {
           Back to Papers
         </Button>
       </div>
+    );
+  }
+
+  if (!images || !Object.keys(images).length) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background p-6 text-center">
+        <h1 className="text-xl font-semibold">Question images are not available yet</h1>
+        <p className="text-sm text-muted-foreground">This paper needs individual question images before you can practise it.</p>
+        <div className="flex flex-wrap justify-center gap-2">
+          <Button variant="outline" onClick={() => reloadImages()} disabled={imagesFetching}>Try again</Button>
+          <Button asChild><Link to={`/papers/${encodeURIComponent(paper.level)}`}>Back to papers</Link></Button>
+        </div>
+      </main>
     );
   }
 
@@ -249,11 +262,6 @@ const QuestionModePage = () => {
             <Badge variant="outline" className="gap-1 border-border/40 font-mono text-xs">
               <TimerIcon className="h-3.5 w-3.5" /> <SplitFlapDisplay value={fmtSeconds(elapsed)} label="Elapsed time" />
             </Badge>
-            <Button variant="ghost" size="sm" asChild className="gap-1 text-muted-foreground">
-              <Link to={`/exam/${paper.id}`}>
-                <ArrowLeft className="h-4 w-4" /> PDF exam
-              </Link>
-            </Button>
           </div>
         </div>
       </header>
@@ -326,6 +334,7 @@ const QuestionModePage = () => {
                 userAnswer={answers[currentQuestion]}
                 correctAnswer={correctAnswers[currentQuestion]}
                 onSelect={handleSelect}
+                disabled={!images[currentQuestion]}
               />
 
               <div className="flex flex-wrap items-center justify-between gap-2">

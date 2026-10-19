@@ -59,7 +59,7 @@ const TopicalMcqSessionPage = () => {
     staleTime: 30 * 60 * 1000,
   });
 
-  const items = set?.questions ?? [];
+  const items = useMemo(() => set?.questions ?? [], [set?.questions]);
   const topicName = set?.topic?.name ?? "Topic";
   const questions = useMemo(() => items.map((q) => q.index), [items]);
   const currentItem = items[Math.min(current, Math.max(items.length - 1, 0))];
@@ -106,7 +106,7 @@ const TopicalMcqSessionPage = () => {
   const handleSelect = useCallback(
     (option: string) => {
       const idx = currentItem?.index;
-      if (!idx || finished || answers[idx]) return;
+      if (!idx || finished || answers[idx] || !images?.[currentItem.questionNumber]) return;
       const spent = Math.max(1, Math.round((Date.now() - shownAt.current) / 1000));
       setTimes((prev) => ({ ...prev, [idx]: spent }));
       setAnswers((prev) => ({ ...prev, [idx]: option }));
@@ -135,7 +135,7 @@ const TopicalMcqSessionPage = () => {
         }
       })();
     },
-    [currentItem, finished, answers, keyByIndex],
+    [currentItem, finished, answers, keyByIndex, images],
   );
 
   useMcqKeyboard({
@@ -351,6 +351,7 @@ const TopicalMcqSessionPage = () => {
                 userAnswer={answers[currentItem.index]}
                 correctAnswer={correctAnswers[currentItem.index]}
                 onSelect={handleSelect}
+                disabled={!images?.[currentItem.questionNumber]}
               />
 
               <div className="flex flex-wrap items-center justify-between gap-2">

@@ -84,7 +84,7 @@ once the live answers are revealed; Left reviews earlier questions.
   particle behind a tile remains visible as diffused light through its backdrop.
 - The keyboard UI suite verifies answer locking, letter/number controls, arrow
   navigation, native Space behavior, physical press styling, real timer updates,
-  the mobile drawer, focus layout, and reduced-motion clock rendering. Isolated
+  mobile answering, focus layout, and reduced-motion clock rendering. Isolated
   classroom checks verify team selection, answers, reveal, and question review.
 - The motion browser suite verifies continuous orbits, moving canvas particles,
   expansion and reverse navigation, scroll restoration, pause/reduced motion,
@@ -105,6 +105,7 @@ python3 .cloud-setup/browser-smoke-offline.py
 python3 scripts/glass-ui-smoke.py
 python3 scripts/motion-smoke.py
 python3 scripts/keyboard-ui-smoke.py
+python3 scripts/mcq-question-mode-smoke.py
 ```
 
 The route sweep uses synthetic fixtures and intercepts every non-local request;
@@ -116,3 +117,19 @@ Live backend behavior, external font delivery, physical-device performance,
 Firefox/WebKit behavior, and production field performance are not established
 by these checks. Existing build warnings about large chunks remain. The licensed
 font configuration is preserved; blocked font delivery uses its existing fallback.
+
+## MCQ question mode
+
+Past-paper tiles now open question mode directly. The PDF MCQ players and their
+desktop answer panel/mobile drawer have been removed, along with the PDF switch.
+Old `/exam/:paperId` links redirect with history replacement and preserve retry
+parameters. Old `/topic-exam/:paperId` links resolve to the matching question-bank
+topic, or the level's topic list when no exact match exists. Topic-practice cards
+and counts use the question bank instead of the retired PDF sets. Theory viewers,
+PDF worksheets, stored content, and historical attempts remain available.
+
+Papers with no question images show an unavailable state with retry and return
+actions. Missing images cannot accept answers or accumulate active-question
+pacing; navigation remains available for retry sets. The isolated MCQ browser
+suite checks desktop/mobile entry points, redirects and Back, missing content,
+and preservation of theory PDF viewers.

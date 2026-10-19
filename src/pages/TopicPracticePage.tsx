@@ -14,7 +14,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { normalizeGradeLabel } from "@/lib/grades";
+import { BANK_LEVELS, fetchBankTopics } from "@/lib/topical-bank";
+import { gradeFromLevel, GRADES, normalizeGradeLabel } from "@/lib/grades";
 
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 
@@ -31,17 +32,10 @@ const TopicPracticePage = () => {
   const { tileProps } = useTileTransition();
 
   const { data: mcqLevels, isLoading: mcqLoading } = useQuery({
-    queryKey: ["topicwise_mcq_levels"],
-    queryFn: async () => {
-      const supabase = await getSupabase();
-      const { data, error } = await supabase
-        .from("topicwise_mcq_papers")
-        .select("level");
-      if (error) throw error;
-      const counts: Record<string, number> = {};
-      data.forEach((r: any) => { counts[r.level] = (counts[r.level] || 0) + 1; });
-      return counts;
-    },
+    queryKey: ["question-mode-topic-counts"],
+    queryFn: async () => Object.fromEntries(await Promise.all(
+      BANK_LEVELS.map(async (level) => [level, (await fetchBankTopics(level)).length] as const),
+    )),
   });
 
   const { data: theoryLevels, isLoading: theoryLoading } = useQuery({
@@ -53,7 +47,11 @@ const TopicPracticePage = () => {
         .select("level");
       if (error) throw error;
       const counts: Record<string, number> = {};
-      data.forEach((r: any) => { counts[r.level] = (counts[r.level] || 0) + 1; });
+      data.forEach((r) => {
+        const grade = gradeFromLevel(r.level);
+        const level = grade ? GRADES[grade].practiceLevel : r.level;
+        counts[level] = (counts[level] || 0) + 1;
+      });
       return counts;
     },
   });
@@ -153,7 +151,7 @@ const TopicPracticePage = () => {
                 </div>
                 <h3 className="text-xl font-bold mb-1">{normalizeGradeLabel(lvl)}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {mcqLevels?.[lvl] ?? 0} MCQ · {theoryLevels?.[lvl] ?? 0} Theory
+                  {mcqLevels?.[lvl] ?? 0} MCQ topics · {theoryLevels?.[lvl] ?? 0} Theory
                 </p>
               </div>
             ))}

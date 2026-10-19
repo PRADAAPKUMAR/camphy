@@ -45,12 +45,13 @@ async def main():
             await route.fulfill(status=200, content_type='application/json', body=json.dumps({'id':'smoke-paper','level':'IGCSE','paper_code':'SMOKE','year':2025,'session':'May/June','pdf_url':'about:blank'}))
         await page.route('**/rest/v1/papers?*', paper_response)
         await page.route('**/functions/v1/get-answer-key', lambda route: route.fulfill(status=200, content_type='application/json', body=json.dumps({'total_questions':40,'correct_answers':{'1':'A','2':'B'}})))
-        await page.route('**/functions/v1/submit-exam', lambda route: route.fulfill(status=200, content_type='application/json', body=json.dumps({'score':1,'total_questions':40,'correct_answers':{'1':'A'}})))
+        image = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="100"><text x="20" y="50">Synthetic question</text></svg>'
+        await page.route('**/functions/v1/sign-question-images', lambda route: route.fulfill(status=200, content_type='application/json', body=json.dumps({'images':{'1':image,'2':image}})))
         await page.goto('http://localhost:8080/exam/smoke-paper', wait_until='networkidle')
-        await page.get_by_role('button', name='Question 1, option A', exact=True).click()
-        assert await page.get_by_role('button', name='Question 1, option B', exact=True).is_disabled()
-        await page.get_by_role('button', name='Submit Answers').click()
-        await page.get_by_text('1/40', exact=True).first.wait_for()
+        await page.get_by_role('button', name='Question 1 option A', exact=True).click()
+        assert await page.get_by_role('button', name='Question 1 option B', exact=True).is_disabled()
+        await page.get_by_role('button', name='Finish now').click()
+        await page.get_by_text('1/2', exact=True).first.wait_for()
         await page.screenshot(path=str(OUT / 'exam-results.png'))
         await page.set_viewport_size({'width':390,'height':844})
         for path in ['/', '/auth', '/grade/igcse']:
