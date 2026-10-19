@@ -15,7 +15,7 @@ const corsHeaders = {
 }
 
 // Configuration
-const SITE_NAME = "PHYSICSHQ"
+const SITE_NAME = "PhysicsHQ"
 const SENDER_DOMAIN = "notify.physicshq.in"
 const ROOT_DOMAIN = "physicshq.in"
 const FROM_DOMAIN = "physicshq.in"
