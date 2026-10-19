@@ -29,22 +29,35 @@ progress milestones, account permissions, data access, and grading are retained.
 
 ## Motion and rendering
 
-Navigation remains immediate. Page entrances, hover/press feedback, icon layers,
-and overlays provide motion without gating input. The home orbit runs once;
-background particles were replaced with a static light field to avoid continuous
-canvas work. Focused learning routes suppress decorative route movement. Reduced
-motion removes decorative transforms and transitions. Mobile cards use denser
-surfaces without backdrop blur. Nested panels avoid redundant blur.
+Navigation remains immediate. Selecting a navigation tile expands a visual copy
+of that tile to the viewport while the live destination loads underneath. Browser
+Back and explicit parent links shrink the outgoing view into the originating tile;
+Browser Forward can replay an expansion. Parent scroll position is restored.
+Snapshots are inert, hidden from accessibility APIs, and removed on completion,
+Escape, resize, scrolling, a new interaction, or a hidden document. Embedded frames
+are replaced with placeholders in copies so they cannot start duplicate loads.
+Direct entries without a recorded tile use the normal page reveal.
+
+The home atom orbits continuously. A single viewport canvas draws small bright
+particles with varied trajectories and inward rebounds at each screen edge. It
+sits behind content and translucent tiles, uses a capped device-pixel ratio, and
+stops drawing in hidden tabs. The navigation provides a pause/resume control (in
+the mobile menu on narrow screens); reduced motion suppresses ambient effects
+and tile morphs. Focused learning routes dim the particle field. Mobile cards use
+denser surfaces without backdrop blur; nested panels avoid redundant blur.
 
 ## Validation
 
-- 65 existing unit tests pass.
+- 71 unit tests pass, including edge/corner/resize and repeated particle rebounds.
 - TypeScript and the production Vite build pass.
 - Existing browser smoke suite passes: eight desktop routes with accessibility
   and deep-link checks, mobile navigation/layout, and mocked login, recovery,
   answer locking, and results.
 - New route sweep passes 55 render/layout checks across desktop, mobile, narrow
   screens, and redirect destinations. Reduced-motion and forced-colors checks pass.
+- The motion browser suite verifies continuous orbits, moving canvas particles,
+  expansion and reverse navigation, scroll restoration, pause/reduced motion,
+  320px layout, concurrent lazy loading, and interruption with Escape.
 - Additional isolated checks cover signed-in profile, admin dashboard, theory
   management, and profile confirmation-dialog keyboard/focus behavior.
 - Full lint remains at its existing baseline: 51 errors and 20 warnings. Targeted
@@ -59,6 +72,7 @@ npm test -- --maxWorkers=2
 ./node_modules/.bin/vite build
 python3 .cloud-setup/browser-smoke-offline.py
 python3 scripts/glass-ui-smoke.py
+python3 scripts/motion-smoke.py
 ```
 
 The route sweep uses synthetic fixtures and intercepts every non-local request;

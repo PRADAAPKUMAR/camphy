@@ -1,3 +1,5 @@
+import PhysicsParticles from "@/components/PhysicsParticles";
+import { useAmbientMotion } from "@/lib/ambient-motion";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
@@ -88,6 +90,7 @@ const DeferredShell = () => {
 /** Router wrapper to enable page transitions */
 const RouterContent = () => {
   usePageTransition();
+  const ambientEnabled = useAmbientMotion();
   const { pathname } = useLocation();
   const { user, profile } = useAuth();
   const { grade: selectedGrade } = useSelectedGrade();
@@ -105,8 +108,9 @@ const RouterContent = () => {
     pathname.startsWith("/topic-theory/");
 
   return (
-    <div className={`glass-app${navExcluded || pathname.startsWith("/theory-paper/") ? " glass-focus" : ""}`}>
+    <div className={`glass-app${ambientEnabled ? "" : " ambient-paused"}${navExcluded || pathname.startsWith("/theory-paper/") ? " glass-focus" : ""}`}>
     <div className="glass-atmosphere" aria-hidden="true" />
+    <PhysicsParticles />
     <PageMetadata />
     <a href="#page-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-3 focus:text-primary-foreground">Skip to content</a>
     {user && profile && !profile.setup_completed && pathname !== "/profile" && !pathname.startsWith("/auth") && <Navigate to="/profile" replace />}

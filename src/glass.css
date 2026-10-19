@@ -45,9 +45,9 @@
     background: radial-gradient(ellipse at 12% 12%, hsl(262 70% 42% / .07), transparent 42%),
       radial-gradient(ellipse at 95% 65%, hsl(194 85% 40% / .05), transparent 42%);
   }
-  #page-content { position: relative; min-width: 0; }
-  #page-content > div { background-color: transparent; }
-  #page-content > div > header {
+  :is(#page-content, .snapshot-page-content) { position: relative; min-width: 0; }
+  :is(#page-content, .snapshot-page-content) > div { background-color: transparent; }
+  :is(#page-content, .snapshot-page-content) > div > header {
     background-color: hsl(var(--card) / .28);
     background-image: linear-gradient(110deg, hsl(230 55% 66% / .04), transparent 65%);
     border-color: var(--glass-edge);
@@ -188,3 +188,18 @@
 
 .glass-reading.rounded-none { border-radius: 0; }
 .glass-reading.border-0 { border: 0; }
+
+/* Ambient artwork lives below every tile; snapshots never intercept input. */
+.physics-particles { position: fixed; inset: 0; z-index: -1; width: 100%; height: 100%; pointer-events: none; }
+.ambient-paused .atom-orbit { animation-play-state: paused; }
+.glass-focus .physics-particles { opacity: .4; }
+.tile-route-snapshot { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; transform-origin: top left; background: hsl(var(--background)); }
+.tile-route-snapshot[data-direction="back"] { z-index: 3; }
+.tile-route-snapshot *, .tile-route-snapshot *::before, .tile-route-snapshot *::after { animation: none !important; transition: none !important; }
+.tile-route-panel { position: fixed; z-index: 1; overflow: hidden; pointer-events: none; background: hsl(var(--card)); border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow); }
+.tile-route-panel > * { position: absolute !important; inset: 0; width: 100% !important; height: 100% !important; margin: 0 !important; transform: none !important; }
+[data-tile-transition] #page-content { animation: none; }
+@media (prefers-reduced-motion: reduce), (forced-colors: active) { .physics-particles { display: none; } }
+@media print { .physics-particles, .tile-route-snapshot, .tile-route-panel { display: none; } }
+
+[data-tile-transition] #root > .glass-app { background-color: hsl(var(--background)); }
