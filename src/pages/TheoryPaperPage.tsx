@@ -98,7 +98,7 @@ const TheoryPaperPage = () => {
 
   return (
     <div className="flex h-screen flex-col bg-background">
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border/40 px-4 py-2">
+      <header className="glass-reading rounded-none border-x-0 border-t-0 flex flex-wrap items-center justify-between gap-2 border-b border-border/40 px-4 py-2">
         <div className="flex min-w-0 items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
             <ArrowLeft className="mr-1 h-4 w-4" /> Back

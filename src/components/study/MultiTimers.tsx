@@ -1,3 +1,4 @@
+import SplitFlapDisplay from "@/components/SplitFlapDisplay";
 import { useState, useSyncExternalStore } from "react";
 import { Play, Pause, RotateCcw, X, Plus, Bell, Maximize2, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -133,7 +134,7 @@ const MultiTimers = () => {
                   className={`mt-3 font-mono text-4xl font-bold tabular-nums ${finished ? "animate-pulse" : ""}`}
                   style={{ color: finished ? `hsl(var(--destructive))` : `hsl(${hsl})` }}
                 >
-                  {fmt(t.left)}
+                  <SplitFlapDisplay value={fmt(t.left)} label={`${t.label} remaining`} />
                 </p>
 
                 <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted/50">
@@ -200,7 +201,7 @@ const MultiTimers = () => {
               {fullTimer.label}
             </p>
             <p
-              className={`font-mono text-[clamp(3.5rem,17vw,12rem)] font-bold leading-none tabular-nums ${
+              className={`font-mono text-[clamp(2rem,10vw,8rem)] font-bold leading-none tabular-nums ${
                 fullTimer.left === 0 ? "animate-pulse" : ""
               }`}
               style={{
@@ -210,7 +211,7 @@ const MultiTimers = () => {
                     : `hsl(${colorHsl(fullTimer.color)})`,
               }}
             >
-              {fmt(fullTimer.left)}
+              <SplitFlapDisplay value={fmt(fullTimer.left)} label={`${fullTimer.label} remaining`} />
             </p>
             <div className="mt-10 h-3 w-full max-w-xl overflow-hidden rounded-full bg-muted/50">
               <div

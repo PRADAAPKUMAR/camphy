@@ -1,3 +1,4 @@
+import ThemeToggle from "@/components/ThemeToggle";
 import { useSearchParams, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,13 +15,14 @@ const DriveViewerPage = () => {
 
   return (
     <div className="flex h-screen flex-col bg-background">
-      <header className="flex items-center gap-3 border-b border-border/40 px-4 py-2">
+      <header className="glass-reading rounded-none border-x-0 border-t-0 flex items-center gap-3 border-b border-border/40 px-4 py-2">
         <Button variant="ghost" size="sm" asChild>
           <Link to={-1 as any} onClick={(e) => { e.preventDefault(); window.history.back(); }}>
             <ArrowLeft className="mr-1 h-4 w-4" /> Back
           </Link>
         </Button>
-        <span className="text-base font-bold text-foreground truncate">{title}</span>
+        <span className="min-w-0 flex-1 truncate text-base font-bold text-foreground">{title}</span>
+        <ThemeToggle />
       </header>
       <div className="flex-1 w-full overflow-auto">
         {embedUrl ? (

@@ -1,3 +1,4 @@
+import ThemeToggle from "@/components/ThemeToggle";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ExternalLink } from "lucide-react";
@@ -65,8 +66,8 @@ const TopicTheoryPage = () => {
 
   return (
     <div className="flex h-screen flex-col bg-background">
-      <header className="flex items-center justify-between border-b border-border/40 px-4 py-2">
-        <div className="flex items-center gap-3">
+      <header className="glass-reading rounded-none border-x-0 border-t-0 flex items-center justify-between gap-2 border-b border-border/40 px-4 py-2">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
             <ArrowLeft className="mr-1 h-4 w-4" /> Back
           </Button>
@@ -88,17 +89,19 @@ const TopicTheoryPage = () => {
             </BreadcrumbList>
           </Breadcrumb>
         </div>
+        <ThemeToggle />
         <Button
           variant="outline"
           size="sm"
-          className="gap-2"
+          aria-label="View Answer Key"
+          className="shrink-0 gap-2"
           asChild
         >
           <Link
             to={`/view-drive?url=${encodeURIComponent(question.answer_pdf_url)}&title=${encodeURIComponent(question.topic + " — Answer Key")}`}
             target="_blank"
           >
-            <ExternalLink className="h-4 w-4" /> View Answer Key
+            <ExternalLink className="h-4 w-4" /><span className="hidden sm:inline">View Answer Key</span>
           </Link>
         </Button>
       </header>

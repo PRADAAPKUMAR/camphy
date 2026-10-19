@@ -1,11 +1,11 @@
+import GlassIcon from "@/components/GlassIcon";
 import { useMemo } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 import { FlaskConical, ScrollText } from "lucide-react";
 import PhysicsBackground from "@/components/PhysicsBackground";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -18,11 +18,12 @@ import {
 } from "@/components/ui/breadcrumb";
 import { compareSessions } from "@/lib/exam-sessions";
 import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
+import { useTileTransition } from "@/hooks/use-tile-transition";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
 
 const SubjectPage = () => {
   const { level } = useParams<{ level: string }>();
-  const navigate = useNavigate();
+  const { tileProps } = useTileTransition();
   const decodedLevel = decodeURIComponent(level || "");
   const grade = gradeFromLevel(decodedLevel);
   useSyncGrade(decodedLevel);
@@ -120,9 +121,7 @@ const SubjectPage = () => {
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-grade/10 border border-grade/20">
-              <FlaskConical className="h-5 w-5 text-grade" />
-            </div>
+            <GlassIcon name="papers" tone="blue" />
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">Physics — {normalizeGradeLabel(decodedLevel)}</h1>
               <p className="text-sm text-muted-foreground">
@@ -168,10 +167,11 @@ const SubjectPage = () => {
                             a.paper_code.localeCompare(b.paper_code),
                         )
                         .map((paper) => (
-                        <div
+                        <button
                           key={paper.id}
-                          className="glass-card-hover group cursor-pointer rounded-xl p-5"
-                          onClick={() => navigate(`/exam/${paper.id}`)}
+                          type="button"
+                          className="glass-card-hover group rounded-xl p-5 text-left"
+                          {...tileProps(`/question-mode/${paper.id}`)}
                         >
                           <div className="flex items-center gap-3 mb-3">
                             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-grade/10 border border-grade/20 text-grade transition-all group-hover:bg-grade group-hover:text-grade-foreground">
@@ -185,18 +185,11 @@ const SubjectPage = () => {
                             <Badge variant="secondary" className="font-medium text-xs bg-grade/10 text-grade border-grade/20">
                               {paper.session}
                             </Badge>
-                            <Button variant="ghost" size="sm"
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/question-mode/${paper.id}`);
-                              }}
-                              className="ml-auto rounded-lg border border-grade/30 bg-grade/10 px-2 py-1 text-[11px] font-semibold text-grade transition-colors hover:bg-grade hover:text-grade-foreground"
-                            >
-                              Question mode
-                            </Button>
+                            <span className="ml-auto text-[11px] font-semibold text-grade">
+                              Start practice
+                            </span>
                           </div>
-                        </div>
+                        </button>
 
                       ))}
                     </div>

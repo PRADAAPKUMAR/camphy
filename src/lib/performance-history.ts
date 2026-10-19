@@ -23,8 +23,9 @@ export interface PerformanceRecord {
    * verified question_topic_mapping rows. Keyed by question number.
    */
   questionResults?: Record<number, boolean>;
-  /** Seconds spent on each question (Question mode only). */
+  /** Active seconds across question visits; sheet mode is an estimate. */
   questionTimes?: Record<number, number>;
+  timingMeasurement?: "active-question" | "answer-sheet-estimate";
   /** "sheet" = PDF + answer sheet, "question" = one-question-at-a-time mode. */
   attemptMode?: "sheet" | "question";
 }
@@ -84,7 +85,7 @@ export const collectWrongQuestions = (records: PerformanceRecord[]): WrongQuesti
     .sort((a, b) => +new Date(b.lastAttempt) - +new Date(a.lastAttempt));
 };
 
-/** Average seconds per question across Question-mode attempts (0 when unknown). */
+/** Average measured seconds per question across timed attempts (0 when unknown). */
 export const averageSecondsPerQuestion = (records: PerformanceRecord[]) => {
   let total = 0;
   let count = 0;

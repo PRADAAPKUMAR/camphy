@@ -1,9 +1,10 @@
+import GlassIcon from "@/components/GlassIcon";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 import { useTileTransition } from "@/hooks/use-tile-transition";
 import { useNavigate, Link } from "react-router-dom";
-import { BookMarked, Zap, Microscope, FlaskConical, Atom } from "lucide-react";
+import { BookMarked, Zap } from "lucide-react";
 import PhysicsBackground from "@/components/PhysicsBackground";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,9 +19,9 @@ import {
 import { normalizeGradeLabel } from "@/lib/grades";
 
 const levelIcons: Record<string, React.ReactNode> = {
-  IGCSE: <Microscope className="h-6 w-6" />,
-  "AS Level": <FlaskConical className="h-6 w-6" />,
-  "A Level": <Atom className="h-6 w-6" />,
+  IGCSE: <GlassIcon name="microscope" tone="blue" />,
+  "AS Level": <GlassIcon name="flask" tone="amber" />,
+  "A Level": <GlassIcon name="atom" tone="green" />,
 };
 
 const levelDescriptions: Record<string, string> = {
@@ -117,9 +118,7 @@ const MaterialsPage = () => {
             </BreadcrumbList>
           </Breadcrumb>
           <div className="flex items-center gap-3 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 border border-accent/20">
-              <BookMarked className="h-5 w-5 text-accent" />
-            </div>
+            <GlassIcon name="materials" tone="pink" />
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">Study Materials</h1>
               <p className="text-muted-foreground text-sm">Select your level to browse resources</p>
@@ -142,7 +141,7 @@ const MaterialsPage = () => {
                 className="glass-card-hover group cursor-pointer rounded-2xl p-7 flex flex-col gap-4"
                 {...tileProps(`/materials/${encodeURIComponent(l.level)}`)}
               >
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-accent/10 border border-accent/20 text-accent transition-all group-hover:bg-accent group-hover:text-accent-foreground">
+                <div className="mb-2 shrink-0">
                   {levelIcons[normalizeGradeLabel(l.level)] || <Zap className="h-6 w-6" />}
                 </div>
                 <div>

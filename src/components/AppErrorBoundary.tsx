@@ -23,7 +23,7 @@ export default class AppErrorBoundary extends Component<Props, State> {
     if (this.state.failed) {
       return (
         <main className="flex min-h-screen items-center justify-center bg-background px-4 text-foreground">
-          <section className="w-full max-w-md rounded-lg border border-border bg-card p-6 text-center shadow-lg">
+          <section className="w-full max-w-md glass-panel border p-6 text-center shadow-lg">
             <h1 className="text-xl font-extrabold">PhysicsHQ could not open</h1>
             <p className="mt-2 text-sm text-muted-foreground">
               Reload the page to reconnect to the latest version.

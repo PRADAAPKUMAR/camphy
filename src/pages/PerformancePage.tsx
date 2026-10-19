@@ -1,3 +1,4 @@
+import GlassIcon from "@/components/GlassIcon";
 import { lazy, Suspense, useMemo, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, BarChart3, Target, ListChecks, Trophy, Trash2, TrendingUp, FileText, Layers, ChevronRight } from "lucide-react";
@@ -160,9 +161,7 @@ const PerformancePage = () => {
           </Button>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
-                <BarChart3 className="h-5 w-5 text-primary" />
-              </div>
+              <GlassIcon name="performance" tone="amber" />
               <div>
                 <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{gradeDetails ? `${gradeDetails.label} Performance` : "Physics Performance"}</h1>
                 <p className="text-xs text-muted-foreground sm:text-sm">

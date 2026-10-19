@@ -1,27 +1,25 @@
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { useLocation, useNavigationType } from "react-router-dom";
+import { animateTileNavigation, installTileNavigation, type RoutePosition } from "@/lib/tile-navigation";
 
-/**
- * Purely visual page reveal. The route is already rendering when this runs, so
- * the animation never gates navigation.
- * - PUSH/REPLACE: zoom-in reveal (continues the clicked tile's zoom).
- * - POP (browser/in-app back): reverse zoom-out reveal.
- */
+/** Record the clicked tile before routing; animate the live next page after commit. */
 export const usePageTransition = () => {
   const location = useLocation();
   const navType = useNavigationType();
+  const current = useRef<RoutePosition>({ key: location.key, path: location.pathname + location.search + location.hash });
 
-  useEffect(() => {
-    const main =
-      document.querySelector("main") || document.querySelector("[role='main']") || document.body;
+  useEffect(() => installTileNavigation(() => current.current), []);
+  useLayoutEffect(() => {
+    const next = { key: location.key, path: location.pathname + location.search + location.hash };
+    const previous = current.current;
+    current.current = next;
+    if (previous.key === next.key) return;
+    if (animateTileNavigation(previous, next)) return;
+    const main = document.getElementById("page-content");
+    if (!main) return;
     const cls = navType === "POP" ? "page-transition-back" : "page-transition";
     main.classList.add(cls);
-
-    const timer = setTimeout(() => main.classList.remove(cls), 320);
-
-    return () => {
-      clearTimeout(timer);
-      main.classList.remove(cls);
-    };
-  }, [location.pathname, navType]);
+    const timer = window.setTimeout(() => main.classList.remove(cls), 320);
+    return () => { clearTimeout(timer); main.classList.remove(cls); };
+  }, [location.key, location.pathname, location.search, location.hash, navType]);
 };

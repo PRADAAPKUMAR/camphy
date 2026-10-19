@@ -1,7 +1,8 @@
+import GlassIcon from "@/components/GlassIcon";
 import { useTileTransition } from "@/hooks/use-tile-transition";
 import { useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { FlaskConical, Target, FileText, ArrowLeft, LayoutGrid } from "lucide-react";
+import { Target, ArrowLeft } from "lucide-react";
 import PhysicsBackground from "@/components/PhysicsBackground";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -13,16 +14,17 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { normalizeGradeLabel } from "@/lib/grades";
+import { BANK_LEVELS, fetchBankTopics } from "@/lib/topical-bank";
+import { gradeFromLevel, GRADES, normalizeGradeLabel } from "@/lib/grades";
 
 const getSupabase = () => import("@/integrations/supabase/client").then(m => m.supabase);
 
 const levelOrder = ["IGCSE", "AS Level", "A Level"];
 
 const levelIcons: Record<string, React.ReactNode> = {
-  IGCSE: <FlaskConical className="h-5 w-5" />,
-  "AS Level": <Target className="h-5 w-5" />,
-  "A Level": <FileText className="h-5 w-5" />,
+  IGCSE: <GlassIcon name="microscope" tone="blue" />,
+  "AS Level": <GlassIcon name="flask" tone="amber" />,
+  "A Level": <GlassIcon name="atom" tone="green" />,
 };
 
 const TopicPracticePage = () => {
@@ -30,17 +32,10 @@ const TopicPracticePage = () => {
   const { tileProps } = useTileTransition();
 
   const { data: mcqLevels, isLoading: mcqLoading } = useQuery({
-    queryKey: ["topicwise_mcq_levels"],
-    queryFn: async () => {
-      const supabase = await getSupabase();
-      const { data, error } = await supabase
-        .from("topicwise_mcq_papers")
-        .select("level");
-      if (error) throw error;
-      const counts: Record<string, number> = {};
-      data.forEach((r: any) => { counts[r.level] = (counts[r.level] || 0) + 1; });
-      return counts;
-    },
+    queryKey: ["question-mode-topic-counts"],
+    queryFn: async () => Object.fromEntries(await Promise.all(
+      BANK_LEVELS.map(async (level) => [level, (await fetchBankTopics(level)).length] as const),
+    )),
   });
 
   const { data: theoryLevels, isLoading: theoryLoading } = useQuery({
@@ -52,7 +47,11 @@ const TopicPracticePage = () => {
         .select("level");
       if (error) throw error;
       const counts: Record<string, number> = {};
-      data.forEach((r: any) => { counts[r.level] = (counts[r.level] || 0) + 1; });
+      data.forEach((r) => {
+        const grade = gradeFromLevel(r.level);
+        const level = grade ? GRADES[grade].practiceLevel : r.level;
+        counts[level] = (counts[level] || 0) + 1;
+      });
       return counts;
     },
   });
@@ -133,8 +132,8 @@ const TopicPracticePage = () => {
               className="glass-card-hover group cursor-pointer rounded-2xl p-7"
               {...tileProps("/topical-mcq")}
             >
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-accent/10 border border-accent/20 text-accent mb-4 transition-all group-hover:bg-accent group-hover:text-accent-foreground group-hover:glow-sm">
-                <LayoutGrid className="h-5 w-5" />
+              <div className="mb-2 shrink-0">
+                <GlassIcon name="practice" tone="cyan" />
               </div>
               <h3 className="text-xl font-bold mb-1">Topical MCQ</h3>
               <p className="text-sm text-muted-foreground">
@@ -147,12 +146,12 @@ const TopicPracticePage = () => {
                 className="glass-card-hover group cursor-pointer rounded-2xl p-7"
                 {...tileProps(`/topic-practice/${encodeURIComponent(lvl)}`)}
               >
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary mb-4 transition-all group-hover:bg-primary group-hover:text-primary-foreground group-hover:glow-sm">
+                <div className="mb-2 shrink-0">
                   {levelIcons[normalizeGradeLabel(lvl)] || <Target className="h-5 w-5" />}
                 </div>
                 <h3 className="text-xl font-bold mb-1">{normalizeGradeLabel(lvl)}</h3>
                 <p className="text-sm text-muted-foreground">
-                  {mcqLevels?.[lvl] ?? 0} MCQ · {theoryLevels?.[lvl] ?? 0} Theory
+                  {mcqLevels?.[lvl] ?? 0} MCQ topics · {theoryLevels?.[lvl] ?? 0} Theory
                 </p>
               </div>
             ))}

@@ -1,3 +1,4 @@
+import GlassIcon from "@/components/GlassIcon";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Timer as TimerIcon, Brain, CalendarDays, ArrowLeft } from "lucide-react";
@@ -17,7 +18,7 @@ const StudyToolsPage = () => {
   const [tab, setTab] = useState<TabKey>("timers");
 
   return (
-    <div className="min-h-screen bg-background page-transition">
+    <div className="min-h-screen bg-background">
       <header className="relative overflow-hidden border-b border-border/40 bg-radial-glow">
         <div className="container relative py-10">
           <Link
@@ -26,6 +27,7 @@ const StudyToolsPage = () => {
           >
             <ArrowLeft className="h-3.5 w-3.5" /> Home
           </Link>
+          <GlassIcon name="timer" tone="cyan" className="mb-4" />
           <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
             Study <span className="gradient-text">Tools</span>
           </h1>
@@ -41,7 +43,8 @@ const StudyToolsPage = () => {
                 <button
                   key={t.key}
                   onClick={() => setTab(t.key)}
-                  className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-all"
+                  aria-pressed={active}
+                  className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-[color,background-color,border-color]"
                   style={{
                     background: active ? `hsl(${t.color} / 0.15)` : "transparent",
                     borderColor: active ? `hsl(${t.color} / 0.45)` : "hsl(var(--border))",
@@ -58,9 +61,11 @@ const StudyToolsPage = () => {
       </header>
 
       <main className="container py-10">
+        <div className="glass-panel p-4 sm:p-6">
         {tab === "timers" && <MultiTimers />}
         {tab === "focus" && <FocusMode />}
         {tab === "timetable" && <TimetableScheduler />}
+        </div>
       </main>
     </div>
   );

@@ -1,3 +1,5 @@
+import ThemeToggle from "@/components/ThemeToggle";
+import SplitFlapDisplay from "@/components/SplitFlapDisplay";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -25,6 +27,7 @@ import { displayLevel, syllabusVersionForLevel } from "@/lib/syllabus";
 import { buildTopicalSet } from "@/lib/topical-bank";
 import { gradeFromLevel, gradeSectionPath } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
+import { useMcqKeyboard } from "@/hooks/use-mcq-keyboard";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
@@ -57,7 +60,7 @@ const TopicalMcqSessionPage = () => {
     staleTime: 30 * 60 * 1000,
   });
 
-  const items = set?.questions ?? [];
+  const items = useMemo(() => set?.questions ?? [], [set?.questions]);
   const topicName = set?.topic?.name ?? "Topic";
   const questions = useMemo(() => items.map((q) => q.index), [items]);
   const currentItem = items[Math.min(current, Math.max(items.length - 1, 0))];
@@ -104,7 +107,7 @@ const TopicalMcqSessionPage = () => {
   const handleSelect = useCallback(
     (option: string) => {
       const idx = currentItem?.index;
-      if (!idx || finished || answers[idx]) return;
+      if (!idx || finished || answers[idx] || !images?.[currentItem.questionNumber]) return;
       const spent = Math.max(1, Math.round((Date.now() - shownAt.current) / 1000));
       setTimes((prev) => ({ ...prev, [idx]: spent }));
       setAnswers((prev) => ({ ...prev, [idx]: option }));
@@ -133,8 +136,15 @@ const TopicalMcqSessionPage = () => {
         }
       })();
     },
-    [currentItem, finished, answers, keyByIndex],
+    [currentItem, finished, answers, keyByIndex, images],
   );
+
+  useMcqKeyboard({
+    enabled: !finished && items.length > 0,
+    onSelect: handleSelect,
+    onNext: () => setCurrent((c) => Math.min(items.length - 1, c + 1)),
+    onPrev: () => setCurrent((c) => Math.max(0, c - 1)),
+  });
 
   const openExplanation = useCallback(
     async (index: number) => {
@@ -263,9 +273,12 @@ const TopicalMcqSessionPage = () => {
               Question mode · {answeredCount}/{items.length} answered
             </p>
           </div>
-          <Badge variant="outline" className="gap-1 border-border/40 font-mono text-xs">
-            <TimerIcon className="h-3.5 w-3.5" /> {fmtSeconds(elapsed)}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Badge variant="outline" className="gap-1 border-border/40 font-mono text-xs">
+              <TimerIcon className="h-3.5 w-3.5" /> <SplitFlapDisplay value={fmtSeconds(elapsed)} label="Elapsed time" />
+            </Badge>
+          </div>
         </div>
       </header>
 
@@ -342,6 +355,7 @@ const TopicalMcqSessionPage = () => {
                 userAnswer={answers[currentItem.index]}
                 correctAnswer={correctAnswers[currentItem.index]}
                 onSelect={handleSelect}
+                disabled={!images?.[currentItem.questionNumber]}
               />
 
               <div className="flex flex-wrap items-center justify-between gap-2">

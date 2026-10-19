@@ -1,6 +1,7 @@
+import GlassIcon from "@/components/GlassIcon";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, LayoutGrid, Target } from "lucide-react";
+import { ArrowLeft, Target } from "lucide-react";
 import PhysicsBackground from "@/components/PhysicsBackground";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -99,9 +100,7 @@ const TopicalMcqLevelPage = () => {
                 }
               >
                 <div className="mb-3 flex items-center gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary transition-all group-hover:bg-primary group-hover:text-primary-foreground">
-                    <LayoutGrid className="h-4 w-4" />
-                  </div>
+                  <GlassIcon name="practice" tone="cyan" size="sm" />
                   <h3 className="text-base font-semibold">{topic.name}</h3>
                 </div>
                 <div className="flex flex-wrap gap-2">

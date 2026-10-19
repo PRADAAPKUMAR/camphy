@@ -1,0 +1,81 @@
+# Physics HQ — Project Progress
+
+**Last updated:** 2026-10-15 (India time)  
+**Source:** Read-only checks of the live Physics HQ Lovable Cloud / Supabase PostgreSQL database.  
+**Repository:** https://github.com/PRADAAPKUMAR/camphy  
+**Website:** https://physicshq.in
+
+> **Verification standard:** A `verified = true` database flag records a workflow state, **not necessarily an independent review of the original Cambridge question image or PDF**. Counts below describe the current database, not a guarantee that every topic mapping is correct.
+
+## Scope decision (2026-10-15)
+
+**Only one specific missing IGCSE mapping is intentionally excluded:** IGCSE June 2024, EXTENDED MCQ-V1, question 14. Do not add or repair that single mapping unless the user asks. **All other IGCSE topic-mapping verification, correction, and audits remain in scope**, alongside AS and A Level. Preserve the excluded question's current state.
+
+## Independent theory-question checks — reconciled from prior chats (2026-10-15)
+
+**Do not confuse three different milestones:**
+
+1. **Database flag:** 1,645/1,645 theory question *page mappings* are marked `verified = true` (IGCSE 794, AS 330, A2 521).
+2. **Earlier reported source-PDF/question checks:** Prior Physics HQ explanation-SQL batches **15–19** reported checking **556 IGCSE source questions**: 2026 **85**, 2025 **125**, 2024 **127**, 2023 **127**, 2022 **92**. These batches also reported page-mapping work and checks of marks/calculations/equations. These 556 are **not automatically 556 independently confirmed topic mappings**; claims come from historical batch completion messages, not from a normalized per-question review ledger.
+3. **Independently evidenced accuracy of question-to-syllabus-topic assignments:** **No defensible exact total established.** The `theory_question_mappings` table has no independent-review provenance/evidence fields (only page ranges, timestamps, and a verification flag). The user asked specifically about independent question-by-question *topic accuracy*. We must not present 1,645 or 556 as an independently proven total of topic assignments.
+
+**AS/A2:** 851 mappings currently marked verified; prior explanation generation is not a reliable substitute for a recorded independent mapping-by-mapping review. Exact question-level source/topic verification count remains **unknown**, not zero.
+
+**Historical follow-up:** Batch claims could be confirmed by inspecting each batch's source PDFs and generated SQL artifacts, then associating stable paper/question IDs with topic assignments and reviewer evidence. A separate audit table/CSV should record `paper_id`, `question_number`, `source_pdf`, `pages`, `mapped_topic`, `review_outcome`, `review_date`, and `evidence`. Preserve existing verified flags and do not silently certify unsampled entries.
+
+## Independent theory topic-accuracy audit — batch 1 (2026-10-15)
+
+**Completed a source-text-based question-by-question topic review for 7 AS theory questions:** Physics 9702/22, February/March 2025. Results: **4 topic-complete (Q2, Q4, Q6, Q7), 3 missing supplementary topic links (Q1, Q3, Q5)**.
+
+| Q | Existing topic codes | Audit | Missing topic link |
+| --- | --- | --- | --- |
+| 1 | 1.3 | INCOMPLETE | **4.3** Density and pressure (the question includes calculating density of cubes) |
+| 2 | 4.1, 4.2, 4.3 | PASS | — |
+| 3 | 2.1, 3.1 | INCOMPLETE | **5.2** Gravitational potential energy and kinetic energy (explicit kinetic energy calculation) |
+| 4 | 8.1 | PASS | — |
+| 5 | 7.1 | INCOMPLETE | **7.3** Doppler effect for sound waves (moving sound source changes observed period) |
+| 6 | 9.1, 9.2, 9.3 | PASS | — |
+| 7 | 3.3, 11.1 | PASS | — |
+
+**Evidence and method:** Cross-referenced transcribed original question-paper content (archive: https://www.scribd.com/document/860514905/9702-m25-qp-22 ) and Cambridge published mark-scheme text (https://studylib.net/doc/28050761/9702-m25-ms-22) against every live `theory_question_topics` link. The original paper PDF in the project's `theory-papers` bucket is **private** and could not be visually downloaded in the current environment; **PDF page visuals and page-range accuracy remain pending**. These 7 are *independently reviewed for question-to-topic fit from source text*, **not** original-PDF-visual certified.
+
+**Structured evidence:** [docs/audits/THEORY_9702_M25_22_TOPIC_AUDIT_2026-10-15.csv](audits/THEORY_9702_M25_22_TOPIC_AUDIT_2026-10-15.csv) records paper/question/mapping IDs, current topics, omissions, supporting question features, public source URLs, and review limitations.
+
+**Production action:** None. Existing database verification flags and all current topic links remain unchanged. Add three missing syllabus topic associations only after review/approval; preserve existing links. This audit must not be conflated with the full 1,645-record `verified=true` database state.
+
+## Current database status
+
+| Area | Latest measured state | Progress / notes |
+| --- | --- | --- |
+| MCQ topic mappings | **5,319 / 5,319 marked verified** | 3,359 IGCSE and 1,960 AS Level. All 200 AS 2026 mappings changed from unverified in the previous audit to verified. |
+| Missing MCQ mapping | **1** | IGCSE, June 2024, EXTENDED MCQ-V1, question 14; no mapping row. |
+| MCQ mapping audit | **840 MATCH / HIGH; 3,319 PENDING** | Audit table contains 4,159 rows, leaving 1,160 mapped MCQs without an audit record. |
+| Earlier 364 mismatches | **Now recorded as MATCH / HIGH** | Earlier proposed corrections were demonstrably problematic in sampled cases. The new audit evidence says the original topic was retained; independent evidence must still be checked before considering the issue closed. |
+| Theory topic mappings | **1,645 / 1,645 marked verified** | 330 AS, 521 A2, 794 IGCSE. Previously 286 IGCSE theory mappings were unverified. |
+| Theory papers | **173** | AS/A2/IGCSE papers registered. |
+| AS MCQ explanations | **1,960 / 1,960 present** | Database explanation record coverage only; no blanket pedagogical quality guarantee. |
+| IGCSE MCQ explanations | **1,679 / 3,359 present** | **1,680 missing**, concentrated in 2020–2024. |
+| AS 2026 question image records | **184 / 200 present** | Missing 16 question image records, detailed below. |
+
+## AS 2026 question-image gaps
+
+- **May/June 2026, V2:** Q26–Q40 (15 images missing).
+- **May/June 2026, V3:** Q15 (1 image missing).
+- **February/March V2, May/June V1 and V4:** 40/40 image records each.
+- A missing `question_images` record is not itself proof the original paper PDF is unavailable.
+
+## Quality risks and follow-up
+
+1. **Exception — one IGCSE question only:** Ignore the missing mapping for June 2024, EXTENDED MCQ-V1, Q14. Continue normal verification and corrections for all other IGCSE questions.
+2. **High priority — Independently validate mapping audit:** The previous 364 mismatch proposals included demonstrably inappropriate topic swaps (e.g., dimensional analysis moved to equations of motion, collision to density and pressure). They were changed to MATCH on 2026-10-15; inspect original question material and maintain traceable evidence before declaring the audit independently complete.
+3. **High priority — Restore 16 AS 2026 image records/files:** Then compare mapped topics against the original questions rather than explanations alone.
+4. **Medium priority — Fill 1,680 missing IGCSE MCQ explanations:** Use Cambridge-level, question-specific reasoning, correct-option justification, and common distractor misconceptions.
+5. **Medium priority — Recheck theory source-file availability:** Earlier audit found 133 verified theory mappings whose source PDFs were absent from the expected private bucket. This specific storage count was not rechecked in the 2026-10-15 query.
+6. **Medium priority — Audit unreviewed mappings across IGCSE, AS and A Level:** Continue auditing pending entries and mappings without audit records, excluding only the single IGCSE June 2024 Extended V1 Q14 exception. Treat database verified flags separately from original-paper verification.
+7. **Operational:** Check that the IGCSE, AS and A Level topical-bank UI correctly shows verified mappings and excludes nothing due to stale caches or frontend filtering (apart from the explicitly ignored IGCSE question).
+
+## Changes and provenance
+
+**2026-10-15 read-only inspection** established the current counts above. The prior session reported 5,119 verified / 200 unverified MCQs, 1,359 verified / 286 unverified theory mappings, and 276 MATCH / 364 MISMATCH / 3,319 PENDING audit entries. Current database state has changed, but **this progress-document update did not modify any MCQ/theory mapping or verification flag**.
+
+This file is a project-status record; it is not a claim that original question-paper review is finished.
