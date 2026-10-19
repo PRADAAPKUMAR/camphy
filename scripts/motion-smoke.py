@@ -1,4 +1,4 @@
-"""Ambient motion and tile navigation regression checks using intercepted backend fixtures."""
+"""Continuous atom and tile navigation regression checks using intercepted backend fixtures."""
 import asyncio,importlib.util,json
 from pathlib import Path
 spec=importlib.util.spec_from_file_location('fixtures',str(Path(__file__).with_name('glass-ui-smoke.py')));f=importlib.util.module_from_spec(spec);spec.loader.exec_module(f)
@@ -13,10 +13,8 @@ async def main():
   page=await c.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
   await page.goto(f.BASE,wait_until='networkidle')
   assert await page.locator('.atom-orbit').first.evaluate('e=>getComputedStyle(e).animationIterationCount')=='infinite'
-  assert await page.locator('.physics-particles').evaluate('e=>e.width>0 && e.height>0')
-  first=await page.locator('.physics-particles').evaluate('e=>e.toDataURL()')
-  await page.wait_for_timeout(100)
-  assert first!=await page.locator('.physics-particles').evaluate('e=>e.toDataURL()')
+  assert await page.locator('.physics-particles').count()==0
+  assert await page.get_by_role('button',name='Pause background animation',exact=True).count()==0
   await page.locator('[data-tile-to="/grade/igcse"]').click()
   await page.wait_for_url('**/grade/igcse')
   assert await page.locator('.tile-route-panel').count()==1
@@ -40,21 +38,17 @@ async def main():
   await page.locator('[data-tile-to="/grade/as"]').click();await page.wait_for_url('**/grade/as');await idle(page)
   await page.go_back(wait_until='domcontentloaded');await idle(page)
   assert abs(await page.evaluate('scrollY')-old_scroll)<2
-  # Pause/resume keeps the requested continuous motion controllable.
-  await page.get_by_role('button',name='Pause background animation',exact=True).click()
-  assert await page.locator('.atom-orbit').first.evaluate('e=>getComputedStyle(e).animationPlayState')=='paused'
-  await page.get_by_role('button',name='Resume background animation',exact=True).click()
-  # Reduced motion suppresses both ambient effects and tile morphs.
+  # Reduced motion still suppresses atom orbits and tile morphs.
   await page.emulate_media(reduced_motion='reduce')
   await page.locator('[data-tile-to="/grade/a2"]').click();await page.wait_for_url('**/grade/a2')
   assert await page.locator('.tile-route-snapshot').count()==0
-  assert await page.locator('.physics-particles').evaluate('e=>getComputedStyle(e).display')=='none'
+  assert await page.locator('.physics-particles').count()==0
   await page.emulate_media(reduced_motion='no-preference')
   # Narrow navigation and touch-like tiles still fit the viewport.
   await page.set_viewport_size({'width':320,'height':720});await page.goto(f.BASE,wait_until='networkidle')
   assert not await page.evaluate('document.documentElement.scrollWidth>innerWidth')
   await page.get_by_role('button',name='Open menu').click()
-  await page.get_by_role('button',name='Pause background animation',exact=True).click()
+  assert await page.get_by_role('button',name='Pause background animation',exact=True).count()==0
   await page.get_by_role('button',name='Close menu').click()
   await page.locator('[data-tile-to="/grade/igcse"]').click();await page.wait_for_url('**/grade/igcse');await idle(page)
   assert not await page.evaluate('document.documentElement.scrollWidth>innerWidth')
@@ -75,7 +69,7 @@ async def main():
   await probe.get_by_role('heading',name='IGCSE Physics',exact=True).wait_for()
   assert await probe.locator('.glass-app').evaluate('e=>e.style.clipPath')==''
   assert not errors,errors
-  print(json.dumps({'continuousAtom':'passed','movingParticles':'passed','forwardAndBack':'passed','scrollRestoration':'passed','pauseAndReducedMotion':'passed','mobile':'passed','concurrentLoadingAndInterruption':'passed','pageErrors':errors}))
+  print(json.dumps({'continuousAtom':'passed','particlesRemoved':'passed','forwardAndBack':'passed','scrollRestoration':'passed','pauseControlRemovedAndReducedMotion':'passed','mobile':'passed','concurrentLoadingAndInterruption':'passed','pageErrors':errors}))
   await b.close()
 if __name__ == "__main__":
  asyncio.run(main())

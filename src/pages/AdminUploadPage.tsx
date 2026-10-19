@@ -539,20 +539,20 @@ const AdminUploadPage = () => {
           {pending.length > 0 && (
             <div className="grid gap-2 rounded-xl border border-border/40 p-3 text-xs sm:grid-cols-3">
               <div>Total files: <span className="font-semibold">{summary.total}</span></div>
-              <div className="text-emerald-300">
+              <div className="text-success">
                 Matched: <span className="font-semibold">{summary.matched}</span>
                 {summary.papersHit ? ` (${summary.papersHit} paper${summary.papersHit > 1 ? "s" : ""})` : ""}
               </div>
               <div className={summary.unmatched ? "text-destructive" : "text-muted-foreground"}>
                 Unmatched: <span className="font-semibold">{summary.unmatched}</span>
               </div>
-              <div className={summary.unparsed ? "text-amber-300" : "text-muted-foreground"}>
+              <div className={summary.unparsed ? "text-amber-700 dark:text-amber-300" : "text-muted-foreground"}>
                 Name not readable: <span className="font-semibold">{summary.unparsed}</span>
               </div>
-              <div className={summary.invalidQ ? "text-amber-300" : "text-muted-foreground"}>
+              <div className={summary.invalidQ ? "text-amber-700 dark:text-amber-300" : "text-muted-foreground"}>
                 Invalid question no.: <span className="font-semibold">{summary.invalidQ}</span>
               </div>
-              <div className={summary.duplicates ? "text-amber-300" : "text-muted-foreground"}>
+              <div className={summary.duplicates ? "text-amber-700 dark:text-amber-300" : "text-muted-foreground"}>
                 Duplicates: <span className="font-semibold">{summary.duplicates}</span>
               </div>
             </div>
@@ -596,10 +596,10 @@ const AdminUploadPage = () => {
                     <div
                       className={
                         p.targetPaperId
-                          ? "truncate text-[11px] text-emerald-300"
+                          ? "truncate text-[11px] text-success"
                           : p.unmatched
                             ? "truncate text-[11px] text-destructive"
-                            : "truncate text-[11px] text-amber-300"
+                            : "truncate text-[11px] text-amber-700 dark:text-amber-300"
                       }
                     >
                       {p.targetLabel ?? "Name not readable — uses the paper picked above"}
@@ -647,7 +647,7 @@ const AdminUploadPage = () => {
                     type="button"
                     onClick={() => removeQuestion(q)}
                     title={`Delete image for Q${q}`}
-                    className="inline-flex items-center gap-1 rounded-lg border border-emerald-400/40 bg-emerald-500/15 px-2 py-1 text-[11px] font-semibold text-emerald-300 hover:border-destructive/50 hover:bg-destructive/15 hover:text-destructive"
+                    className="inline-flex items-center gap-1 rounded-lg border border-emerald-400/40 bg-emerald-500/15 px-2 py-1 text-[11px] font-semibold text-success hover:border-destructive/50 hover:bg-destructive/15 hover:text-destructive"
                   >
                     Q{q}
                     <Trash2 className="h-3 w-3" />

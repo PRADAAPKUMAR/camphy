@@ -1,6 +1,6 @@
 # Glass UI implementation
 
-The website now uses a shared dark glass design system. `src/glass.css` defines
+The website now uses a shared light and dark glass design system. `src/glass.css` defines
 surface materials, backdrop lighting, local layered icon styling, motion,
 mobile rendering, reduced-motion behavior, solid fallbacks, and forced colors.
 `GlassIcon` combines Lucide symbols with original translucent layered artwork.
@@ -38,15 +38,25 @@ Escape, resize, scrolling, a new interaction, or a hidden document. Embedded fra
 are replaced with placeholders in copies so they cannot start duplicate loads.
 Direct entries without a recorded tile use the normal page reveal.
 
-The home atom orbits continuously. A single viewport canvas draws small bright
-particles with varied trajectories and inward rebounds at each screen edge. It
-sits behind content and translucent tiles, uses a capped device-pixel ratio, and
-stops drawing in hidden tabs. The navigation provides a pause/resume control (in
-the mobile menu on narrow screens); reduced motion suppresses ambient effects
-and tile morphs. Focused learning routes dim the particle field. Navigation tiles
-use a translucent tint and 7px backdrop blur (6px on mobile),
-so particle halos transmit as diffused light while foreground text stays sharp.
-Utility/reading cards retain denser surfaces; nested panels avoid redundant blur.
+The home atom orbits continuously. The viewport particle canvas, particle engine,
+and background-animation pause/resume controls have been removed. Existing saved
+pause preferences no longer stop the atom. Reduced motion suppresses atom orbits
+and tile morphs through CSS. Navigation tiles retain their translucent glass tint
+and 7px backdrop blur (6px on mobile); reading surfaces remain quieter and denser.
+
+## Light and dark themes
+
+Dark mode remains the default. A sun/moon control switches themes in desktop
+navigation, the mobile menu's Appearance row, and focused question, classroom,
+and document toolbars. Preferences persist across routes, reloads, and tabs. A
+small head bootstrap paints the saved theme before the deferred app loads.
+
+Both themes use shared semantic tokens for text, cards, inputs, menus, tables,
+reading areas, grade accents, scoring feedback, and split-flap timers. Light mode
+uses pearl glass with ink text and deeper blue, orange, and green accents. Dark
+mode retains midnight surfaces with quieter static lighting and restrained glow.
+The licensed font, original question images, and document/PDF rendering remain
+unchanged. Theme changes do not reset quiz answers, scores, or timers.
 
 ## Glass buttons, clocks, and keyboard controls
 
@@ -58,43 +68,40 @@ classroom timers, and the India clock. Only changed characters animate; reduced
 motion shows the current value immediately and suppresses decorative transforms.
 The display never drives or delays timekeeping.
 
-Across exam sheets, topic exam sheets, question mode, and topical MCQ sessions:
+In question mode and topical MCQ sessions:
 
 - **A–D** or **1–4** select an answer for the active question.
 - **Left / Right arrows** move to the previous / next question.
 - Space can move forward when the page itself is focused; focused buttons retain
   their native Space activation. Typing, menus, explanation dialogs, and modifier
-  shortcuts retain their keys. The mobile answer drawer supports these shortcuts.
+  shortcuts retain their keys.
 
-Answer sheets highlight the active row, keep it in view, and provide Previous/Next
-buttons. Answers lock after selection; movement is explicit so an arrow never
-accidentally skips a question following an automatic advance. Classroom quizzes
+Answers lock after selection and question navigation remains explicit. Classroom quizzes
 use their on-screen answer and navigation buttons; custom answer keys, arrow-key
 navigation, and shortcut hints are disabled.
 
 ## Validation
 
-- 75 unit tests pass, including edge/corner/resize and repeated particle rebounds.
+- 69 unit tests pass. The retired particle engine and its six tests were removed.
 - TypeScript and the production Vite build pass.
 - Existing browser smoke suite passes: eight desktop routes with accessibility
   and deep-link checks, mobile navigation/layout, and mocked login, recovery,
   answer locking, and results.
 - New route sweep passes 55 render/layout checks across desktop, mobile, narrow
   screens, and redirect destinations. Reduced-motion and forced-colors checks pass.
-- Desktop (1440px) and mobile (390px) pixel comparisons verify that a controlled
-  particle behind a tile remains visible as diffused light through its backdrop.
 - The keyboard UI suite verifies answer locking, letter/number controls, arrow
   navigation, native Space behavior, button press feedback, real timer updates,
   mobile answering, focus layout, and reduced-motion clock rendering. Isolated
-  classroom checks verify team selection, answers, reveal, and question review.
-- The motion browser suite verifies continuous orbits, moving canvas particles,
-  expansion and reverse navigation, scroll restoration, pause/reduced motion,
+  classroom checks verify team answers, reveal, and question review.
+- The motion browser suite verifies continuous atom orbits, removal of particles
+  and pause controls, expansion/reverse navigation, scroll restoration, reduced motion,
   320px layout, concurrent lazy loading, and interruption with Escape.
 - Additional isolated checks cover signed-in profile, admin dashboard, theory
   management, and profile confirmation-dialog keyboard/focus behavior.
-- Full lint remains at its existing baseline: 51 errors and 20 warnings. Targeted
-  lint passes for the new artwork, background, dashboard/home/study-tools changes,
-  and route-transition hook.
+- The theme suite passes 42 desktop/mobile route checks across both themes,
+  accessibility checks, saved preferences and early paint, atom animation,
+  removed particle/pause UI, and theme changes during a live game.
+- Repository-wide lint has pre-existing issues; targeted lint passes for this change.
 
 Run the dev server on port 8080, then run:
 
@@ -108,6 +115,7 @@ python3 scripts/motion-smoke.py
 python3 scripts/keyboard-ui-smoke.py
 python3 scripts/mcq-question-mode-smoke.py
 python3 scripts/classroom-layout-smoke.py
+python3 scripts/theme-ui-smoke.py
 ```
 
 The route sweep uses synthetic fixtures and intercepts every non-local request;

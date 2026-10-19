@@ -15,17 +15,85 @@
     --secondary: 225 27% 21%;
     --ring: 199 100% 78%;
     --radius: 0.85rem;
+    color-scheme: dark;
+    --card-foreground: var(--foreground);
+    --popover-foreground: var(--foreground);
+    --secondary-foreground: var(--foreground);
+    --sidebar-background: var(--card);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--muted);
+    --sidebar-accent-foreground: var(--foreground);
+    --sidebar-border: var(--border);
+    --sidebar-ring: var(--ring);
     --glass-surface: linear-gradient(135deg, hsl(228 32% 21% / .84), hsl(228 35% 12% / .9));
-    --glass-tile-surface: linear-gradient(135deg, hsl(228 32% 21% / .38), hsl(228 35% 12% / .5));
+    --glass-tile-surface: linear-gradient(135deg, hsl(228 32% 21% / .62), hsl(228 35% 12% / .76));
     --glass-edge: hsl(220 50% 88% / .14);
     --glass-shadow: 0 16px 48px -24px hsl(240 65% 2% / .8), inset 0 1px 0 hsl(220 60% 95% / .09);
     --glass-floating: hsl(226 32% 13% / .96);
     --glass-ease: cubic-bezier(.22, 1, .36, 1);
+    --glass-nav-surface: hsl(226 38% 10% / .88);
+    --glass-control-surface: hsl(226 38% 9% / .75);
+    --glass-reading-surface: hsl(226 32% 12% / .97);
+    --glass-mobile-surface: linear-gradient(135deg, hsl(228 32% 18% / .96), hsl(228 35% 11% / .97));
+    --glass-floating-shadow: 0 24px 80px -20px hsl(240 65% 2% / .85), inset 0 1px 0 hsl(220 60% 95% / .12);
+    --glass-body-glow: radial-gradient(ellipse at 12% 0%, hsl(262 65% 27% / .16), transparent 48%), radial-gradient(ellipse at 95% 35%, hsl(205 75% 22% / .14), transparent 48%);
+    --glass-atmosphere-glow: radial-gradient(ellipse at 8% 6%, hsl(269 76% 42% / .1), transparent 45%), radial-gradient(ellipse at 92% 24%, hsl(205 90% 43% / .09), transparent 44%), radial-gradient(ellipse at 50% 100%, hsl(230 70% 32% / .08), transparent 60%);
+    --glass-grid-dot: hsl(var(--foreground) / .035);
+    --flap-surface: linear-gradient(hsl(225 25% 19%), hsl(226 38% 9%));
+    --flap-face: hsl(226 32% 14%);
+    --flap-line: hsl(230 50% 2% / .85);
+    --flap-shadow: 0 2px 0 hsl(230 55% 2% / .8);
+  }
+
+  :root.light {
+    color-scheme: light;
+    --background: 220 35% 97%;
+    --foreground: 224 38% 15%;
+    --card: 0 0% 100%;
+    --popover: 220 30% 99%;
+    --muted: 220 25% 92%;
+    --muted-foreground: 220 16% 38%;
+    --border: 220 24% 78%;
+    --input: 218 18% 60%;
+    --primary: 216 82% 39%;
+    --primary-foreground: 0 0% 100%;
+    --accent: 190 84% 28%;
+    --accent-foreground: 0 0% 100%;
+    --secondary: 220 30% 92%;
+    --ring: 216 82% 39%;
+    --destructive: 0 72% 43%;
+    --success: 152 68% 29%;
+    --grade-green: 160 78% 28%;
+    --grade-foreground: 0 0% 100%;
+    --study-1: 217 83% 42%;
+    --study-2: 152 65% 29%;
+    --study-3: 25 88% 34%;
+    --study-4: 280 60% 43%;
+    --study-5: 340 70% 39%;
+    --study-6: 190 85% 28%;
+    --glass-surface: linear-gradient(135deg, hsl(0 0% 100% / .94), hsl(220 40% 97% / .86));
+    --glass-tile-surface: linear-gradient(135deg, hsl(0 0% 100% / .86), hsl(220 45% 97% / .76));
+    --glass-edge: hsl(218 35% 42% / .18);
+    --glass-shadow: 0 14px 38px -24px hsl(220 45% 27% / .3), inset 0 1px 0 hsl(0 0% 100% / .95);
+    --glass-floating: hsl(0 0% 100% / .97);
+    --glass-nav-surface: hsl(0 0% 100% / .82);
+    --glass-control-surface: hsl(0 0% 100% / .8);
+    --glass-reading-surface: hsl(220 35% 99% / .98);
+    --glass-mobile-surface: linear-gradient(135deg, hsl(0 0% 100% / .98), hsl(220 40% 97% / .98));
+    --glass-floating-shadow: 0 22px 64px -22px hsl(220 45% 27% / .24), inset 0 1px 0 white;
+    --glass-body-glow: radial-gradient(ellipse at 12% 0%, hsl(240 65% 75% / .12), transparent 48%), radial-gradient(ellipse at 95% 35%, hsl(200 75% 75% / .1), transparent 48%);
+    --glass-atmosphere-glow: radial-gradient(ellipse at 8% 6%, hsl(250 70% 85% / .2), transparent 45%), radial-gradient(ellipse at 92% 24%, hsl(200 80% 82% / .18), transparent 44%);
+    --glass-grid-dot: hsl(220 30% 35% / .045);
+    --flap-surface: linear-gradient(hsl(220 25% 97%), hsl(220 25% 90%));
+    --flap-face: hsl(220 25% 95%);
+    --flap-line: hsl(220 20% 60% / .4);
+    --flap-shadow: 0 2px 0 hsl(220 25% 72% / .65);
   }
 
   body {
-    background-image: radial-gradient(ellipse at 12% 0%, hsl(262 65% 27% / .28), transparent 48%),
-      radial-gradient(ellipse at 95% 35%, hsl(205 75% 22% / .22), transparent 48%);
+    background-image: var(--glass-body-glow);
     min-width: 320px;
   }
 
@@ -37,10 +105,7 @@
   .glass-app { position: relative; isolation: isolate; min-height: 100vh; }
   .glass-atmosphere {
     position: fixed; inset: 0; z-index: -1; pointer-events: none;
-    background:
-      radial-gradient(ellipse at 8% 6%, hsl(269 76% 42% / .18), transparent 45%),
-      radial-gradient(ellipse at 92% 24%, hsl(205 90% 43% / .14), transparent 44%),
-      radial-gradient(ellipse at 50% 100%, hsl(230 70% 32% / .13), transparent 60%);
+    background: var(--glass-atmosphere-glow);
   }
   .physics-light-field {
     background: radial-gradient(ellipse at 12% 12%, hsl(262 70% 42% / .07), transparent 42%),
@@ -54,7 +119,7 @@
     border-color: var(--glass-edge);
   }
   .glass-nav {
-    background: hsl(226 38% 10% / .9);
+    background: var(--glass-nav-surface);
     border-color: var(--glass-edge);
     -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
     box-shadow: 0 4px 32px hsl(240 60% 2% / .2);
@@ -72,14 +137,14 @@
   }
   .glass-floating {
     background: var(--glass-floating);
-    border-color: hsl(220 50% 88% / .2);
+    border-color: var(--glass-edge);
     border-radius: 1rem;
-    box-shadow: 0 24px 80px -20px hsl(240 65% 2% / .85), inset 0 1px 0 hsl(220 60% 95% / .12);
+    box-shadow: var(--glass-floating-shadow);
     -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
   }
   .glass-control {
     border-color: hsl(var(--input));
-    background: hsl(226 38% 9% / .75);
+    background: var(--glass-control-surface);
     border-radius: .75rem;
     box-shadow: inset 0 1px 2px hsl(240 60% 2% / .18);
     transition: border-color 160ms, background-color 160ms, box-shadow 160ms;
@@ -93,13 +158,13 @@
   }
   .glass-button-outline { background: hsl(var(--card) / .65); border-color: var(--glass-edge); }
   .glass-button-outline:hover, .glass-button-ghost:hover { background-color: hsl(var(--muted) / .7); }
-  .glass-tabs { background: hsl(226 38% 9% / .65); border: 1px solid var(--glass-edge); border-radius: .9rem; }
+  .glass-tabs { background: var(--glass-control-surface); border: 1px solid var(--glass-edge); border-radius: .9rem; }
   .glass-tab { border-radius: .6rem; }
   .glass-tab[data-state="active"] { box-shadow: inset 0 1px 0 hsl(0 0% 100% / .12), 0 2px 8px hsl(240 60% 2% / .25); }
   .glass-table { border: 1px solid var(--glass-edge); border-radius: 1rem; background: hsl(var(--card) / .8); }
-  .glass-table thead { background: hsl(226 32% 19% / .95); }
+  .glass-table thead { background: hsl(var(--muted) / .95); }
   .glass-overlay { background: hsl(230 55% 3% / .76); }
-  .glass-reading { background: hsl(226 32% 12% / .97); border: 1px solid var(--glass-edge); border-radius: 1rem; }
+  .glass-reading { background: var(--glass-reading-surface); border: 1px solid var(--glass-edge); border-radius: 1rem; }
 
   /* Layered glass artwork, rendered locally without image downloads. */
   .glass-icon {
@@ -138,15 +203,15 @@
   .glass-stat { border: 1px solid var(--glass-edge); border-radius: 999px; background: hsl(var(--card) / .72); box-shadow: inset 0 1px 0 hsl(0 0% 100% / .04); }
   .glass-section-label { font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: hsl(var(--muted-foreground)); }
   .glass-focus .glass-atmosphere { opacity: .35; }
-  .glass-focus .glass-card, .glass-focus .glass-panel { background: hsl(226 32% 12% / .97); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .glass-focus .glass-card, .glass-focus .glass-panel { background: var(--glass-reading-surface); -webkit-backdrop-filter: none; backdrop-filter: none; }
   .glass-focus .glass-card-hover, .glass-focus .grade-tile { transform: none; }
   .glass-focus .physics-light-field { display: none; }
 
 
 /* Existing page surfaces use this material so every route shares the system. */
 
-  .bg-grid { background-image: radial-gradient(hsl(220 35% 80% / .055) .8px, transparent .8px); background-size: 28px 28px; }
-  /* Let the moving light transmit through tiles without blurring their content. */
+  .bg-grid { background-image: radial-gradient(var(--glass-grid-dot) .8px, transparent .8px); background-size: 28px 28px; }
+  /* Restrained glass depth keeps content clear in both themes. */
   .glass-card-hover, .grade-tile {
     background: var(--glass-tile-surface);
     -webkit-backdrop-filter: blur(7px) saturate(135%);
@@ -169,7 +234,7 @@
   }
   @media (hover: none) { .glass-card-hover:hover, .grade-tile:hover { transform: none; } }
   @media (max-width: 640px) {
-    .glass-card { -webkit-backdrop-filter: none; backdrop-filter: none; background: linear-gradient(135deg, hsl(228 32% 18% / .96), hsl(228 35% 11% / .97)); }
+    .glass-card { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--glass-mobile-surface); }
     .glass-card-hover, .grade-tile {
       -webkit-backdrop-filter: blur(6px) saturate(135%);
       backdrop-filter: blur(6px) saturate(135%);
@@ -200,17 +265,13 @@
 .glass-reading.border-0 { border: 0; }
 
 /* Ambient artwork lives below every tile; snapshots never intercept input. */
-.physics-particles { position: fixed; inset: 0; z-index: -1; width: 100%; height: 100%; pointer-events: none; }
-.ambient-paused .atom-orbit { animation-play-state: paused; }
-.glass-focus .physics-particles { opacity: .4; }
 .tile-route-snapshot { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; transform-origin: top left; background: hsl(var(--background)); }
 .tile-route-snapshot[data-direction="back"] { z-index: 3; }
 .tile-route-snapshot *, .tile-route-snapshot *::before, .tile-route-snapshot *::after { animation: none !important; transition: none !important; }
 .tile-route-panel { position: fixed; z-index: 1; overflow: hidden; pointer-events: none; background: hsl(var(--card)); border: 1px solid var(--glass-edge); box-shadow: var(--glass-shadow); }
 .tile-route-panel > * { position: absolute !important; inset: 0; width: 100% !important; height: 100% !important; margin: 0 !important; transform: none !important; }
 [data-tile-transition] #page-content { animation: none; }
-@media (prefers-reduced-motion: reduce), (forced-colors: active) { .physics-particles { display: none; } }
-@media print { .physics-particles, .tile-route-snapshot, .tile-route-panel { display: none; } }
+@media print { .tile-route-snapshot, .tile-route-panel { display: none; } }
 
 [data-tile-transition] #root > .glass-app { background-color: hsl(var(--background)); }
 
@@ -220,13 +281,13 @@
 /* Airport departure-board cells: only a changed character turns its two flaps. */
 .split-flap { display: inline-flex; vertical-align: middle; max-width: 100%; font-family: var(--font-mono); font-variant-numeric: tabular-nums; line-height: 1; }
 .split-flap__digits { display: inline-flex; align-items: center; gap: .075em; }
-.split-flap__cell { position: relative; display: inline-block; flex-shrink: 0; width: .65em; height: 1.3em; border: 1px solid hsl(220 40% 90% / .14); border-radius: .14em; background: linear-gradient(hsl(225 25% 19%), hsl(226 38% 9%)); box-shadow: inset 0 1px 0 hsl(0 0% 100% / .1), 0 2px 0 hsl(230 55% 2% / .8); perspective: 5em; }
-.split-flap__cell::after { content: ""; position: absolute; inset: 50% 0 auto; height: 1px; background: hsl(230 50% 2% / .85); box-shadow: 0 1px 0 hsl(0 0% 100% / .05); pointer-events: none; z-index: 3; }
+.split-flap__cell { position: relative; display: inline-block; flex-shrink: 0; width: .65em; height: 1.3em; border: 1px solid hsl(220 40% 90% / .14); border-radius: .14em; background: var(--flap-surface); box-shadow: inset 0 1px 0 hsl(0 0% 100% / .1), var(--flap-shadow); perspective: 5em; }
+.split-flap__cell::after { content: ""; position: absolute; inset: 50% 0 auto; height: 1px; background: var(--flap-line); box-shadow: 0 1px 0 hsl(0 0% 100% / .05); pointer-events: none; z-index: 3; }
 .split-flap__character { display: grid; place-items: center; height: 100%; }
 .split-flap__separator { width: .24em; text-align: center; }
 .split-flap__space { width: .22em; }
 .split-flap__change { position: absolute; inset: 0; perspective: 5em; }
-.split-flap__top, .split-flap__bottom { position: absolute; left: 0; right: 0; height: 50%; overflow: hidden; backface-visibility: hidden; background: hsl(226 32% 14%); }
+.split-flap__top, .split-flap__bottom { position: absolute; left: 0; right: 0; height: 50%; overflow: hidden; backface-visibility: hidden; background: var(--flap-face); }
 .split-flap__top { top: 0; transform-origin: bottom; animation: flapTop 160ms ease-in forwards; }
 .split-flap__bottom { bottom: 0; transform-origin: top; transform: rotateX(90deg); animation: flapBottom 180ms 160ms ease-out forwards; }
 .split-flap__top > span, .split-flap__bottom > span { position: absolute; inset-inline: 0; display: grid; place-items: center; height: 200%; }
@@ -241,3 +302,17 @@
   .split-flap__cell { background: Canvas; border-color: CanvasText; box-shadow: none; }
   .split-flap__change { display: none; }
 }
+
+/* Pearl glass accents and crisp artwork against light surfaces. */
+.light .glass-icon[data-tone="blue"] { --icon-color: 216 88% 43%; }
+.light .glass-icon[data-tone="violet"] { --icon-color: 268 65% 47%; }
+.light .glass-icon[data-tone="cyan"] { --icon-color: 186 90% 29%; }
+.light .glass-icon[data-tone="amber"] { --icon-color: 30 92% 34%; }
+.light .glass-icon[data-tone="green"] { --icon-color: 158 78% 29%; }
+.light .glass-icon[data-tone="pink"] { --icon-color: 324 72% 42%; }
+.light .glass-icon__face { color: hsl(var(--icon-color)); background: linear-gradient(135deg, hsl(0 0% 100% / .8), hsl(var(--icon-color) / .09)); border-color: hsl(0 0% 100% / .95); }
+.light .glass-nav { box-shadow: 0 4px 24px hsl(220 40% 30% / .05); }
+.light .glass-control { box-shadow: inset 0 1px 2px hsl(220 35% 30% / .04); }
+.light .glass-overlay { background: hsl(224 35% 15% / .35); }
+.light .glass-button-outline { box-shadow: inset 0 1px 0 hsl(0 0% 100% / .8); }
+.light .glass-button-primary { box-shadow: inset 0 1px 0 hsl(0 0% 100% / .2), 0 4px 14px -8px hsl(var(--primary) / .45); }

@@ -1,3 +1,4 @@
+import ThemeToggle from "@/components/ThemeToggle";
 import SplitFlapDisplay from "@/components/SplitFlapDisplay";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -272,9 +273,12 @@ const TopicalMcqSessionPage = () => {
               Question mode · {answeredCount}/{items.length} answered
             </p>
           </div>
-          <Badge variant="outline" className="gap-1 border-border/40 font-mono text-xs">
-            <TimerIcon className="h-3.5 w-3.5" /> <SplitFlapDisplay value={fmtSeconds(elapsed)} label="Elapsed time" />
-          </Badge>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Badge variant="outline" className="gap-1 border-border/40 font-mono text-xs">
+              <TimerIcon className="h-3.5 w-3.5" /> <SplitFlapDisplay value={fmtSeconds(elapsed)} label="Elapsed time" />
+            </Badge>
+          </div>
         </div>
       </header>
 

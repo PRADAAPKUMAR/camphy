@@ -1,3 +1,4 @@
+import ThemeToggle from "@/components/ThemeToggle";
 import SplitFlapDisplay from "@/components/SplitFlapDisplay";
 import GlassIcon from "@/components/GlassIcon";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -274,9 +275,12 @@ const ClassroomQuizPage = () => {
       <div className="min-h-screen bg-background bg-grid page-transition">
         <header className="border-b border-border/40 bg-radial-glow">
           <div className="container py-8 sm:py-10">
-            <Button variant="ghost" size="sm" className="mb-4 gap-2 text-muted-foreground" onClick={() => navigate(`/grade/${grade}`)}>
-              <ArrowLeft className="h-4 w-4" /> {GRADES[grade].label} home
-            </Button>
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground" onClick={() => navigate(`/grade/${grade}`)}>
+                <ArrowLeft className="h-4 w-4" /> {GRADES[grade].label} home
+              </Button>
+              <ThemeToggle />
+            </div>
             <div className="flex items-center gap-4">
               <GlassIcon name="quiz" tone="violet" />
               <div><p className="font-mono text-xs text-primary">{GRADES[grade].label} · Classroom activity</p><h1 className="text-3xl font-extrabold sm:text-4xl">Classroom Quiz</h1></div>
@@ -338,6 +342,7 @@ const ClassroomQuizPage = () => {
   if (phase === "results") {
     return <div className="min-h-screen bg-background bg-grid px-4 py-8 page-transition">
       <main className="mx-auto max-w-4xl">
+        <div className="mb-3 flex justify-end"><ThemeToggle /></div>
         <div className="mb-8 text-center"><Trophy className="mx-auto mb-4 h-14 w-14 text-primary" /><p className="font-mono text-xs text-primary">FINAL RESULTS</p><h1 className="mt-1 text-4xl font-extrabold">{ranked[0]?.rank === ranked[1]?.rank ? "It’s a tie!" : `${ranked[0]?.name} wins!`}</h1></div>
         <div className="space-y-3">{ranked.map((team, index) => <div key={team.id} className={`glass-card flex items-center gap-4 rounded-xl p-5 ${team.rank === 1 ? "border-primary/50 glow-sm" : ""}`}>
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-muted text-lg font-black">{team.rank === 1 ? <Crown className="h-6 w-6 text-primary" /> : team.rank}</div>
@@ -362,6 +367,7 @@ const ClassroomQuizPage = () => {
               {ranked.map((team) => <li key={team.id} className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border/40 bg-card/60 px-2 py-1.5 text-[10px] sm:text-xs"><span className="text-[9px] font-black text-muted-foreground">{team.rank}</span><span className="max-w-16 truncate font-semibold sm:max-w-24" title={team.name}>{team.name}</span><strong className="tabular-nums">{team.score.toLocaleString()}</strong></li>)}
             </ol>
           </section>
+          <ThemeToggle />
           <AlertDialog>
             <AlertDialogTrigger asChild><Button variant="outline" size="sm" aria-label="End quiz" className="h-9 w-9 shrink-0 gap-2 px-0 sm:w-auto sm:px-3"><Flag className="h-4 w-4" /><span className="hidden sm:inline">End quiz</span></Button></AlertDialogTrigger>
             <AlertDialogContent>

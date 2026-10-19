@@ -60,7 +60,7 @@ const WeakestSubtopics = ({ records }: { records: PerformanceRecord[] }) => {
               </div>
               <Badge
                 variant="outline"
-                className="shrink-0 gap-1 border-rose-400/40 bg-rose-500/10 text-xs text-rose-300"
+                className="shrink-0 gap-1 border-destructive/40 bg-destructive/10 text-xs text-destructive"
               >
                 <TriangleAlert className="h-3 w-3" />
                 {s.accuracy}%

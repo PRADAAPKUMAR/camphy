@@ -1,3 +1,4 @@
+import ThemeToggle from "@/components/ThemeToggle";
 import { useSearchParams, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,8 @@ const DriveViewerPage = () => {
             <ArrowLeft className="mr-1 h-4 w-4" /> Back
           </Link>
         </Button>
-        <span className="text-base font-bold text-foreground truncate">{title}</span>
+        <span className="min-w-0 flex-1 truncate text-base font-bold text-foreground">{title}</span>
+        <ThemeToggle />
       </header>
       <div className="flex-1 w-full overflow-auto">
         {embedUrl ? (
