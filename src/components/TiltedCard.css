@@ -1,0 +1,46 @@
+/* React Bits TiltedCard hover treatment adapted to responsive, existing glass tiles.
+   Attribution and license: docs/vendor/reactbits-license.md. */
+[data-tilted-card] {
+  position: relative;
+  z-index: 2;
+  transform: perspective(800px) rotateX(var(--tc-rx, 0deg)) rotateY(var(--tc-ry, 0deg)) scale(var(--tc-scale, 1));
+  /* Physics updates each frame; CSS must not animate behind the pointer. */
+  transition: border-color 180ms, background-color 180ms;
+  will-change: transform;
+  box-shadow: var(--glass-shadow), 0 24px 42px -18px hsl(230 55% 2% / calc(var(--tc-shadow, 0) * 0.8));
+}
+/* Match the specificity of the existing hover surfaces without changing their colors. */
+:is(.grade-tile, .glass-card-hover)[data-tilted-card]:hover {
+  transform: perspective(800px) rotateX(var(--tc-rx, 0deg)) rotateY(var(--tc-ry, 0deg)) scale(var(--tc-scale, 1));
+  box-shadow: var(--glass-shadow), 0 24px 42px -18px hsl(230 55% 2% / calc(var(--tc-shadow, 0) * 0.8));
+}
+[data-tilted-card]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(farthest-corner circle at var(--tc-gx, 50%) var(--tc-gy, 50%),
+    rgb(255 255 255 / calc(var(--tc-glare, 0) * 0.34)), transparent 65%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / calc(var(--tc-glare, 0) * 0.5));
+}
+[data-tilted-card] .glass-icon,
+[data-tilted-card] .tilted-card-layer {
+  transform: translate3d(calc(var(--tc-px, 0) * var(--tc-depth, 30) * 1px), calc(var(--tc-py, 0) * var(--tc-depth, 30) * 1px), 0);
+}
+.light [data-tilted-card]::after {
+  background: radial-gradient(farthest-corner circle at var(--tc-gx, 50%) var(--tc-gy, 50%),
+    hsl(var(--grade-accent, var(--primary)) / calc(var(--tc-glare, 0) * 0.16)), transparent 65%);
+}
+@media (prefers-reduced-motion: reduce), (forced-colors: active), (hover: none) {
+  [data-tilted-card], :is(.grade-tile, .glass-card-hover)[data-tilted-card]:hover {
+    transform: none;
+    will-change: auto;
+  }
+  [data-tilted-card]::after { display: none; }
+  [data-tilted-card] .glass-icon, [data-tilted-card] .tilted-card-layer { transform: none; }
+}
+@media (forced-colors: active) {
+  [data-tilted-card], :is(.grade-tile, .glass-card-hover)[data-tilted-card]:hover { box-shadow: none; }
+}

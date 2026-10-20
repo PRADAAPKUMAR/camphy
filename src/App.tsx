@@ -5,6 +5,7 @@ import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-route
 import { usePageTransition } from "@/hooks/use-page-transition";
 import RunningTimerBar from "@/components/study/RunningTimerBar";
 import SiteNav from "@/components/SiteNav";
+import TiltedCard from "@/components/TiltedCard";
 import { GradeProvider } from "@/contexts/GradeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProgressMergePrompt from "@/components/ProgressMergePrompt";
@@ -106,6 +107,7 @@ const RouterContent = () => {
 
   return (
     <div className={`glass-app${navExcluded || pathname.startsWith("/theory-paper/") ? " glass-focus" : ""}`}>
+    <TiltedCard key={pathname} rotateAmplitude={15} scaleOnHover={1.1} glare={0.5} shadow={0.5} />
     <div className="glass-atmosphere" aria-hidden="true" />
     <PageMetadata />
     <a href="#page-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-3 focus:text-primary-foreground">Skip to content</a>
