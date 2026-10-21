@@ -1,0 +1,61 @@
+.policy-page { --policy-line: hsl(var(--border) / .65); }
+.policy-hero { background: radial-gradient(ellipse at 15% 10%, hsl(var(--primary) / .08), transparent 65%); }
+.policy-back { display: inline-flex; align-items: center; gap: .65rem; min-height: 2.75rem; font-size: .75rem; color: hsl(var(--muted-foreground)); }
+.policy-back:hover { color: hsl(var(--foreground)); }
+.policy-back > span { opacity: .45; margin-inline: .25rem; }
+.policy-hero-icon { width: 4.5rem; height: 4.5rem; flex-shrink: 0; place-items: center; border: 1px solid hsl(var(--primary) / .18); border-radius: 1.35rem; color: hsl(var(--primary)); background: hsl(var(--primary) / .06); }
+.policy-eyebrow { font-family: var(--font-mono, monospace); font-size: .65rem; letter-spacing: .13em; text-transform: uppercase; color: hsl(var(--muted-foreground)); }
+.policy-metadata { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem 1.25rem; font-size: .75rem; color: hsl(var(--muted-foreground)); }
+.policy-metadata > span { display: inline-flex; align-items: center; gap: .4rem; }
+.policy-metadata svg { width: .9rem; height: .9rem; }
+.policy-review-label { border: 1px solid var(--policy-line); padding: .3rem .6rem; border-radius: 999px; font-size: .65rem; }
+.policy-layout { display: grid; align-items: start; gap: 1.75rem; }
+.policy-layout > aside { position: sticky; top: 1.5rem; }
+.policy-sidebar { max-height: calc(100svh - 3rem); overflow-y: auto; padding: .75rem .25rem; scrollbar-width: thin; }
+.policy-document-link { display: flex; align-items: center; gap: .7rem; padding: .8rem .75rem; border-radius: .8rem; font-size: .8rem; line-height: 1.5; color: hsl(var(--muted-foreground)); transition: color 160ms, background 160ms; }
+.policy-document-link svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+.policy-document-link:hover { color: hsl(var(--foreground)); background: hsl(var(--muted) / .35); }
+.policy-document-link[aria-current="page"] { color: hsl(var(--primary)); background: hsl(var(--primary) / .08); }
+.policy-contact-note { margin-top: 2rem; padding: 1.25rem .75rem 0; border-top: 1px solid var(--policy-line); }
+.policy-picker { width: 100%; appearance: none; border: 1px solid var(--policy-line); border-radius: .85rem; padding: .9rem 2.5rem .9rem 1rem; font-size: .85rem; color: hsl(var(--foreground)); background: hsl(var(--card)); }
+.policy-contents { display: grid; gap: .2rem; }
+.policy-contents a { display: flex; gap: .65rem; padding: .55rem .65rem; border-left: 1px solid var(--policy-line); border-radius: 0 .4rem .4rem 0; font-size: .72rem; line-height: 1.55; color: hsl(var(--muted-foreground)); transition: color 160ms, border-color 160ms, background 160ms; }
+.policy-contents a > span { font-size: .6rem; line-height: 1.85; font-family: monospace; opacity: .7; }
+.policy-contents a:hover, .policy-contents a[aria-current="location"] { color: hsl(var(--primary)); border-color: hsl(var(--primary)); background: hsl(var(--primary) / .05); }
+.policy-mobile-contents { border: 1px solid var(--policy-line); border-radius: .85rem; background: hsl(var(--card) / .5); }
+.policy-mobile-contents summary { list-style: none; display: flex; justify-content: space-between; align-items: center; min-height: 3rem; padding: .8rem 1rem; cursor: pointer; font-size: .8rem; }
+.policy-mobile-contents summary::-webkit-details-marker { display: none; }
+.policy-mobile-contents[open] summary svg { transform: rotate(180deg); }
+.policy-mobile-contents .policy-contents { padding: 0 1rem 1rem; }
+.policy-paper { min-width: 0; padding: 1.4rem; border: 1px solid var(--policy-line); border-radius: 1.25rem; background: hsl(var(--card) / .65); box-shadow: 0 12px 40px -30px hsl(230 50% 2% / .25); }
+.policy-paper-heading { display: flex; justify-content: space-between; gap: 1rem; padding-bottom: 1.25rem; margin-bottom: 1.75rem; border-bottom: 1px solid var(--policy-line); color: hsl(var(--muted-foreground)); font-size: .65rem; font-family: monospace; }
+.policy-section + .policy-section { margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--policy-line); }
+.policy-section-heading { display: flex; align-items: baseline; gap: .8rem; margin-bottom: 1rem; }
+.policy-section-heading > span { flex-shrink: 0; color: hsl(var(--primary)); font-family: monospace; font-size: .7rem; }
+.policy-section-heading h2 { color: hsl(var(--foreground)); font-size: 1.05rem; line-height: 1.6; scroll-margin-top: 2rem; }
+.policy-paper .legal-copy { font-size: .9rem; line-height: 1.95; }
+.policy-paper .legal-copy p:last-child { margin-bottom: 0; }
+.policy-paper .legal-copy ul { margin-block: 1rem; }
+.policy-paper .legal-copy strong { font-weight: 600; }
+.policy-review-note { display: flex; align-items: flex-start; gap: .75rem; margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--policy-line); font-size: .7rem; line-height: 1.85; color: hsl(var(--muted-foreground)); }
+.policy-review-note svg { margin-top: .2rem; }
+.policy-next-link { display: flex; align-items: center; gap: .85rem; min-width: 0; padding: 1rem 1.15rem; border: 1px solid var(--policy-line); border-radius: 1rem; background: hsl(var(--card) / .35); color: hsl(var(--foreground)); font-size: .8rem; line-height: 1.6; transition: border-color 160ms, background 160ms; }
+.policy-next-link small { display: block; margin-bottom: .3rem; font-size: .65rem; color: hsl(var(--muted-foreground)); }
+.policy-next-link:hover { border-color: hsl(var(--primary) / .4); background: hsl(var(--primary) / .04); }
+@media (min-width: 640px) {
+  .policy-paper { padding: 2rem 2.25rem; }
+  .policy-section-heading h2 { font-size: 1.15rem; }
+}
+@media (min-width: 1024px) {
+  .policy-layout { grid-template-columns: 225px minmax(0, 1fr); gap: 2.25rem; }
+}
+@media (min-width: 1280px) {
+  .policy-layout { grid-template-columns: 215px minmax(0, 1fr) 190px; gap: 2rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .policy-document-link, .policy-contents a, .policy-next-link { transition: none; }
+}
+@media (forced-colors: active) {
+  .policy-paper, .policy-hero-icon, .policy-picker, .policy-mobile-contents, .policy-next-link { background: Canvas; border-color: CanvasText; box-shadow: none; }
+  .policy-document-link[aria-current="page"], .policy-contents a[aria-current="location"] { color: LinkText; outline: 1px solid LinkText; }
+}

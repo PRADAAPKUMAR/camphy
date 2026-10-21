@@ -16,6 +16,7 @@ import { HelmetProvider } from "react-helmet-async";
 import PageMetadata from "@/components/PageMetadata";
 import { gradeFromLevel, isGradeKey } from "@/lib/grades";
 import { useSelectedGrade } from "@/contexts/grade-context";
+import { LEGAL_POLICIES } from "@/lib/legal-policies";
 
 const SpeedInsights = lazy(() => import("@vercel/speed-insights/react").then(m => ({ default: m.SpeedInsights })));
 const Analytics = lazy(() => import("@vercel/analytics/react").then(m => ({ default: m.Analytics })));
@@ -54,6 +55,7 @@ const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const LegalPolicyPage = lazy(() => import("./pages/LegalPolicyPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -173,6 +175,7 @@ const RouterContent = () => {
         <Route path="/theory-paper/:paperId" element={<TheoryPaperPage />} />
         <Route path="/theory-topical/:level" element={<TheoryTopicalPdfPage />} />
         <Route path="/about" element={<AboutPage />} />
+        {LEGAL_POLICIES.map((policy) => <Route key={policy.slug} path={`/${policy.slug}`} element={<LegalPolicyPage />} />)}
         <Route path="/study-tools" element={<StudyToolsPage />} />
         <Route path="/performance" element={<GradeSectionRedirect section="performance" />} />
         <Route path="/performance/:grade" element={<PerformancePage />} />
