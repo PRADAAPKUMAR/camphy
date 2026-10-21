@@ -1,6 +1,6 @@
 import GlassIcon from "@/components/GlassIcon";
 import { lazy, Suspense, useMemo } from "react";
-import { Link } from "react-router-dom";
+import SiteFooter from "@/components/SiteFooter";
 import { useQuery } from "@tanstack/react-query";
 import { Atom, ArrowRight, FlaskConical, Microscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -98,11 +98,8 @@ const HomePage = () => {
           </Button>;
         })}
       </div>
-      <div className="mx-auto mt-10 flex max-w-5xl justify-center gap-6 text-xs text-muted-foreground">
-        <Link to="/study-tools" className="transition-colors hover:text-foreground">Study Tools</Link>
-        <Link to="/about" className="transition-colors hover:text-foreground">About PhysicsHQ</Link>
-      </div>
     </main>
+     <SiteFooter />
   </div>;
 };
 export default HomePage;
