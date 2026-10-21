@@ -1,5 +1,5 @@
 import pages from "@/lib/seo-routes.json";
-import { legalPolicyForPath } from "@/lib/legal-policies";
+import { legalPolicyForPath, POLICY_UPDATED_LABEL } from "@/lib/legal-policies";
 
 export const metadataForPath = (pathname: string) => {
   const cleanPath = pathname === "/" ? "/" : pathname.replace(/\/+$/, "");
@@ -7,7 +7,7 @@ export const metadataForPath = (pathname: string) => {
   const policy = legalPolicyForPath(cleanPath);
   return {
     title: page?.title ?? (policy ? `${policy.title} (Draft) | PhysicsHQ` : "Physics HQ | Cambridge Physics Practice"),
-    description: page?.description ?? (policy ? `Read the PhysicsHQ ${policy.title.toLowerCase()}. Draft notice awaiting confirmed contact details and legal review.` : "Cambridge IGCSE, AS and A Level Physics practice and revision tools."),
+    description: page?.description ?? (policy ? `Read the PhysicsHQ ${policy.title.toLowerCase()}, updated ${POLICY_UPDATED_LABEL}, with contact information and guidance for students, teachers and families. Review copy.` : "Cambridge IGCSE, AS and A Level Physics practice and revision tools."),
     canonical: `https://physicshq.in${page?.path ?? cleanPath}`,
     indexable: Boolean(page),
   };

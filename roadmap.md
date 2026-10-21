@@ -4,7 +4,8 @@
 - [x] Create six draft policy pages from the supplied package with clear navigation and readable layouts
 - [x] Replace the homepage footer with grade, website and policy links
 - [x] Verify every policy link, draft indexing safeguards and mobile/desktop layouts
-- [ ] Finalize policies for publication (requires confirmed contact email, public correspondence address, effective date and legal/compliance review)
+- [x] Update all six notices on 21 October 2026, use the confirmed public contact email, omit postal-address placeholders, and improve desktop/mobile policy navigation and footer
+- [ ] Finalize policy review for publication; keep review copies outside the search catalog until approved
 
 # PDF preparation feedback
 - [x] Add shared grade-coloured progress and completion feedback to worksheet preparation, both MCQ PDFs and theory PDFs
