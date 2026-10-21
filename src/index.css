@@ -105,6 +105,14 @@
 }
 
 @layer utilities {
+  .legal-copy { font-size: 1rem; line-height: 1.9; color: hsl(var(--muted-foreground)); overflow-wrap: anywhere; }
+  .legal-copy h2 { margin: 2.5rem 0 1rem; font-size: 1.25rem; line-height: 1.5; color: hsl(var(--foreground)); scroll-margin-top: 6rem; }
+  .legal-copy h2:first-child { margin-top: 0; }
+  .legal-copy p { margin-bottom: 1.25rem; }
+  .legal-copy strong { color: hsl(var(--foreground)); }
+  .legal-copy ul { list-style: disc; padding-left: 1.4rem; margin-bottom: 1.25rem; }
+  .legal-copy li { padding-left: 0.25rem; margin-bottom: 0.5rem; }
+  .legal-copy a { color: hsl(var(--primary)); text-decoration: underline; text-underline-offset: 4px; }
   .pdf-progress-hud { background: hsl(var(--pdf-progress-surface)); backdrop-filter: blur(16px); box-shadow: var(--grade-glow); }
   .pdf-action { transition: border-radius 240ms, background 240ms; }
   .pdf-action-active { border-radius: 999px; background: hsl(var(--card)); color: hsl(var(--foreground)); border: 1px solid hsl(var(--grade-accent-border)); }

@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { metadataForPath } from "@/lib/page-metadata";
 import pages from "@/lib/seo-routes.json";
+import { LEGAL_POLICIES } from "@/lib/legal-policies";
 describe("search metadata", () => {
+  it.each(LEGAL_POLICIES)("keeps the unapproved $slug draft out of search indexing", (policy) => {
+    const metadata = metadataForPath(`/${policy.slug}`);
+    expect(metadata.indexable).toBe(false);
+    expect(metadata.canonical).toBe(`https://physicshq.in/${policy.slug}`);
+  });
   it("uses the main domain and distinct titles for every public page", () => {
     expect(new Set(pages.map((page) => page.path)).size).toBe(pages.length);
     for (const page of pages) {

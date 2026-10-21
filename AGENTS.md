@@ -1,5 +1,7 @@
 # Architecture rules
 
+- Legal pages and footer links share one static policy catalog; unapproved drafts stay outside the indexable-page catalog so incomplete notices cannot be mistaken for finalized policies.
+
 - MCQ finalisation awaits a valid mark for every answered question; pending or failed checks never become incorrect outcomes or saved zero scores. Instant feedback and finalisation share retryable requests.
 
 - Account history uses per-user caches and one canonical activity key across automatic sync and guest import. Anonymous history requires explicit import; late account reads cannot populate another user’s cache.
