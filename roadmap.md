@@ -1,9 +1,9 @@
 # Grade-first navigation
 
 # Legal policy pages and homepage footer
-- [ ] Create six draft policy pages from the supplied package with clear navigation and readable layouts
-- [ ] Replace the homepage footer with grade, website and policy links
-- [ ] Verify every policy link, draft indexing safeguards and mobile/desktop layouts
+- [x] Create six draft policy pages from the supplied package with clear navigation and readable layouts
+- [x] Replace the homepage footer with grade, website and policy links
+- [x] Verify every policy link, draft indexing safeguards and mobile/desktop layouts
 - [ ] Finalize policies for publication (requires confirmed contact email, public correspondence address, effective date and legal/compliance review)
 
 # PDF preparation feedback
