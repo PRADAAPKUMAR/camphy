@@ -1,5 +1,11 @@
 # Grade-first navigation
 
+# Legal policy pages and homepage footer
+- [ ] Create six draft policy pages from the supplied package with clear navigation and readable layouts
+- [ ] Replace the homepage footer with grade, website and policy links
+- [ ] Verify every policy link, draft indexing safeguards and mobile/desktop layouts
+- [ ] Finalize policies for publication (requires confirmed contact email, public correspondence address, effective date and legal/compliance review)
+
 # PDF preparation feedback
 - [x] Add shared grade-coloured progress and completion feedback to worksheet preparation, both MCQ PDFs and theory PDFs
 - [x] Verify generation milestones, failures, real PDF opening and mobile layout
