@@ -3,7 +3,7 @@ import re
 import hashlib
 from collections import defaultdict
 
-PART = re.compile(r"\('([0-9a-f-]{36})'::uuid\s*,\s*(\d+)\s*,\s*'([^']+)'\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*\$explanation\$", re.I)
+PART = re.compile(r"\('([0-9a-f-]{36})'::uuid\s*,\s*(\d+)\s*,\s*'([^']*)'\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*\$explanation\$", re.I)
 
 
 def extract(text, filename):
@@ -34,7 +34,7 @@ def extract(text, filename):
     digest = hashlib.sha256(text.encode()).hexdigest()
     for pid, q, label, order, marks in PART.findall(text):
         q, order, marks = int(q), int(order), int(marks)
-        if pid not in papers or not re.fullmatch(r"[a-z](?:\((?:[ivx]+|\d+)\))*", label):
+        if pid not in papers or (label and not re.fullmatch(r"[a-z](?:\((?:[ivx]+|\d+)\))*", label)):
             raise ValueError("Unknown paper or part label")
         key, okey = (pid, q, label), (pid, q, order)
         if key in keys or okey in orders or min(q, order, marks) < 1:
@@ -44,6 +44,8 @@ def extract(text, filename):
         groups[pid, q].append(rows[-1])
     for (pid, q), parts in groups.items():
         labels = [p["part_label"] for p in parts]
+        if "" in labels and len(labels) != 1:
+            raise ValueError("Whole question and subdivisions overlap")
         if any(a != b and b.startswith(a + "(") for a in labels for b in labels):
             raise ValueError("Overlapping parent and child marks")
         if sorted(p["order_index"] for p in parts) != list(range(1, len(parts) + 1)):

@@ -23,6 +23,11 @@ class ImportTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             module.extract(HEADER + row("a", 1, 30) * 2, "PhysicsHQ_Batch02_test.sql")
 
+    def test_unsubdivided_question_marks(self):
+        header = HEADER.replace("2022,1,2", "2022,1,1")
+        _, rows = module.extract(header + row("", 1, 60), "PhysicsHQ_Batch02_test.sql")
+        self.assertEqual((rows[0]['part_label'], rows[0]['marks']), ("", 60))
+
     def test_parent_child_double_count_rejected(self):
         with self.assertRaises(ValueError):
             module.extract(HEADER + row("a", 1, 30) + row("a(i)", 2, 30), "PhysicsHQ_Batch02_test.sql")
