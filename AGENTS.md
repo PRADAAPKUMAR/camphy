@@ -21,6 +21,8 @@
 - Isolated Edge Function regression tests execute the actual Deno handlers with TypeScript transpilation and an in-memory client; they must never contact the shared live backend or use real credentials.
 
 - Theory topical PDFs keep original vector PDF pages and use reviewed page/topic mappings; this preserves exam quality and avoids runtime AI dependence.
+- Theory question marks come from unambiguous printed totals or admin review, with unknown values left nullable; live basket totals deduplicate mappings and disclose incomplete marks.
+- Uploaded subdivision marks live in a source-traceable per-part table, separate from explanations; imports validate exact paper identity, complete non-overlapping parts and reconciled totals, and never overwrite conflicting existing question marks.
 - Theory question topics use a normalized many-to-many table linked to the existing syllabus topics; one question can be discovered under multiple topics without duplication.
 - Theory PDF browsing filters are separate from the ordered question basket, and topic groups resolve mapped syllabus ancestors; switching topics preserves selections across syllabus versions.
 - Theory PDF question browsing scrolls inside a clipped, height-constrained region below the ordered basket; separate scroll areas prevent questions from crossing the PDF controls.

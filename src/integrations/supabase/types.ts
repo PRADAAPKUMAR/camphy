@@ -690,6 +690,7 @@ export type Database = {
           created_at: string
           end_page: number
           id: string
+          marks: number | null
           question_number: number
           shared_page_warning: boolean
           start_page: number
@@ -701,6 +702,7 @@ export type Database = {
           created_at?: string
           end_page: number
           id?: string
+          marks?: number | null
           question_number: number
           shared_page_warning?: boolean
           start_page: number
@@ -712,6 +714,7 @@ export type Database = {
           created_at?: string
           end_page?: number
           id?: string
+          marks?: number | null
           question_number?: number
           shared_page_warning?: boolean
           start_page?: number
@@ -722,6 +725,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "theory_question_mappings_theory_paper_id_fkey"
+            columns: ["theory_paper_id"]
+            isOneToOne: false
+            referencedRelation: "theory_papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      theory_question_part_marks: {
+        Row: {
+          created_at: string
+          id: string
+          marks: number
+          order_index: number
+          part_label: string
+          question_number: number
+          source_file: string
+          source_sha256: string
+          theory_paper_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          marks: number
+          order_index: number
+          part_label: string
+          question_number: number
+          source_file: string
+          source_sha256: string
+          theory_paper_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          marks?: number
+          order_index?: number
+          part_label?: string
+          question_number?: number
+          source_file?: string
+          source_sha256?: string
+          theory_paper_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "theory_question_part_marks_theory_paper_id_fkey"
             columns: ["theory_paper_id"]
             isOneToOne: false
             referencedRelation: "theory_papers"

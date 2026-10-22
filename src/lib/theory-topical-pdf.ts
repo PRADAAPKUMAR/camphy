@@ -8,6 +8,7 @@ export interface TheoryTopicalQuestion {
   start_page: number;
   end_page: number;
   shared_page_warning: boolean;
+  marks?: number | null;
   paper_code: string;
   session: string;
   year: number;
