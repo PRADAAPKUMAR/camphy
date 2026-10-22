@@ -2,14 +2,14 @@ import GlassIcon from "@/components/GlassIcon";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDown, ArrowLeft, ArrowUp, ChevronDown, FileStack, TriangleAlert, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, ChevronDown, Download, TriangleAlert, X } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createTheoryTopicalPdf, type TheoryTopicalQuestion } from "@/lib/theory-topical-pdf";
-import { addTheoryQuestionIds, groupTheoryTopics } from "@/lib/theory-topic-selection";
+import { addTheoryQuestionIds, groupTheoryTopics, theoryMarksSummary } from "@/lib/theory-topic-selection";
 import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
 import { useTopicsByIds } from "@/hooks/use-syllabus";
@@ -61,6 +61,7 @@ const TheoryTopicalPdfPage = () => {
     const question = data?.questions.find((item) => item.mapping_id === id);
     return question ? [question] : [];
   }), [data, selectedIds]);
+  const marksSummary = useMemo(() => theoryMarksSummary(selected), [selected]);
   const move = (index: number, delta: number) => setSelectedIds((current) => {
     const target = index + delta;
     if (target < 0 || target >= current.length) return current;
@@ -109,12 +110,14 @@ const TheoryTopicalPdfPage = () => {
         <section aria-label="Selected questions" className="glass-reading min-w-0 p-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="flex items-center gap-2 font-semibold">Your PDF <Badge>{selected.length} selected</Badge></h2>
-            <div className="w-full sm:w-52"><PdfProgressButton state={pdfProgress.state} action="theory" label="Create theory PDF" icon={FileStack} onClick={generate} disabled={!selected.length || generating} /></div>
+            <div className="w-full sm:w-52"><PdfProgressButton state={pdfProgress.state} action="theory" label="Download" completeLabel="Download" icon={Download} onClick={generate} disabled={!selected.length || generating} /></div>
           </div>
+          <p role="status" aria-live="polite" className="mt-3 text-sm text-grade">{marksSummary.pending ? `Known marks: ${marksSummary.total} · ${marksSummary.pending} question${marksSummary.pending === 1 ? "" : "s"} awaiting marks` : `Total marks: ${marksSummary.total}`}</p>
           <PdfGenerationProgress state={pdfProgress.state} />
           {selected.length > 0 && <div className="mt-3 max-h-[min(12rem,25dvh)] space-y-1 overflow-y-auto overscroll-contain" aria-label="PDF question order">{selected.map((question, index) => <div key={question.mapping_id} className="flex items-center gap-2 border-b border-border/40 py-2 text-xs">
             <span className="w-5 shrink-0 font-bold text-primary">{index + 1}</span>
             <span className="min-w-0 flex-1 break-words">{question.paper_code} · {question.session} {question.year} · Q{question.question_number}</span>
+            <span className="shrink-0 text-grade">{question.marks ? `${question.marks} marks` : "Marks pending"}</span>
             <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" title="Move question up" aria-label={`Move question ${index + 1} up`} onClick={() => move(index, -1)} disabled={index === 0}><ArrowUp className="h-3.5 w-3.5" /></Button>
             <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" title="Move question down" aria-label={`Move question ${index + 1} down`} onClick={() => move(index, 1)} disabled={index === selected.length - 1}><ArrowDown className="h-3.5 w-3.5" /></Button>
             <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" title="Remove question" aria-label={`Remove question ${index + 1}`} onClick={() => setSelectedIds((current) => current.filter((id) => id !== question.mapping_id))}><X className="h-3.5 w-3.5" /></Button>
@@ -129,6 +132,7 @@ const TheoryTopicalPdfPage = () => {
           {!activeGroup ? <p className="text-sm text-muted-foreground">Select a topic to view its questions.</p> : !matching.length ? <p className="text-sm text-muted-foreground">No reviewed questions match this subtopic.</p> : <div className="space-y-2">{matching.map((question) => <label key={question.mapping_id} className="flex cursor-pointer items-start gap-3 rounded-lg border border-border/40 p-3 hover:border-primary/40">
             <Checkbox aria-label={`Select ${question.paper_code} Q${question.question_number}`} checked={selectedIds.includes(question.mapping_id)} onCheckedChange={(checked) => setSelectedIds((current) => checked === true ? addTheoryQuestionIds(current, [question.mapping_id]) : current.filter((id) => id !== question.mapping_id))} />
             <span className="min-w-0 flex-1"><span className="block break-words text-sm font-semibold">{question.paper_code} · {question.session} {question.year} · Q{question.question_number}</span><span className="mt-1 flex flex-wrap gap-1">{question.topics.map((topic) => <Badge key={topic.id} variant="outline" className="whitespace-normal text-[10px]">{topic.topic_name}</Badge>)}</span><span className="mt-2 block text-xs text-muted-foreground">Pages {question.start_page}–{question.end_page}</span></span>
+            <span className="shrink-0 text-xs text-grade">{question.marks ? `${question.marks} marks` : "Marks pending"}</span>
             {question.shared_page_warning && <TriangleAlert aria-label="Shared pages" className="h-4 w-4 shrink-0 text-warning" />}
           </label>)}</div>}
         </section>

@@ -44,3 +44,15 @@ export const groupTheoryTopics = (
 /** Browsing filters never replace the question basket. */
 export const addTheoryQuestionIds = (current: string[], incoming: string[]) =>
   [...new Set([...current, ...incoming])];
+
+/** Unknown marks never contribute a guessed zero to a complete total. */
+export const theoryMarksSummary = (questions: { mapping_id: string; marks?: number | null }[]) => {
+  const unique = [...new Map(questions.map((question) => [question.mapping_id, question])).values()];
+  let total = 0;
+  let pending = 0;
+  for (const question of unique) {
+    if (typeof question.marks === "number" && Number.isInteger(question.marks) && question.marks > 0) total += question.marks;
+    else pending += 1;
+  }
+  return { total, pending };
+};

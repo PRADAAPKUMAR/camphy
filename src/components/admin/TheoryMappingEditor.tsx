@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 
 interface Paper { id: string; syllabus_code: string; total_questions: number; paper_code: string; session: string; year: number }
 interface Topic { id: string; topic_code: string; topic_name: string; level: string | null }
-interface Mapping { id?: string; question_number: number; start_page: number | string; end_page: number | string; verified: boolean; shared_page_warning: boolean; topic_ids: string[] }
+interface Mapping { id?: string; question_number: number; start_page: number | string; end_page: number | string; verified: boolean; shared_page_warning: boolean; topic_ids: string[]; marks?: number | string | null }
 
 export interface MappingData { topics?: Topic[]; mappings?: Mapping[] }
 
@@ -37,9 +37,11 @@ const TheoryMappingEditor = ({ paper, call }: { paper: Paper; call: (body: Recor
   const save = async () => {
     const invalid = rows.find((row) => row.verified && (!Number(row.start_page) || Number(row.end_page) < Number(row.start_page) || !row.topic_ids.length));
     if (invalid) return toast.error(`Q${invalid.question_number} needs a valid page range and at least one topic`);
+    const invalidMarks = rows.find((row) => row.marks != null && row.marks !== "" && (!Number.isInteger(Number(row.marks)) || Number(row.marks) <= 0));
+    if (invalidMarks) return toast.error(`Q${invalidMarks.question_number} marks must be a positive whole number`);
     setSaving(true);
     try {
-      await call({ action: "save_mappings", paper_id: paper.id, mappings: rows.filter((row) => Number(row.start_page) > 0).map((row) => ({ ...row, start_page: Number(row.start_page), end_page: Number(row.end_page) })) });
+      await call({ action: "save_mappings", paper_id: paper.id, mappings: rows.filter((row) => Number(row.start_page) > 0).map((row) => ({ ...row, start_page: Number(row.start_page), end_page: Number(row.end_page), marks: row.marks == null || row.marks === "" ? null : Number(row.marks) })) });
       toast.success("Question mappings saved");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not save mappings");
@@ -58,6 +60,7 @@ const TheoryMappingEditor = ({ paper, call }: { paper: Paper; call: (body: Recor
           <strong className="min-w-10 text-primary">Q{row.question_number}</strong>
           <Label className="space-y-1 text-xs">Start page<Input className="h-8 w-20" type="number" min={1} value={row.start_page} onChange={(event) => update(row.question_number, { start_page: event.target.value })} /></Label>
           <Label className="space-y-1 text-xs">End page<Input className="h-8 w-20" type="number" min={1} value={row.end_page} onChange={(event) => update(row.question_number, { end_page: event.target.value })} /></Label>
+          <Label className="space-y-1 text-xs">Marks<Input className="h-8 w-20" type="number" min={1} step={1} value={row.marks ?? ""} placeholder="Pending" onChange={(event) => update(row.question_number, { marks: event.target.value })} /></Label>
           <Label className="flex items-center gap-2 text-xs"><Checkbox checked={row.verified} onCheckedChange={(checked) => update(row.question_number, { verified: checked === true })} />Reviewed</Label>
           <Label className="flex items-center gap-2 text-xs"><Checkbox checked={row.shared_page_warning} onCheckedChange={(checked) => update(row.question_number, { shared_page_warning: checked === true })} />Shared page</Label>
           {row.verified && <CheckCircle2 className="h-4 w-4 text-success" />}

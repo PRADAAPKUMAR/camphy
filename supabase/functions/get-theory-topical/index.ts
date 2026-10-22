@@ -1,9 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status,
   headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -14,7 +10,10 @@ Deno.serve(async (req) => {
   try {
     const { level } = await req.json();
     if (typeof level !== "string" || !level.trim()) return json({ error: "Invalid level" }, 400);
-    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const url = Deno.env.get("SUPABASE_URL");
+    const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!url || !key) return json({ error: "Service unavailable" }, 500);
+    const supabase = createClient(url, key);
     const { data: papers, error: paperError } = await supabase
       .from("theory_papers")
       .select("id, paper_code, session, year, question_storage_path")
@@ -26,7 +25,7 @@ Deno.serve(async (req) => {
 
     const { data: mappings, error: mappingError } = await supabase
       .from("theory_question_mappings")
-      .select("id, theory_paper_id, question_number, start_page, end_page, shared_page_warning, theory_question_topics(syllabus_topics(id, topic_code, topic_name))")
+      .select("id, theory_paper_id, question_number, start_page, end_page, shared_page_warning, marks, theory_question_topics(syllabus_topics(id, topic_code, topic_name))")
       .in("theory_paper_id", paperIds)
       .eq("verified", true)
       .order("question_number");
@@ -50,6 +49,7 @@ Deno.serve(async (req) => {
         start_page: mapping.start_page,
         end_page: mapping.end_page,
         shared_page_warning: mapping.shared_page_warning,
+        marks: mapping.marks,
         paper_code: paper.paper_code,
         session: paper.session,
         year: paper.year,
