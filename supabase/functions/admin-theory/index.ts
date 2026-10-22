@@ -1,10 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { requireAdmin } from "../_shared/require-user.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 
 const BUCKET = "theory-papers";
 
@@ -53,10 +49,10 @@ Deno.serve(async (req) => {
     const body = await req.json();
     await requireAdmin(req);
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const url = Deno.env.get("SUPABASE_URL");
+    const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!url || !key) return json({ error: "Service unavailable" }, 500);
+    const supabase = createClient(url, key);
     const action = body.action ?? "list";
 
     if (action === "list") {
@@ -90,7 +86,7 @@ Deno.serve(async (req) => {
       if (topicError) return json({ error: topicError.message }, 400);
       const { data: mappings, error: mappingError } = await supabase
         .from("theory_question_mappings")
-        .select("id, question_number, start_page, end_page, verified, shared_page_warning, theory_question_topics(syllabus_topic_id)")
+        .select("id, question_number, start_page, end_page, verified, shared_page_warning, marks, theory_question_topics(syllabus_topic_id)")
         .eq("theory_paper_id", paper_id)
         .order("question_number");
       if (mappingError) return json({ error: mappingError.message }, 400);
@@ -117,7 +113,9 @@ Deno.serve(async (req) => {
           return json({ error: `Invalid page mapping for Q${question_number || "?"}` }, 400);
         }
         if (item?.verified === true && topic_ids.length === 0) return json({ error: `Reviewed Q${question_number} needs at least one topic` }, 400);
-        normalized.push({ question_number, start_page, end_page, verified: item?.verified === true, shared_page_warning: item?.shared_page_warning === true, topic_ids });
+        const marks = item?.marks == null || item.marks === "" ? null : Number(item.marks);
+        if (marks !== null && (!Number.isInteger(marks) || marks <= 0)) return json({ error: `Invalid marks for Q${question_number}` }, 400);
+        normalized.push({ question_number, start_page, end_page, verified: item?.verified === true, shared_page_warning: item?.shared_page_warning === true, topic_ids, ...(item.marks !== undefined ? { marks } : {}) });
       }
       const keptQuestions = normalized.map((item) => item.question_number);
       let staleQuery = supabase.from("theory_question_mappings").delete().eq("theory_paper_id", paper_id);
@@ -127,7 +125,7 @@ Deno.serve(async (req) => {
       for (const item of normalized) {
         const { data: mapping, error: upsertError } = await supabase
           .from("theory_question_mappings")
-          .upsert({ theory_paper_id: paper_id, question_number: item.question_number, start_page: item.start_page, end_page: item.end_page, verified: item.verified, shared_page_warning: item.shared_page_warning }, { onConflict: "theory_paper_id,question_number" })
+          .upsert({ theory_paper_id: paper_id, question_number: item.question_number, start_page: item.start_page, end_page: item.end_page, verified: item.verified, shared_page_warning: item.shared_page_warning, ...("marks" in item ? { marks: item.marks } : {}) }, { onConflict: "theory_paper_id,question_number" })
           .select("id")
           .single();
         if (upsertError) return json({ error: upsertError.message }, 400);

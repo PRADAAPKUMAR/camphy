@@ -68,6 +68,10 @@
 
 # Theory topical PDF preparation
 
+- [x] Store and extract AS/A Level question marks with unknown values kept explicit (544 printed totals populated; ambiguous/missing totals remain pending for admin review)
+- [x] Show per-question marks, live selected totals and Download action in both builders
+- [x] Verify extraction, totals, admin input validation and real builder selection
+
 - [x] Retain selected questions across topic changes and additive select-all
 - [x] Add main-topic list and mapped subtopic dropdown, with questions on the right
 - [x] Position and rename PDF creation action and verify selection flow

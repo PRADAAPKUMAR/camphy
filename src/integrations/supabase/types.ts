@@ -690,6 +690,7 @@ export type Database = {
           created_at: string
           end_page: number
           id: string
+          marks: number | null
           question_number: number
           shared_page_warning: boolean
           start_page: number
@@ -701,6 +702,7 @@ export type Database = {
           created_at?: string
           end_page: number
           id?: string
+          marks?: number | null
           question_number: number
           shared_page_warning?: boolean
           start_page: number
@@ -712,6 +714,7 @@ export type Database = {
           created_at?: string
           end_page?: number
           id?: string
+          marks?: number | null
           question_number?: number
           shared_page_warning?: boolean
           start_page?: number

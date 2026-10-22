@@ -10,9 +10,10 @@ interface ActionProps {
   disabled?: boolean;
   onClick: () => void;
   outline?: boolean;
+  completeLabel?: string;
 }
 
-export const PdfProgressButton = ({ state, action, label, icon: Icon, disabled, onClick, outline }: ActionProps) => {
+export const PdfProgressButton = ({ state, action, label, icon: Icon, disabled, onClick, outline, completeLabel = "Ready!" }: ActionProps) => {
   const current = state?.action === action ? state : null;
   const active = current?.status === "working" || current?.status === "complete";
   return <Button onClick={onClick} disabled={disabled} variant={outline ? "outline" : "default"}
@@ -20,7 +21,7 @@ export const PdfProgressButton = ({ state, action, label, icon: Icon, disabled, 
     {active && <span aria-hidden="true" className="pdf-action-fill absolute inset-0 origin-left" style={{ transform: `scaleX(${current.percent / 100})` }} />}
     <span className="relative flex min-w-0 items-center justify-center gap-2">
       {current?.status === "complete" ? <Check className="pdf-complete-check h-4 w-4 shrink-0" /> : current?.status === "working" ? <Loader2 className="h-4 w-4 shrink-0 animate-spin motion-reduce:animate-none" /> : <Icon className="h-4 w-4 shrink-0" />}
-      <span className="whitespace-normal text-center leading-tight">{current?.status === "complete" ? "Ready!" : current?.status === "working" ? `Preparing · ${current.percent}%` : label}</span>
+      <span className="whitespace-normal text-center leading-tight">{current?.status === "complete" ? completeLabel : current?.status === "working" ? `Preparing · ${current.percent}%` : label}</span>
     </span>
   </Button>;
 };

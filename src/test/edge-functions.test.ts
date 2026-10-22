@@ -58,6 +58,13 @@ const request = (body: unknown, signedIn = false) => new Request("http://localho
 beforeEach(() => { identity = null; role = "user"; dbError = false; inserted = undefined; queries.length = 0; });
 
 describe("actual admin authorization handlers", () => {
+  it.each([0, -1, 1.5])("rejects invalid question marks %s before saving mappings", async (marks) => {
+    identity = { id: "admin-user" }; role = "admin";
+    const response = await loadFunction("admin-theory")(request({ action: "save_mappings", paper_id: "paper", mappings: [{ question_number: 1, start_page: 1, end_page: 2, topic_ids: ["topic"], verified: true, marks }] }, true));
+    expect(response.status).toBe(400);
+    expect(await response.text()).toContain("Invalid marks");
+    expect(queries.map((entry) => entry.table)).toEqual(["user_roles"]);
+  });
   for (const name of ["admin-table-editor", "admin-theory", "admin-upload-question"]) {
     it(`${name} rejects anonymous requests before reading content`, async () => {
       const response = await loadFunction(name)(request({ action: "tables" }));
