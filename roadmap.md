@@ -68,9 +68,9 @@
 
 # Theory topical PDF preparation
 
-- [ ] Validate uploaded subdivision marks against exact paper identities, part coverage and existing totals
-- [ ] Store subdivision marks with source traceability; fill only consistent missing question totals
-- [ ] Verify imported rows, skipped conflicts and unchanged existing content
+- [x] Validate all ten uploads against exact paper identities, complete non-overlapping parts and existing totals
+- [x] Store 3,540 source-traceable marks across 85 papers and 730 questions; fill 190 missing question totals
+- [x] Read back every imported value and source hash, confirm zero total conflicts, and pass 18 marks/extraction tests; preserve explanations, page ranges, topics and previously recorded totals
 
 - [x] Store and extract AS/A Level question marks with unknown values kept explicit (544 printed totals populated; ambiguous/missing totals remain pending for admin review)
 - [x] Show per-question marks, live selected totals and Download action in both builders
