@@ -43,7 +43,7 @@ const SiteNav = () => {
   </DropdownMenu> : <Button variant="outline" size="sm" className="px-2 sm:px-3" asChild><Link to={`/auth?returnTo=${encodeURIComponent(pathname)}`} aria-label="Sign in"><LogIn className="h-4 w-4 sm:mr-1.5" /><span className="hidden sm:inline">Sign in</span></Link></Button>;
   return <nav aria-label="Main navigation" className="glass-nav relative z-40 border-b">
     <div className="container flex items-center justify-between gap-3 py-2">
-      <Link to={grade ? `/grade/${grade}` : "/"} className="flex min-w-0 items-center gap-2 text-sm font-extrabold"><img src="/favicon.png" alt="PhysicsHQ" width="28" height="28" className="h-7 w-7 shrink-0 object-contain" /><span className="hidden min-[370px]:inline">Physics<span className="gradient-text">HQ</span></span></Link>
+      <Link to="/" onClick={() => setMenuOpen(false)} aria-label="PhysicsHQ home — all grades" className="flex min-w-0 items-center gap-2 text-sm font-extrabold"><img src="/favicon.png" alt="" width="28" height="28" className="h-7 w-7 shrink-0 object-contain" /><span className="hidden min-[370px]:inline">Physics<span className="gradient-text">HQ</span></span></Link>
       <div className="hidden items-center gap-1 lg:flex">{primary.map((item) => <Link key={item.to} to={item.to} aria-current={isActive(pathname, item.to) ? "page" : undefined} className={linkClass(item.to)}>{item.label}</Link>)}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
