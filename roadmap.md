@@ -1,5 +1,11 @@
 # Grade-first navigation
 
+# Topical theory practice
+- [ ] Create Paper 2 and Paper 4 question queues with topic/year filters and local-only completion/flags
+- [ ] Add original question pages, searchable official mark schemes and explanation tabs with subdivision marks
+- [ ] Link both grade dashboards and theory sections; verify real content and persistent progress
+- [ ] Resolve the subdivision-mark read-access security finding
+
 # Legal policy pages and homepage footer
 - [x] Create six draft policy pages from the supplied package with clear navigation and readable layouts
 - [x] Replace the homepage footer with grade, website and policy links
