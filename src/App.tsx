@@ -40,6 +40,7 @@ const TheoryPapersPage = lazy(() => import("./pages/TheoryPapersPage"));
 const TheoryLevelPage = lazy(() => import("./pages/TheoryLevelPage"));
 const TheoryPaperPage = lazy(() => import("./pages/TheoryPaperPage"));
 const TheoryTopicalPdfPage = lazy(() => import("./pages/TheoryTopicalPdfPage"));
+const TheoryPracticePage = lazy(() => import("./pages/TheoryPracticePage"));
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const StudyToolsPage = lazy(() => import("./pages/StudyToolsPage"));
 const PerformancePage = lazy(() => import("./pages/PerformancePage"));
@@ -108,7 +109,7 @@ const RouterContent = () => {
     pathname.startsWith("/topic-theory/");
 
   return (
-    <div className={`glass-app${navExcluded || pathname.startsWith("/theory-paper/") ? " glass-focus" : ""}`}>
+    <div className={`glass-app${navExcluded || pathname.startsWith("/theory-paper/") || pathname.startsWith("/theory-practice/") ? " glass-focus" : ""}`}>
     <TiltedCard key={pathname} rotateAmplitude={15} scaleOnHover={1.1} glare={0.5} shadow={0.5} />
     <div className="glass-atmosphere" aria-hidden="true" />
     <PageMetadata />
@@ -174,6 +175,7 @@ const RouterContent = () => {
         <Route path="/theory-papers/:level" element={<TheoryLevelPage />} />
         <Route path="/theory-paper/:paperId" element={<TheoryPaperPage />} />
         <Route path="/theory-topical/:level" element={<TheoryTopicalPdfPage />} />
+        <Route path="/theory-practice/:level" element={<TheoryPracticePage />} />
         <Route path="/about" element={<AboutPage />} />
         {LEGAL_POLICIES.map((policy) => <Route key={policy.slug} path={`/${policy.slug}`} element={<LegalPolicyPage />} />)}
         <Route path="/study-tools" element={<StudyToolsPage />} />

@@ -1,5 +1,7 @@
 # Architecture rules
 
+- Topical theory practice reuses reviewed mappings and signed original PDFs, lazy-loads a PDF.js reader for exact pages/search, and keeps question completion and flags local-only; this preserves source quality without changing account history.
+
 - Legal pages and footer links share one static policy catalog; unapproved drafts stay outside the indexable-page catalog so incomplete notices cannot be mistaken for finalized policies.
 
 - MCQ finalisation awaits a valid mark for every answered question; pending or failed checks never become incorrect outcomes or saved zero scores. Instant feedback and finalisation share retryable requests.

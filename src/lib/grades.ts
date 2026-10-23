@@ -84,6 +84,7 @@ export const gradeSectionPath = (grade: GradeKey, section: "mcq" | "theory" | "p
 };
 
 export const equivalentGradePath = (pathname: string, grade: GradeKey) => {
+  if (pathname.startsWith("/theory-practice/")) return grade === "igcse" ? gradeSectionPath(grade, "theory") : `/theory-practice/${grade === "as" ? "as-level" : "a2-level"}`;
   if (pathname.startsWith("/papers/")) return GRADES[grade].hasMcqPapers ? gradeSectionPath(grade, "mcq") : gradePath(grade);
   if (pathname.startsWith("/theory-papers/")) return gradeSectionPath(grade, "theory");
   if (pathname.startsWith("/topic-practice/") || pathname.startsWith("/topical-mcq/")) return gradeSectionPath(grade, "practice");

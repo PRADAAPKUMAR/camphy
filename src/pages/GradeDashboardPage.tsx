@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import PhysicsBackground from "@/components/PhysicsBackground";
 import { GRADES, gradeSectionPath, isGradeKey, type GradeKey } from "@/lib/grades";
 import { useTileTransition } from "@/hooks/use-tile-transition";
+import { theoryPracticePath } from "@/lib/theory-practice";
 
 const icons = { igcse: Microscope, as: FlaskConical, a2: Atom };
 
@@ -18,6 +19,7 @@ const GradeDashboardPage = () => {
   const items = [
     ...(details.hasMcqPapers ? [{ section: "mcq" as const, title: "MCQ Past Papers", desc: "Full Cambridge multiple-choice papers by year and series.", icon: ClipboardList }] : []),
     { section: "theory" as const, title: "Theory Past Papers", desc: "Structured papers, official answers and explanations.", icon: FileText },
+    ...(grade !== "igcse" ? [{ section: "theory-practice" as const, title: `Paper ${grade === "as" ? "2" : "4"} Topical Practice`, desc: "Topic-based theory questions, official mark schemes and worked explanations.", icon: Target }] : []),
     { section: "practice" as const, title: "Practice", desc: "Strengthen individual topics with MCQ and theory sets.", icon: Target },
     { section: "materials" as const, title: "Study Materials", desc: "Open notes, revision guides and learning resources.", icon: BookOpen },
     ...(details.worksheetLevel ? [{ section: "worksheet" as const, title: "Worksheet Generator", desc: "Create custom printable MCQ worksheets and answer keys.", icon: FilePlus2 }] : []),
@@ -39,7 +41,7 @@ const GradeDashboardPage = () => {
     <main className="container relative py-10">
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {items.map(({ section, title, desc, icon: Icon }) => {
-          const to = gradeSectionPath(grade, section);
+          const to = section === "theory-practice" && grade !== "igcse" ? theoryPracticePath(grade) : gradeSectionPath(grade, section as Parameters<typeof gradeSectionPath>[1]);
           return <Button variant="ghost" key={section} type="button" {...tileProps(to)} className="grade-tile group flex h-auto min-h-[240px] flex-col items-start whitespace-normal rounded-lg p-6 text-left focus-visible:ring-grade">
             <GlassIcon icon={Icon} className="mb-5" tone={section === "materials" ? "pink" : section === "performance" || section === "worksheet" ? "amber" : section === "theory" || section === "quiz" ? "violet" : "cyan"} />
             <h2 className="text-lg font-bold">{title}</h2><p className="mb-5 mt-2 text-sm leading-relaxed text-muted-foreground">{desc}</p>
