@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { compareSessions } from "@/lib/exam-sessions";
 import { gradeFromLevel, gradePath, normalizeGradeLabel } from "@/lib/grades";
 import { useSyncGrade } from "@/hooks/use-sync-grade";
+import { theoryPracticePath } from "@/lib/theory-practice";
 
 const getSupabase = () => import("@/integrations/supabase/client").then((m) => m.supabase);
 
@@ -68,7 +69,7 @@ const TheoryLevelPage = () => {
               <GlassIcon name="theory" tone="violet" className="mb-4" /><h1 className="text-3xl font-extrabold tracking-tight">{normalizeGradeLabel(decodedLevel)} — Theory Papers</h1>
               <p className="text-sm text-muted-foreground">Open a paper to read the questions, official answer key and explanations</p>
             </div>
-            <Button asChild className="gap-2"><Link to={`/theory-topical/${encodeURIComponent(decodedLevel)}`}><FileStack className="h-4 w-4" />Build topical PDF</Link></Button>
+            <div className="flex flex-wrap gap-2">{grade && grade !== "igcse" && <Button asChild variant="outline" className="gap-2"><Link to={theoryPracticePath(grade)}><FileText className="h-4 w-4" />Paper {grade === "as" ? "2" : "4"} Topical Practice</Link></Button>}<Button asChild className="gap-2"><Link to={`/theory-topical/${encodeURIComponent(decodedLevel)}`}><FileStack className="h-4 w-4" />Build topical PDF</Link></Button></div>
           </div>
         </div>
       </header>
