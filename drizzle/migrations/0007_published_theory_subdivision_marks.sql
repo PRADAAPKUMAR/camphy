@@ -1,0 +1,5 @@
+DROP POLICY IF EXISTS "Signed-in users can read theory subdivision marks" ON public.theory_question_part_marks;
+GRANT SELECT ON public.theory_question_part_marks TO anon, authenticated;
+GRANT ALL ON public.theory_question_part_marks TO service_role;
+CREATE POLICY "Published theory question subdivision marks are readable" ON public.theory_question_part_marks FOR SELECT TO anon, authenticated USING (EXISTS (SELECT 1 FROM public.theory_question_mappings m JOIN public.theory_papers p ON p.id = m.theory_paper_id WHERE m.theory_paper_id = theory_question_part_marks.theory_paper_id AND m.question_number = theory_question_part_marks.question_number AND m.verified = true AND p.question_storage_path IS NOT NULL));
+COMMENT ON TABLE public.theory_question_part_marks IS 'Source-traceable academic mark allocations, publicly readable for reviewed published questions; unpublished imports remain service-only.';
