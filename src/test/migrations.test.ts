@@ -41,6 +41,19 @@ describe("isolated PostgreSQL migration replay", () => {
       await expect(db.query("SELECT * FROM public.attempts")).rejects.toThrow();
       await expect(db.query("SELECT * FROM public.profiles")).rejects.toThrow();
       await db.exec("RESET ROLE");
+      await db.exec(`INSERT INTO public.theory_papers (id, level, syllabus_code, paper_code, component, session, year, question_storage_path)
+        VALUES ('77777777-7777-4777-8777-777777777777','AS Level','9702','9702/22','22','May/June',2025,'qp/test.pdf');
+        INSERT INTO public.theory_question_mappings (theory_paper_id,question_number,start_page,end_page,verified)
+        VALUES ('77777777-7777-4777-8777-777777777777',1,2,3,true),('77777777-7777-4777-8777-777777777777',2,4,5,false);
+        INSERT INTO public.theory_question_part_marks (theory_paper_id,question_number,part_label,order_index,marks,source_file,source_sha256)
+        VALUES ('77777777-7777-4777-8777-777777777777',1,'a',1,4,'test.sql',repeat('a',64)),('77777777-7777-4777-8777-777777777777',2,'a',1,9,'test.sql',repeat('a',64));
+        SET ROLE anon;`);
+      const publicMarks = await db.query<{ marks: number }>("SELECT marks FROM public.theory_question_part_marks ORDER BY question_number");
+      expect(publicMarks.rows).toEqual([{ marks: 4 }]);
+      await db.exec("RESET ROLE; SET ROLE authenticated;");
+      const signedInMarks = await db.query<{ marks: number }>("SELECT marks FROM public.theory_question_part_marks ORDER BY question_number");
+      expect(signedInMarks.rows).toEqual([{ marks: 4 }]);
+      await db.exec("RESET ROLE");
       await db.exec(`INSERT INTO public.profiles (id) VALUES ('11111111-1111-4111-8111-111111111111');
         INSERT INTO public.user_activity (user_id, event_key, activity_type, payload) VALUES
         ('11111111-1111-4111-8111-111111111111','activity-same','question','{"score":1,"totalQuestions":2}'),
